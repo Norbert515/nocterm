@@ -74,6 +74,27 @@ abstract class Element implements BuildContext {
 
   void attachRenderObject(dynamic newSlot) {}
 
+  /// Returns the RenderObject associated with this Element or its descendants.
+  /// 
+  /// If this Element is a RenderObjectElement, returns its renderObject.
+  /// Otherwise, walks down the tree to find the first RenderObjectElement descendant.
+  RenderObject? get renderObject {
+    Element? current = this;
+    while (current != null) {
+      if (current._lifecycleState == _ElementLifecycle.defunct) {
+        break;
+      } else if (current is RenderObjectElement) {
+        return current.renderObject;
+      } else {
+        // For non-RenderObjectElements, we need to check their children
+        // This is simplified - Flutter has a more complex renderObjectAttachingChild
+        // For now, just return null for non-RenderObjectElements
+        break;
+      }
+    }
+    return null;
+  }
+
   void unmount() {
     assert(_lifecycleState == _ElementLifecycle.inactive);
     final Key? key = component.key;
@@ -171,6 +192,16 @@ abstract class Element implements BuildContext {
       return _owner!._forgottenChildren.contains(child) ? null : child;
     }
 
+    // Helper function to create appropriate slot for multi-child elements
+    Object? slotFor(int newChildIndex, Element? previousChild) {
+      // For MultiChildRenderObjectElement, create an IndexedSlot
+      if (this is MultiChildRenderObjectElement) {
+        return IndexedSlot(newChildIndex, previousChild);
+      }
+      // For other elements, just return the previous child (legacy behavior)
+      return previousChild;
+    }
+
     int newChildrenTop = 0;
     int oldChildrenTop = 0;
     int newChildrenBottom = newComponents.length - 1;
@@ -188,7 +219,7 @@ abstract class Element implements BuildContext {
       if (oldChild == null || !Component.canUpdate(oldChild.component, newComponent)) {
         break;
       }
-      final Element newChild = updateChild(oldChild, newComponent, previousChild)!;
+      final Element newChild = updateChild(oldChild, newComponent, slotFor(newChildrenTop, previousChild))!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
       previousChild = newChild;
@@ -245,7 +276,7 @@ abstract class Element implements BuildContext {
         }
       }
       assert(oldChild == null || Component.canUpdate(oldChild.component, newComponent));
-      final Element newChild = updateChild(oldChild, newComponent, previousChild)!;
+      final Element newChild = updateChild(oldChild, newComponent, slotFor(newChildrenTop, previousChild))!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
       previousChild = newChild;
@@ -266,7 +297,7 @@ abstract class Element implements BuildContext {
       assert(oldChild._lifecycleState == _ElementLifecycle.active);
       final Component newComponent = newComponents[newChildrenTop];
       assert(Component.canUpdate(oldChild.component, newComponent));
-      final Element newChild = updateChild(oldChild, newComponent, previousChild)!;
+      final Element newChild = updateChild(oldChild, newComponent, slotFor(newChildrenTop, previousChild))!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
       previousChild = newChild;

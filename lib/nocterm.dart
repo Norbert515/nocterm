@@ -22,3 +22,4 @@ export 'nocterm_test.dart';
 export 'src/framework/framework.dart';
 
 export 'src/components/spacer.dart';
+export 'src/process/pty_controller.dart';

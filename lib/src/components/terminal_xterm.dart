@@ -41,7 +41,7 @@ class TerminalXterm extends StatefulComponent {
 
 class _TerminalXtermState extends State<TerminalXterm> {
   late final xterm.Terminal _terminal;
-  pty.VoidCallback? _controllerListener;
+  VoidCallback? _controllerListener;
 
   // Terminal dimensions
   int _rows = 24;

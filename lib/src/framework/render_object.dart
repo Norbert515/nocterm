@@ -482,6 +482,43 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject> on RenderObject
     dropChild(child);
   }
 
+  /// Insert a child at the correct position in the children list
+  void insert(ChildType child, {ChildType? after}) {
+    adoptChild(child);
+    if (after == null) {
+      // Insert at the beginning
+      _children.insert(0, child);
+    } else {
+      final int index = _children.indexOf(after);
+      if (index < 0) {
+        // If 'after' is not found, add at the end as fallback
+        _children.add(child);
+      } else {
+        // Insert after the specified child
+        _children.insert(index + 1, child);
+      }
+    }
+  }
+
+  /// Move a child to a new position in the children list
+  void move(ChildType child, {ChildType? after}) {
+    assert(_children.contains(child));
+    _children.remove(child);
+    if (after == null) {
+      // Move to the beginning
+      _children.insert(0, child);
+    } else {
+      final int index = _children.indexOf(after);
+      if (index < 0) {
+        // If 'after' is not found, add at the end as fallback
+        _children.add(child);
+      } else {
+        // Insert after the specified child
+        _children.insert(index + 1, child);
+      }
+    }
+  }
+
   void removeAll() {
     for (final child in _children) {
       child.detach();
@@ -724,17 +761,42 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     final ContainerRenderObjectMixin<RenderObject> renderObject =
         this.renderObject as ContainerRenderObjectMixin<RenderObject>;
 
-    // Default: add at the end
-    renderObject.addChild(child);
+    if (slot is IndexedSlot) {
+      // Insert the child at the correct position based on the slot
+      // The slot.value contains the previous element, we need its render object
+      final Element? previousElement = slot.value as Element?;
+      RenderObject? previousRenderObject;
+      
+      // Try to get the render object from the previous element
+      if (previousElement != null) {
+        previousRenderObject = previousElement.renderObject;
+      }
+      
+      renderObject.insert(child, after: previousRenderObject);
+    } else {
+      // Fallback for non-indexed slots
+      renderObject.addChild(child);
+    }
   }
 
   @override
   void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
-    //final ContainerRenderObjectMixin<RenderObject> renderObject =
-    //   this.renderObject as ContainerRenderObjectMixin<RenderObject>;
-    // For multi-child elements, we would need to reorder children
-    // This is typically done with IndexedSlot in Flutter
-    // For now, we don't support reordering in the simplified implementation
+    final ContainerRenderObjectMixin<RenderObject> renderObject =
+        this.renderObject as ContainerRenderObjectMixin<RenderObject>;
+    
+    if (newSlot is IndexedSlot) {
+      // Move the child to the new position based on the slot
+      final Element? previousElement = newSlot.value as Element?;
+      RenderObject? previousRenderObject;
+      
+      // Get the render object from the previous element if it's a RenderObjectElement
+      if (previousElement is RenderObjectElement) {
+        previousRenderObject = previousElement.renderObject;
+      }
+      
+      renderObject.move(child, after: previousRenderObject);
+    }
+    // If not an IndexedSlot, do nothing (child stays in place)
   }
 
   @override
