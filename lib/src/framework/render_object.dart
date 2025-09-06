@@ -753,6 +753,28 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     _children = updateChildren(_children, newChildren);
   }
 
+  /// Find the last render object descendant of an element.
+  /// This traverses down the tree to find render objects even when
+  /// the element itself is not a RenderObjectElement (e.g., StatelessComponent).
+  RenderObject? _findLastRenderObjectDescendant(Element element) {
+    RenderObject? result;
+    
+    // If this is a RenderObjectElement, return its render object
+    if (element is RenderObjectElement) {
+      return element.renderObject;
+    }
+    
+    // Otherwise, traverse children to find the last render object
+    element.visitChildren((Element child) {
+      final RenderObject? childRenderObject = _findLastRenderObjectDescendant(child);
+      if (childRenderObject != null) {
+        result = childRenderObject;
+      }
+    });
+    
+    return result;
+  }
+
   @override
   void insertRenderObjectChild(RenderObject child, dynamic slot) {
     final ContainerRenderObjectMixin<RenderObject> renderObject =
@@ -764,9 +786,9 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
       final Element? previousElement = slot.value as Element?;
       RenderObject? previousRenderObject;
 
-      // Try to get the render object from the previous element
+      // Find the render object from the previous element, traversing down if needed
       if (previousElement != null) {
-        previousRenderObject = previousElement.renderObject;
+        previousRenderObject = _findLastRenderObjectDescendant(previousElement);
       }
 
       renderObject.insert(child, after: previousRenderObject);
@@ -786,9 +808,9 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
       final Element? previousElement = newSlot.value as Element?;
       RenderObject? previousRenderObject;
 
-      // Get the render object from the previous element if it's a RenderObjectElement
-      if (previousElement is RenderObjectElement) {
-        previousRenderObject = previousElement.renderObject;
+      // Find the render object from the previous element, traversing down if needed
+      if (previousElement != null) {
+        previousRenderObject = _findLastRenderObjectDescendant(previousElement);
       }
 
       renderObject.move(child, after: previousRenderObject);
