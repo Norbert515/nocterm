@@ -8,7 +8,10 @@ import 'package:nocterm/src/rectangle.dart';
 
 import '../backend/terminal.dart' as term;
 import '../buffer.dart' as buf;
-import '../keyboard/keyboard_parser.dart';
+import '../keyboard/input_parser.dart';
+import '../keyboard/input_event.dart';
+import '../keyboard/mouse_event.dart';
+import '../components/scrollable_element.dart';
 import 'hot_reload_mixin.dart';
 
 /// Terminal UI binding that handles terminal input/output and event loop
@@ -29,7 +32,8 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
   bool _shouldExit = false;
   final _inputController = StreamController<String>.broadcast();
   final _keyboardEventController = StreamController<KeyboardEvent>.broadcast();
-  final _keyboardParser = KeyboardParser();
+  final _inputParser = InputParser();
+  final _mouseEventController = StreamController<MouseEvent>.broadcast();
   StreamSubscription? _inputSubscription;
   StreamSubscription? _sigwinchSubscription;
   Size? _lastKnownSize;
@@ -44,6 +48,9 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
 
   /// Stream of parsed keyboard events
   Stream<KeyboardEvent> get keyboardEvents => _keyboardEventController.stream;
+  
+  /// Stream of parsed mouse events
+  Stream<MouseEvent> get mouseEvents => _mouseEventController.stream;
 
   /// Initialize the terminal and start the event loop
   void initialize() {
@@ -51,6 +58,16 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
     terminal.enterAlternateScreen();
     terminal.hideCursor();
     terminal.clear();
+    
+    // Enable mouse tracking (SGR mode for better coordinate support)
+    // ESC [ ? 1000 h - Send Mouse X & Y on button press and release
+    // ESC [ ? 1002 h - Use Cell Motion Mouse Tracking
+    // ESC [ ? 1003 h - Enable all motion mouse tracking  
+    // ESC [ ? 1006 h - Enable SGR mouse mode
+    stdout.write('\x1B[?1000h'); // Basic mouse tracking
+    stdout.write('\x1B[?1002h'); // Button event tracking
+    stdout.write('\x1B[?1003h'); // All motion tracking
+    stdout.write('\x1B[?1006h'); // SGR mouse mode
 
     // Store initial size
     _lastKnownSize = terminal.size;
@@ -74,23 +91,33 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
       // This happens in CI/CD environments or when piping output
     }
 
-    // Listen for keyboard input at the byte level for proper escape sequence handling
+    // Listen for input at the byte level for proper escape sequence handling
     _inputSubscription = stdin.listen((bytes) {
-      // Parse the bytes into a keyboard event
-      final event = _keyboardParser.parseBytes(bytes);
-
-      if (event != null) {
-        // Add to keyboard event stream
-        _keyboardEventController.add(event);
-
-        // Route the event through the component tree
-        _routeKeyboardEvent(event);
-      } else {}
-
-      // Exit on Ctrl+C or Escape (check when event is not null)
-      if (event != null) {
-        if (event.logicalKey == LogicalKey.escape || (event.matches(LogicalKey.keyC, ctrl: true))) {
-          shutdown();
+      // Parse the bytes and process ALL events in the buffer
+      _inputParser.addBytes(bytes);
+      
+      // Process all available events
+      InputEvent? inputEvent;
+      while ((inputEvent = _inputParser.parseNext()) != null) {
+        if (inputEvent is KeyboardInputEvent) {
+          final event = inputEvent.event;
+          // Add to keyboard event stream
+          _keyboardEventController.add(event);
+          
+          // Route the event through the component tree
+          _routeKeyboardEvent(event);
+          
+          // Exit on Ctrl+C or Escape
+          if (event.logicalKey == LogicalKey.escape || (event.matches(LogicalKey.keyC, ctrl: true))) {
+            shutdown();
+          }
+        } else if (inputEvent is MouseInputEvent) {
+          final event = inputEvent.event;
+          // Add to mouse event stream
+          _mouseEventController.add(event);
+          
+          // Route the mouse event through the component tree
+          _routeMouseEvent(event);
         }
       }
 
@@ -157,6 +184,32 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
     // The event will bubble through focused components
     _dispatchKeyToElement(rootElement!, event);
   }
+  
+  /// Route a mouse event through the component tree
+  void _routeMouseEvent(MouseEvent event) {
+    if (rootElement == null) return;
+    
+    // For now, just route wheel events to scrollable widgets
+    if (event.button == MouseButton.wheelUp || event.button == MouseButton.wheelDown) {
+      // Find the render object at the mouse position
+      final renderObject = _findRenderObjectInTree(rootElement!);
+      if (renderObject != null) {
+        _dispatchMouseWheelAtPosition(rootElement!, event, Offset(event.x.toDouble(), event.y.toDouble()), Offset.zero);
+      }
+    }
+  }
+  
+  /// Find the render object in the element tree
+  RenderObject? _findRenderObjectInTree(Element element) {
+    if (element is RenderObjectElement) {
+      return element.renderObject;
+    }
+    RenderObject? result;
+    element.visitChildren((child) {
+      result ??= _findRenderObjectInTree(child);
+    });
+    return result;
+  }
 
   /// Dispatch a keyboard event to an element and its children
   bool _dispatchKeyToElement(Element element, KeyboardEvent event) {
@@ -173,6 +226,63 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
       handled = element.handleKeyEvent(event);
     }
 
+    return handled;
+  }
+  
+  /// Dispatch a mouse wheel event to scrollable elements at a specific position
+  bool _dispatchMouseWheelAtPosition(Element element, MouseEvent event, Offset mousePos, Offset currentOffset) {
+    // Calculate this element's bounds if it has a render object
+    Rect? elementBounds;
+    if (element is RenderObjectElement) {
+      final renderObject = element.renderObject;
+      final size = renderObject.size;
+      
+      // Get the offset from parent data if available
+      Offset localOffset = currentOffset;
+      if (renderObject.parentData is BoxParentData) {
+        final boxParentData = renderObject.parentData as BoxParentData;
+        localOffset = currentOffset + boxParentData.offset;
+      }
+      
+      elementBounds = Rect.fromLTWH(
+        localOffset.dx,
+        localOffset.dy,
+        size.width,
+        size.height,
+      );
+    }
+    
+    // Check if mouse is within this element's bounds
+    bool isWithinBounds = elementBounds?.contains(mousePos) ?? true;
+    
+    if (!isWithinBounds) {
+      return false; // Mouse is outside this element
+    }
+    
+    // Try to dispatch to children first (depth-first, but only if within their bounds)
+    bool handled = false;
+    
+    // Calculate offset for children
+    Offset childrenOffset = currentOffset;
+    if (element is RenderObjectElement && elementBounds != null) {
+      // Use the element's actual position for its children
+      childrenOffset = Offset(elementBounds.left, elementBounds.top);
+    }
+    
+    element.visitChildren((child) {
+      if (!handled) {
+        handled = _dispatchMouseWheelAtPosition(child, event, mousePos, childrenOffset);
+      }
+    });
+    
+    // If no child handled it and this element is scrollable, handle it here
+    if (!handled && element is StatefulElement) {
+      final state = element.state;
+      if (state is ScrollableElement) {
+        handled = (state as ScrollableElement).handleMouseWheel(event);
+      }
+    }
+    
     return handled;
   }
 
@@ -195,9 +305,16 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
     _sigwinchSubscription?.cancel();
     _inputController.close();
     _keyboardEventController.close();
+    _mouseEventController.close();
 
     // Stop hot reload if it was initialized
     shutdownWithHotReload();
+    
+    // Disable mouse tracking
+    stdout.write('\x1B[?1000l'); // Disable basic mouse tracking
+    stdout.write('\x1B[?1002l'); // Disable button event tracking
+    stdout.write('\x1B[?1003l'); // Disable all motion tracking  
+    stdout.write('\x1B[?1006l'); // Disable SGR mouse mode
 
     // Restore stdin if we have a terminal
     try {

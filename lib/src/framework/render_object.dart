@@ -259,11 +259,8 @@ abstract class RenderObject {
   /// repaint boundary, at which point it will be registered with the
   /// pipeline owner for processing during the next frame.
   void markNeedsPaint() {
-    print('bef Marking needs paint $_needsPaint');
     if (_needsPaint) return;
     _needsPaint = true;
-    print('Marking needs paint pp');
-    print('parent: $parent');
 
     // Check if this is a repaint boundary
     if (parent != null) {
@@ -766,12 +763,12 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
       // The slot.value contains the previous element, we need its render object
       final Element? previousElement = slot.value as Element?;
       RenderObject? previousRenderObject;
-      
+
       // Try to get the render object from the previous element
       if (previousElement != null) {
         previousRenderObject = previousElement.renderObject;
       }
-      
+
       renderObject.insert(child, after: previousRenderObject);
     } else {
       // Fallback for non-indexed slots
@@ -783,17 +780,17 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   void moveRenderObjectChild(RenderObject child, dynamic oldSlot, dynamic newSlot) {
     final ContainerRenderObjectMixin<RenderObject> renderObject =
         this.renderObject as ContainerRenderObjectMixin<RenderObject>;
-    
+
     if (newSlot is IndexedSlot) {
       // Move the child to the new position based on the slot
       final Element? previousElement = newSlot.value as Element?;
       RenderObject? previousRenderObject;
-      
+
       // Get the render object from the previous element if it's a RenderObjectElement
       if (previousElement is RenderObjectElement) {
         previousRenderObject = previousElement.renderObject;
       }
-      
+
       renderObject.move(child, after: previousRenderObject);
     }
     // If not an IndexedSlot, do nothing (child stays in place)

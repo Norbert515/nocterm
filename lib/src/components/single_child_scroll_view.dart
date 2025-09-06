@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import 'package:nocterm/nocterm.dart';
 import 'package:nocterm/src/framework/terminal_canvas.dart';
 import 'package:nocterm/src/rectangle.dart';
+import '../keyboard/mouse_event.dart';
+import 'scrollable_element.dart';
 
 /// A box in which a single widget can be scrolled.
 ///
@@ -35,7 +37,7 @@ class SingleChildScrollView extends StatefulComponent {
   State<SingleChildScrollView> createState() => _SingleChildScrollViewState();
 }
 
-class _SingleChildScrollViewState extends State<SingleChildScrollView> {
+class _SingleChildScrollViewState extends State<SingleChildScrollView> implements ScrollableElement {
   ScrollController? _controller;
 
   ScrollController get _effectiveController => component.controller ?? _controller!;
@@ -71,7 +73,6 @@ class _SingleChildScrollViewState extends State<SingleChildScrollView> {
   bool _handleKeyEvent(KeyboardEvent event) {
     final controller = _effectiveController;
     final key = event.logicalKey;
-    print('key: $key');
 
     if (component.scrollDirection == Axis.vertical) {
       if (key == LogicalKey.arrowUp) {
@@ -108,6 +109,35 @@ class _SingleChildScrollViewState extends State<SingleChildScrollView> {
         return true;
       }
     }
+    return false;
+  }
+  
+  @override
+  bool handleMouseWheel(MouseEvent event) {
+    final controller = _effectiveController;
+    
+    // Only handle vertical scroll for vertical ScrollViews
+    // and horizontal scroll for horizontal ScrollViews
+    if (component.scrollDirection == Axis.vertical) {
+      if (event.button == MouseButton.wheelUp) {
+        controller.scrollUp(3.0); // Scroll 3 lines
+        return true;
+      } else if (event.button == MouseButton.wheelDown) {
+        controller.scrollDown(3.0); // Scroll 3 lines
+        return true;
+      }
+    } else {
+      // For horizontal scroll, we might want to handle horizontal wheel events
+      // but for now just handle vertical wheel as horizontal scroll
+      if (event.button == MouseButton.wheelUp) {
+        controller.scrollUp(3.0);
+        return true;
+      } else if (event.button == MouseButton.wheelDown) {
+        controller.scrollDown(3.0);
+        return true;
+      }
+    }
+    
     return false;
   }
 
@@ -193,7 +223,6 @@ class RenderSingleChildViewport extends RenderObject with RenderObjectWithChildM
 
   void _handleScrollUpdate() {
     markNeedsPaint();
-    print('Marking needs paint');
   }
 
   @override
@@ -248,8 +277,6 @@ class RenderSingleChildViewport extends RenderObject with RenderObjectWithChildM
     super.paint(canvas, offset);
     if (child == null) return;
 
-    print('Painted');
-    print(_controller.offset);
     // Calculate the scroll offset
     final scrollOffset =
         scrollDirection == Axis.vertical ? Offset(0, -_controller.offset) : Offset(-_controller.offset, 0);
