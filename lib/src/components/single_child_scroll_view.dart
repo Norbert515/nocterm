@@ -4,7 +4,7 @@ import 'package:nocterm/nocterm.dart';
 import 'package:nocterm/src/framework/terminal_canvas.dart';
 import 'package:nocterm/src/rectangle.dart';
 import '../keyboard/mouse_event.dart';
-import 'scrollable_element.dart';
+import '../rendering/scrollable_render_object.dart';
 
 /// A box in which a single widget can be scrolled.
 ///
@@ -37,7 +37,7 @@ class SingleChildScrollView extends StatefulComponent {
   State<SingleChildScrollView> createState() => _SingleChildScrollViewState();
 }
 
-class _SingleChildScrollViewState extends State<SingleChildScrollView> implements ScrollableElement {
+class _SingleChildScrollViewState extends State<SingleChildScrollView> {
   ScrollController? _controller;
 
   ScrollController get _effectiveController => component.controller ?? _controller!;
@@ -111,35 +111,6 @@ class _SingleChildScrollViewState extends State<SingleChildScrollView> implement
     }
     return false;
   }
-  
-  @override
-  bool handleMouseWheel(MouseEvent event) {
-    final controller = _effectiveController;
-    
-    // Only handle vertical scroll for vertical ScrollViews
-    // and horizontal scroll for horizontal ScrollViews
-    if (component.scrollDirection == Axis.vertical) {
-      if (event.button == MouseButton.wheelUp) {
-        controller.scrollUp(3.0); // Scroll 3 lines
-        return true;
-      } else if (event.button == MouseButton.wheelDown) {
-        controller.scrollDown(3.0); // Scroll 3 lines
-        return true;
-      }
-    } else {
-      // For horizontal scroll, we might want to handle horizontal wheel events
-      // but for now just handle vertical wheel as horizontal scroll
-      if (event.button == MouseButton.wheelUp) {
-        controller.scrollUp(3.0);
-        return true;
-      } else if (event.button == MouseButton.wheelDown) {
-        controller.scrollDown(3.0);
-        return true;
-      }
-    }
-    
-    return false;
-  }
 
   @override
   Component build(BuildContext context) {
@@ -192,7 +163,7 @@ class _SingleChildViewport extends SingleChildRenderObjectComponent {
 }
 
 /// Render object for a scrollable single child viewport.
-class RenderSingleChildViewport extends RenderObject with RenderObjectWithChildMixin<RenderObject> {
+class RenderSingleChildViewport extends RenderObject with RenderObjectWithChildMixin<RenderObject>, ScrollableRenderObjectMixin {
   RenderSingleChildViewport({
     required Axis scrollDirection,
     required ScrollController controller,
@@ -223,6 +194,33 @@ class RenderSingleChildViewport extends RenderObject with RenderObjectWithChildM
 
   void _handleScrollUpdate() {
     markNeedsPaint();
+  }
+  
+  @override
+  bool handleMouseWheel(MouseEvent event) {
+    // Only handle vertical scroll for vertical ScrollViews
+    // and horizontal scroll for horizontal ScrollViews
+    if (_scrollDirection == Axis.vertical) {
+      if (event.button == MouseButton.wheelUp) {
+        _controller.scrollUp(3.0); // Scroll 3 lines
+        return true;
+      } else if (event.button == MouseButton.wheelDown) {
+        _controller.scrollDown(3.0); // Scroll 3 lines
+        return true;
+      }
+    } else {
+      // For horizontal scroll, we might want to handle horizontal wheel events
+      // but for now just handle vertical wheel as horizontal scroll
+      if (event.button == MouseButton.wheelUp) {
+        _controller.scrollUp(3.0);
+        return true;
+      } else if (event.button == MouseButton.wheelDown) {
+        _controller.scrollDown(3.0);
+        return true;
+      }
+    }
+    
+    return false;
   }
 
   @override

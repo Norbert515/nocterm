@@ -5,13 +5,13 @@ import 'dart:io';
 import 'package:nocterm/nocterm.dart';
 import 'package:nocterm/src/framework/terminal_canvas.dart';
 import 'package:nocterm/src/rectangle.dart';
+import 'package:nocterm/src/rendering/scrollable_render_object.dart';
 
 import '../backend/terminal.dart' as term;
 import '../buffer.dart' as buf;
 import '../keyboard/input_parser.dart';
 import '../keyboard/input_event.dart';
 import '../keyboard/mouse_event.dart';
-import '../components/scrollable_element.dart';
 import 'hot_reload_mixin.dart';
 
 /// Terminal UI binding that handles terminal input/output and event loop
@@ -48,7 +48,7 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
 
   /// Stream of parsed keyboard events
   Stream<KeyboardEvent> get keyboardEvents => _keyboardEventController.stream;
-  
+
   /// Stream of parsed mouse events
   Stream<MouseEvent> get mouseEvents => _mouseEventController.stream;
 
@@ -58,11 +58,11 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
     terminal.enterAlternateScreen();
     terminal.hideCursor();
     terminal.clear();
-    
+
     // Enable mouse tracking (SGR mode for better coordinate support)
     // ESC [ ? 1000 h - Send Mouse X & Y on button press and release
     // ESC [ ? 1002 h - Use Cell Motion Mouse Tracking
-    // ESC [ ? 1003 h - Enable all motion mouse tracking  
+    // ESC [ ? 1003 h - Enable all motion mouse tracking
     // ESC [ ? 1006 h - Enable SGR mouse mode
     stdout.write('\x1B[?1000h'); // Basic mouse tracking
     stdout.write('\x1B[?1002h'); // Button event tracking
@@ -95,7 +95,7 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
     _inputSubscription = stdin.listen((bytes) {
       // Parse the bytes and process ALL events in the buffer
       _inputParser.addBytes(bytes);
-      
+
       // Process all available events
       InputEvent? inputEvent;
       while ((inputEvent = _inputParser.parseNext()) != null) {
@@ -103,10 +103,10 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
           final event = inputEvent.event;
           // Add to keyboard event stream
           _keyboardEventController.add(event);
-          
+
           // Route the event through the component tree
           _routeKeyboardEvent(event);
-          
+
           // Exit on Ctrl+C or Escape
           if (event.logicalKey == LogicalKey.escape || (event.matches(LogicalKey.keyC, ctrl: true))) {
             shutdown();
@@ -115,7 +115,7 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
           final event = inputEvent.event;
           // Add to mouse event stream
           _mouseEventController.add(event);
-          
+
           // Route the mouse event through the component tree
           _routeMouseEvent(event);
         }
@@ -184,11 +184,11 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
     // The event will bubble through focused components
     _dispatchKeyToElement(rootElement!, event);
   }
-  
+
   /// Route a mouse event through the component tree
   void _routeMouseEvent(MouseEvent event) {
     if (rootElement == null) return;
-    
+
     // For now, just route wheel events to scrollable widgets
     if (event.button == MouseButton.wheelUp || event.button == MouseButton.wheelDown) {
       // Find the render object at the mouse position
@@ -198,7 +198,7 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
       }
     }
   }
-  
+
   /// Find the render object in the element tree
   RenderObject? _findRenderObjectInTree(Element element) {
     if (element is RenderObjectElement) {
@@ -228,22 +228,24 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
 
     return handled;
   }
-  
-  /// Dispatch a mouse wheel event to scrollable elements at a specific position
+
+  /// Dispatch a mouse wheel event to scrollable RenderObjects at a specific position
   bool _dispatchMouseWheelAtPosition(Element element, MouseEvent event, Offset mousePos, Offset currentOffset) {
     // Calculate this element's bounds if it has a render object
     Rect? elementBounds;
+    RenderObject? renderObject;
+
     if (element is RenderObjectElement) {
-      final renderObject = element.renderObject;
+      renderObject = element.renderObject;
       final size = renderObject.size;
-      
+
       // Get the offset from parent data if available
       Offset localOffset = currentOffset;
       if (renderObject.parentData is BoxParentData) {
         final boxParentData = renderObject.parentData as BoxParentData;
         localOffset = currentOffset + boxParentData.offset;
       }
-      
+
       elementBounds = Rect.fromLTWH(
         localOffset.dx,
         localOffset.dy,
@@ -251,38 +253,38 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
         size.height,
       );
     }
-    
+
     // Check if mouse is within this element's bounds
     bool isWithinBounds = elementBounds?.contains(mousePos) ?? true;
-    
+
     if (!isWithinBounds) {
       return false; // Mouse is outside this element
     }
-    
+
     // Try to dispatch to children first (depth-first, but only if within their bounds)
     bool handled = false;
-    
+
     // Calculate offset for children
     Offset childrenOffset = currentOffset;
     if (element is RenderObjectElement && elementBounds != null) {
       // Use the element's actual position for its children
       childrenOffset = Offset(elementBounds.left, elementBounds.top);
     }
-    
+
     element.visitChildren((child) {
       if (!handled) {
         handled = _dispatchMouseWheelAtPosition(child, event, mousePos, childrenOffset);
       }
     });
-    
-    // If no child handled it and this element is scrollable, handle it here
-    if (!handled && element is StatefulElement) {
-      final state = element.state;
-      if (state is ScrollableElement) {
-        handled = (state as ScrollableElement).handleMouseWheel(event);
-      }
+
+    // If no child handled it and this element's render object is scrollable, handle it here
+    if (!handled && renderObject != null && renderObject is ScrollableRenderObjectMixin) {
+      final scrollableRenderObject = renderObject as ScrollableRenderObjectMixin;
+      // Check if the render object implements scrolling through duck typing
+      // This allows the RenderObject to handle scrolling without importing the mixin
+      handled = scrollableRenderObject.handleMouseWheel(event);
     }
-    
+
     return handled;
   }
 
@@ -309,11 +311,11 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
 
     // Stop hot reload if it was initialized
     shutdownWithHotReload();
-    
+
     // Disable mouse tracking
     stdout.write('\x1B[?1000l'); // Disable basic mouse tracking
     stdout.write('\x1B[?1002l'); // Disable button event tracking
-    stdout.write('\x1B[?1003l'); // Disable all motion tracking  
+    stdout.write('\x1B[?1003l'); // Disable all motion tracking
     stdout.write('\x1B[?1006l'); // Disable SGR mouse mode
 
     // Restore stdin if we have a terminal
