@@ -1,3 +1,4 @@
+import 'package:characters/characters.dart';
 import '../utils/unicode_width.dart';
 
 /// How overflowing text should be handled
@@ -205,30 +206,83 @@ class TextLayoutEngine {
     return lines;
   }
   
-  /// Split text into words, preserving spaces
+  /// Split text into words, preserving spaces and considering break opportunities
   static List<String> _splitIntoWords(String text) {
     final List<String> words = [];
     final StringBuffer currentWord = StringBuffer();
-    
-    for (int i = 0; i < text.length; i++) {
-      final char = text[i];
-      
-      if (char == ' ') {
+
+    String? prevGrapheme;
+    for (final grapheme in text.characters) {
+      // Check for break opportunities
+      if (_canBreakAfter(prevGrapheme, grapheme)) {
         if (currentWord.isNotEmpty) {
           words.add(currentWord.toString());
           currentWord.clear();
         }
-        words.add(' ');
+        if (grapheme == ' ') {
+          words.add(' ');
+        } else {
+          currentWord.write(grapheme);
+        }
       } else {
-        currentWord.write(char);
+        currentWord.write(grapheme);
       }
+      prevGrapheme = grapheme;
     }
-    
+
     if (currentWord.isNotEmpty) {
       words.add(currentWord.toString());
     }
-    
+
     return words;
+  }
+
+  /// Check if we can break between two graphemes
+  static bool _canBreakAfter(String? prev, String next) {
+    if (prev == null) return false;
+
+    // Always break on spaces
+    if (next == ' ' || prev == ' ') return true;
+
+    // Break after hyphens
+    if (prev == '-') return true;
+
+    // Break after slashes (for URLs)
+    if (prev == '/') return true;
+
+    // Zero-width space is an explicit break opportunity
+    if (prev == '\u200B' || next == '\u200B') return true;
+
+    // CJK characters can break between each other
+    if (_isCJK(prev) && _isCJK(next)) return true;
+
+    return false;
+  }
+
+  /// Check if a grapheme is a CJK character
+  static bool _isCJK(String grapheme) {
+    if (grapheme.isEmpty) return false;
+    final rune = grapheme.runes.first;
+
+    // CJK Unified Ideographs
+    if ((rune >= 0x4E00 && rune <= 0x9FFF) ||
+        (rune >= 0x3400 && rune <= 0x4DBF) ||
+        (rune >= 0x20000 && rune <= 0x2A6DF)) {
+      return true;
+    }
+
+    // Hiragana, Katakana
+    if ((rune >= 0x3040 && rune <= 0x309F) ||
+        (rune >= 0x30A0 && rune <= 0x30FF)) {
+      return true;
+    }
+
+    // Hangul
+    if (rune >= 0xAC00 && rune <= 0xD7AF) {
+      return true;
+    }
+
+    return false;
   }
   
   /// Break a long word that doesn't fit on a single line
@@ -236,25 +290,25 @@ class TextLayoutEngine {
     final List<String> parts = [];
     String currentPart = '';
     int currentWidth = 0;
-    
-    for (int i = 0; i < word.length; i++) {
-      final char = word[i];
-      final charWidth = UnicodeWidth.runeWidth(word.codeUnitAt(i));
-      
-      if (currentWidth + charWidth > maxWidth && currentPart.isNotEmpty) {
+
+    // Use grapheme clusters to avoid breaking multi-codepoint characters
+    for (final grapheme in word.characters) {
+      final graphemeW = UnicodeWidth.graphemeWidth(grapheme);
+
+      if (currentWidth + graphemeW > maxWidth && currentPart.isNotEmpty) {
         parts.add(currentPart);
-        currentPart = char;
-        currentWidth = charWidth;
+        currentPart = grapheme;
+        currentWidth = graphemeW;
       } else {
-        currentPart += char;
-        currentWidth += charWidth;
+        currentPart += grapheme;
+        currentWidth += graphemeW;
       }
     }
-    
+
     if (currentPart.isNotEmpty) {
       parts.add(currentPart);
     }
-    
+
     return parts.isEmpty ? [''] : parts;
   }
   
@@ -262,27 +316,26 @@ class TextLayoutEngine {
   static String _addEllipsisToLine(String line, int maxWidth) {
     final ellipsisWidth = UnicodeWidth.stringWidth(_ellipsis);
     final lineWidth = UnicodeWidth.stringWidth(line);
-    
+
     if (lineWidth <= maxWidth - ellipsisWidth) {
       return line + _ellipsis;
     }
-    
-    // Truncate line to make room for ellipsis
+
+    // Truncate line to make room for ellipsis using grapheme clusters
     String truncated = '';
     int width = 0;
-    
-    for (int i = 0; i < line.length; i++) {
-      final char = line[i];
-      final charWidth = UnicodeWidth.runeWidth(line.codeUnitAt(i));
-      
-      if (width + charWidth + ellipsisWidth > maxWidth) {
+
+    for (final grapheme in line.characters) {
+      final graphemeW = UnicodeWidth.graphemeWidth(grapheme);
+
+      if (width + graphemeW + ellipsisWidth > maxWidth) {
         break;
       }
-      
-      truncated += char;
-      width += charWidth;
+
+      truncated += grapheme;
+      width += graphemeW;
     }
-    
+
     return truncated + _ellipsis;
   }
   

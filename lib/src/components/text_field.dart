@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:characters/characters.dart';
 import 'package:nocterm/nocterm.dart' hide TextAlign;
 import 'package:nocterm/src/framework/terminal_canvas.dart';
-import '../text/text_layout_engine.dart' show TextAlign;
+import '../text/text_layout_engine.dart';
+import '../utils/unicode_width.dart';
 
 /// Controls the text being edited.
 class TextEditingController {
@@ -443,9 +445,17 @@ class _TextFieldState extends State<TextField> {
       _controller.text = text.substring(0, selection.start) + text.substring(selection.end);
       _controller.selection = TextSelection.collapsed(offset: selection.start);
     } else if (selection.extentOffset > 0) {
-      // Delete character before cursor
-      _controller.text = text.substring(0, selection.extentOffset - 1) + text.substring(selection.extentOffset);
-      _controller.selection = TextSelection.collapsed(offset: selection.extentOffset - 1);
+      // Delete the grapheme cluster before cursor
+      final textBefore = text.substring(0, selection.extentOffset);
+      final textAfter = text.substring(selection.extentOffset);
+
+      // Use grapheme clusters to delete the entire cluster
+      final graphemes = textBefore.characters;
+      if (graphemes.isNotEmpty) {
+        final newTextBefore = graphemes.skipLast(1).toString();
+        _controller.text = newTextBefore + textAfter;
+        _controller.selection = TextSelection.collapsed(offset: newTextBefore.length);
+      }
     }
   }
 
@@ -458,8 +468,17 @@ class _TextFieldState extends State<TextField> {
       _controller.text = text.substring(0, selection.start) + text.substring(selection.end);
       _controller.selection = TextSelection.collapsed(offset: selection.start);
     } else if (selection.extentOffset < text.length) {
-      // Delete character after cursor
-      _controller.text = text.substring(0, selection.extentOffset) + text.substring(selection.extentOffset + 1);
+      // Delete the grapheme cluster after cursor
+      final textBefore = text.substring(0, selection.extentOffset);
+      final textAfter = text.substring(selection.extentOffset);
+
+      // Use grapheme clusters to delete the entire cluster
+      final graphemesAfter = textAfter.characters;
+      if (graphemesAfter.isNotEmpty) {
+        final newTextAfter = graphemesAfter.skip(1).toString();
+        _controller.text = textBefore + newTextAfter;
+        // Cursor position stays the same
+      }
     }
   }
 
@@ -467,7 +486,28 @@ class _TextFieldState extends State<TextField> {
     final selection = _controller.selection;
     final text = _controller.text;
 
-    int newOffset = (selection.extentOffset + delta).clamp(0, text.length);
+    // Use grapheme clusters for proper cursor movement
+    final graphemes = text.characters.toList();
+
+    // Find current position in grapheme clusters
+    int currentGraphemeIndex = 0;
+    int charCount = 0;
+    for (int i = 0; i < graphemes.length; i++) {
+      if (charCount >= selection.extentOffset) {
+        currentGraphemeIndex = i;
+        break;
+      }
+      charCount += graphemes[i].length;
+    }
+
+    // Move by grapheme clusters
+    final newGraphemeIndex = (currentGraphemeIndex + delta).clamp(0, graphemes.length);
+
+    // Calculate new character offset
+    int newOffset = 0;
+    for (int i = 0; i < newGraphemeIndex; i++) {
+      newOffset += graphemes[i].length;
+    }
 
     if (extendSelection) {
       _controller.selection = selection.copyWith(extentOffset: newOffset);
@@ -499,39 +539,89 @@ class _TextFieldState extends State<TextField> {
   }
 
   void _moveCursorVertically(int direction) {
-    // Simple implementation for multi-line text
     final text = _controller.text;
-    final lines = text.split('\n');
     final selection = _controller.selection;
+    final currentOffset = selection.extentOffset;
 
-    int currentLine = 0;
-    int currentColumn = 0;
-    int charCount = 0;
+    // For multi-line text, calculate layout using TextLayoutEngine
+    final maxWidth = component.width?.toInt() ?? 80;
 
-    // Find current line and column
-    for (int i = 0; i < lines.length; i++) {
-      if (charCount + lines[i].length >= selection.extentOffset) {
-        currentLine = i;
-        currentColumn = selection.extentOffset - charCount;
+    final config = TextLayoutConfig(
+      maxWidth: maxWidth,
+      maxLines: component.maxLines,
+      textAlign: component.textAlign,
+      overflow: TextOverflow.visible,
+      softWrap: component.maxLines != 1,
+    );
+
+    final layoutResult = TextLayoutEngine.layout(text, config);
+    final layoutLines = layoutResult.lines;
+
+    if (layoutLines.isEmpty) return;
+
+    // Build line offset mapping
+    final List<int> lineStartOffsets = [];
+    final List<int> lineEndOffsets = [];
+    int textPosition = 0;
+
+    for (final line in layoutLines) {
+      lineStartOffsets.add(textPosition);
+      // Find the actual text that corresponds to this line
+      // Account for the fact that lines might be wrapped
+      int lineLength = line.characters.length;
+      lineEndOffsets.add(textPosition + lineLength);
+      textPosition += lineLength;
+
+      // Check if there's a newline after this line in the original text
+      if (textPosition < text.length && text[textPosition] == '\n') {
+        textPosition++; // Skip the newline
+      }
+    }
+
+    // Find current line and column position
+    int currentLineIndex = 0;
+    int currentVisualColumn = 0;
+
+    for (int i = 0; i < layoutLines.length; i++) {
+      if (currentOffset >= lineStartOffsets[i] &&
+          (i == layoutLines.length - 1 || currentOffset < lineStartOffsets[i + 1])) {
+        currentLineIndex = i;
+        // Calculate visual column from start of this line
+        final lineStart = lineStartOffsets[i];
+        if (currentOffset > lineStart) {
+          final textBeforeCursor = text.substring(lineStart, currentOffset);
+          currentVisualColumn = UnicodeWidth.stringWidth(textBeforeCursor);
+        }
         break;
       }
-      charCount += lines[i].length + 1; // +1 for newline
     }
 
     // Move to new line
-    final newLine = (currentLine + direction).clamp(0, lines.length - 1);
-    if (newLine == currentLine) return;
+    final newLineIndex = (currentLineIndex + direction).clamp(0, layoutLines.length - 1);
+    if (newLineIndex == currentLineIndex) return;
 
-    // Calculate new offset
-    charCount = 0;
-    for (int i = 0; i < newLine; i++) {
-      charCount += lines[i].length + 1;
+    // Find the position in the new line that matches the visual column
+    final newLineStart = lineStartOffsets[newLineIndex];
+    final newLineEnd = lineEndOffsets[newLineIndex];
+    final newLineText = text.substring(newLineStart, math.min(newLineEnd, text.length));
+
+    int targetOffset = newLineStart;
+    int visualPosition = 0;
+
+    for (final char in newLineText.characters) {
+      final charWidth = UnicodeWidth.stringWidth(char);
+      if (visualPosition + charWidth > currentVisualColumn) {
+        // If we'd overshoot, decide whether to place before or after this character
+        if (visualPosition + charWidth / 2 <= currentVisualColumn) {
+          targetOffset += char.length;
+        }
+        break;
+      }
+      visualPosition += charWidth;
+      targetOffset += char.length;
     }
 
-    final newColumn = math.min(currentColumn, lines[newLine].length);
-    final newOffset = charCount + newColumn;
-
-    _controller.selection = TextSelection.collapsed(offset: newOffset);
+    _controller.selection = TextSelection.collapsed(offset: targetOffset);
   }
 
   void _moveCursorToStart() {
@@ -743,6 +833,9 @@ class RenderTextField extends RenderObject {
   int? _maxLines;
   bool _isFocused;
 
+  // Store the layout result for proper Unicode rendering
+  TextLayoutResult? _layoutResult;
+
   set text(String value) {
     if (_text != value) {
       _text = value;
@@ -836,81 +929,168 @@ class RenderTextField extends RenderObject {
 
   @override
   void performLayout() {
-    final lines = (_maxLines ?? 1).clamp(1, 100);
+    // Use TextLayoutEngine for proper Unicode text wrapping
+    final textToLayout = _text.isEmpty && _placeholder != null ? _placeholder! : _text;
+
+    final maxWidth = constraints.maxWidth.isFinite
+        ? constraints.maxWidth.toInt()
+        : 80; // Default width for infinite constraints
+
+    final config = TextLayoutConfig(
+      softWrap: _maxLines != 1, // Enable wrapping for multi-line fields
+      overflow: TextOverflow.clip,
+      textAlign: _textAlign,
+      maxLines: _maxLines,
+      maxWidth: maxWidth,
+    );
+
+    _layoutResult = TextLayoutEngine.layout(textToLayout, config);
+
+    // Size based on actual layout result
+    final actualHeight = _layoutResult!.actualHeight.toDouble();
     size = constraints.constrain(Size(
       constraints.maxWidth,
-      lines.toDouble(),
+      actualHeight,
     ));
   }
 
   @override
   void paint(TerminalCanvas canvas, Offset offset) {
     super.paint(canvas, offset);
-    final displayText = _text.isEmpty && _placeholder != null ? _placeholder! : _text;
+
+    if (_layoutResult == null) return;
+
     final textStyle = _text.isEmpty && _placeholder != null
         ? (_placeholderStyle ?? TextStyle(color: Colors.gray))
         : (_style ?? const TextStyle());
 
-    // For multi-line text, split into lines
-    if (_maxLines != 1) {
-      final lines = displayText.split('\n');
-      for (int i = 0; i < lines.length && i < (_maxLines ?? lines.length); i++) {
-        _paintLine(canvas, offset + Offset(0, i.toDouble()), lines[i], textStyle, i);
+    final lines = _layoutResult!.lines;
+    final alignmentWidth = size.width.toInt();
+
+    // Paint each line from the layout result
+    for (int i = 0; i < lines.length; i++) {
+      final line = lines[i];
+
+      // Calculate horizontal offset based on text alignment
+      final xOffset = offset.dx + TextLayoutEngine.calculateAlignmentOffset(
+        line,
+        alignmentWidth,
+        _textAlign,
+      );
+
+      // Apply justification if needed
+      String displayLine = line;
+      if (_textAlign == TextAlign.justify && i < lines.length - 1) {
+        displayLine = TextLayoutEngine.justifyLine(line, alignmentWidth, isLastLine: false);
       }
-    } else {
-      _paintLine(canvas, offset, displayText, textStyle, 0);
+
+      _paintLineWithSelection(canvas, Offset(xOffset, offset.dy + i), displayLine, textStyle, i);
     }
 
     // Paint cursor only for the focused field
     if (_cursorVisible && _isFocused) {
-      _paintCursor(canvas, offset, displayText);
+      _paintCursor(canvas, offset);
     }
   }
 
-  void _paintLine(TerminalCanvas canvas, Offset offset, String line, TextStyle style, int lineIndex) {
-    // Handle text alignment
-    double xOffset = 0;
-    if (_textAlign == TextAlign.center) {
-      xOffset = (size.width - line.length) / 2;
-    } else if (_textAlign == TextAlign.right) {
-      xOffset = size.width - line.length;
-    }
-
-    final lineOffset = offset + Offset(xOffset, 0);
-
-    // Paint selection background if applicable
-    if (!_selection.isCollapsed && _selectionColor != null) {
-      final selStart = (_selection.start - _viewOffset).clamp(0, line.length);
-      final selEnd = (_selection.end - _viewOffset).clamp(0, line.length);
-
-      if (selStart < selEnd) {
-        final selectedText = line.substring(selStart, selEnd);
-        final selectionStyle = style.copyWith(backgroundColor: _selectionColor);
-        canvas.drawText(lineOffset + Offset(selStart.toDouble(), 0), selectedText, style: selectionStyle);
+  void _paintLineWithSelection(TerminalCanvas canvas, Offset offset, String line, TextStyle style, int lineIndex) {
+    // Calculate the character range for this line
+    int lineStartOffset = 0;
+    if (_layoutResult != null && lineIndex > 0) {
+      // Sum up the character count of all previous lines
+      for (int i = 0; i < lineIndex && i < _layoutResult!.lines.length; i++) {
+        lineStartOffset += _layoutResult!.lines[i].length;
+        // Add 1 for the newline character if not a wrapped line
+        if (i < _layoutResult!.lines.length - 1 && _text.contains('\n')) {
+          // Check if this is a natural line break or wrapped
+          final textUpToLine = _text.substring(0, math.min(lineStartOffset, _text.length));
+          if (textUpToLine.endsWith('\n')) {
+            lineStartOffset++;
+          }
+        }
       }
     }
 
-    // Paint the text
-    canvas.drawText(lineOffset, line, style: style);
+    final lineEndOffset = lineStartOffset + line.length;
+
+    // Check if selection intersects with this line
+    if (!_selection.isCollapsed && _selectionColor != null) {
+      final selStart = _selection.start;
+      final selEnd = _selection.end;
+
+      // Check if selection overlaps with this line
+      if (selEnd > lineStartOffset && selStart < lineEndOffset) {
+        // Calculate selection within this line
+        final localSelStart = math.max(0, selStart - lineStartOffset);
+        final localSelEnd = math.min(line.length, selEnd - lineStartOffset);
+
+        if (localSelStart < localSelEnd) {
+          // Paint non-selected text before selection
+          if (localSelStart > 0) {
+            final beforeText = line.substring(0, localSelStart);
+            canvas.drawText(offset, beforeText, style: style);
+          }
+
+          // Paint selected text with selection background
+          final selectedText = line.substring(localSelStart, localSelEnd);
+          final beforeWidth = localSelStart > 0 ? UnicodeWidth.stringWidth(line.substring(0, localSelStart)) : 0;
+          final selectionStyle = style.copyWith(backgroundColor: _selectionColor);
+          canvas.drawText(offset + Offset(beforeWidth.toDouble(), 0), selectedText, style: selectionStyle);
+
+          // Paint non-selected text after selection
+          if (localSelEnd < line.length) {
+            final afterText = line.substring(localSelEnd);
+            final beforeSelectedWidth = UnicodeWidth.stringWidth(line.substring(0, localSelEnd));
+            canvas.drawText(offset + Offset(beforeSelectedWidth.toDouble(), 0), afterText, style: style);
+          }
+
+          return;
+        }
+      }
+    }
+
+    // No selection on this line, paint normally
+    canvas.drawText(offset, line, style: style);
   }
 
-  void _paintCursor(TerminalCanvas canvas, Offset offset, String displayText) {
+  void _paintCursor(TerminalCanvas canvas, Offset offset) {
+    if (_layoutResult == null) return;
+
     final cursorColor = _cursorColor ?? Colors.white;
+    final lines = _layoutResult!.lines;
 
     if (_text.isEmpty && _placeholder == null) {
       // Empty field - show cursor at beginning
       _drawCursorAtPosition(canvas, offset, ' ', 0, cursorColor);
-    } else {
-      // Calculate cursor position for visual indicator
-      final cursorPos = _selection.extentOffset - _viewOffset;
-      if (cursorPos >= 0 && cursorPos <= displayText.length) {
-        final cursorOffset = offset + Offset(cursorPos.toDouble(), 0);
+      return;
+    }
+
+    // Find which line the cursor is on
+    int charCount = 0;
+    for (int i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      final lineLength = line.length;
+
+      // Check if cursor is on this line
+      if (charCount + lineLength >= _selection.extentOffset || i == lines.length - 1) {
+        final positionInLine = (_selection.extentOffset - charCount).clamp(0, lineLength);
+
+        // Calculate visual position using Unicode width
+        final textBeforeCursor = line.substring(0, positionInLine);
+        final visualColumn = UnicodeWidth.stringWidth(textBeforeCursor);
+
+        final cursorOffset = offset + Offset(visualColumn.toDouble(), i.toDouble());
 
         // Get the character at cursor position (or space if at end)
-        final charAtCursor = cursorPos < displayText.length ? displayText[cursorPos] : ' ';
+        final charAtCursor = positionInLine < line.length ? line[positionInLine] : ' ';
 
-        _drawCursorAtPosition(canvas, cursorOffset, charAtCursor, cursorPos, cursorColor);
+        _drawCursorAtPosition(canvas, cursorOffset, charAtCursor, positionInLine, cursorColor);
+        break;
       }
+
+      charCount += lineLength;
+      // Add 1 for the newline if not the last line
+      if (i < lines.length - 1) charCount++;
     }
   }
 
