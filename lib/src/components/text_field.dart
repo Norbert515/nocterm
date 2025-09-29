@@ -328,14 +328,17 @@ class _TextFieldState extends State<TextField> {
     }
 
     // Handle special keys
+    // Note: Shift+Enter detection doesn't work in most terminals due to input limitations
+    // Most terminals send the same code for Enter and Shift+Enter
     if (key == LogicalKey.enter && event.isShiftPressed) {
-      // Shift+Enter always inserts a newline in multi-line fields
+      // This branch rarely works in real terminals but is kept for compatibility
+      // with test environments and potential future terminal improvements
       if (component.maxLines != 1) {
         _insertText('\n');
       }
       return true;
     } else if (key == LogicalKey.enter && !event.isShiftPressed) {
-      // Enter always submits (for both single-line and multi-line fields)
+      // Enter submits in all fields (both single-line and multi-line)
       component.onEditingComplete?.call();
       component.onSubmitted?.call(_controller.text);
       return true;

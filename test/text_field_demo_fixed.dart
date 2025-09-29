@@ -13,7 +13,7 @@ void main() {
         await tester.pumpComponent(
           Column(
             children: [
-              const Text('Multi-line (Shift+Enter for new line, Enter to submit):'),
+              const Text('Multi-line (Enter to submit):'),
               const SizedBox(height: 1),
               TextField(
                 controller: controller,

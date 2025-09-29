@@ -97,7 +97,7 @@ class _TextFieldDemoState extends State<TextFieldDemo> {
             const SizedBox(height: 1),
 
             // Multi-line field
-            const Text('Multi-line (Shift+Enter for new line, Enter to submit):'),
+            const Text('Multi-line (Enter to submit):'),
             Container(
               decoration: BoxDecoration(
                 border: BoxBorder.all(
@@ -110,7 +110,7 @@ class _TextFieldDemoState extends State<TextFieldDemo> {
                 width: 50,
                 height: 4,
                 maxLines: 4,
-                placeholder: 'Enter multiple lines...\nShift+Enter for new line',
+                placeholder: 'Enter multiple lines...\nNote: Enter submits the text',
               ),
             ),
             const SizedBox(height: 1),
