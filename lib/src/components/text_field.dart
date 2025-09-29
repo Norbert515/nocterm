@@ -7,6 +7,34 @@ import 'package:nocterm/src/framework/terminal_canvas.dart';
 import '../text/text_layout_engine.dart';
 import '../utils/unicode_width.dart';
 
+/// Line info for tracking wrapped lines
+class LineInfo {
+  const LineInfo({
+    required this.width,
+    required this.charWidth,
+    required this.height,
+    required this.startColumn,
+    required this.columnOffset,
+    required this.rowOffset,
+    required this.charOffset,
+  });
+
+  /// Width is the number of columns in the line.
+  final int width;
+  /// CharWidth is the number of characters in the line to account for double-width runes.
+  final int charWidth;
+  /// Height is the number of rows in the line.
+  final int height;
+  /// StartColumn is the index of the first column of the line.
+  final int startColumn;
+  /// ColumnOffset is the number of columns that the cursor is offset from the start of the line.
+  final int columnOffset;
+  /// RowOffset is the number of rows that the cursor is offset from the start of the line.
+  final int rowOffset;
+  /// CharOffset is the number of characters that the cursor is offset from the start of the line.
+  final int charOffset;
+}
+
 /// Controls the text being edited.
 class TextEditingController {
   TextEditingController({String? text})
@@ -173,6 +201,11 @@ class _TextFieldState extends State<TextField> {
   Timer? _cursorTimer;
   bool _cursorVisible = true;
   int _viewOffset = 0; // For horizontal scrolling
+  int _viewportYOffset = 0; // For vertical scrolling in multi-line fields
+  int _lastCharOffset = 0; // For maintaining cursor position when moving vertically
+  List<List<String>> _wrappedLines = []; // Cache for wrapped lines
+  int _row = 0; // Current row in logical lines (not wrapped)
+  int _col = 0; // Current column in the current row
 
   @override
   void initState() {
@@ -186,6 +219,10 @@ class _TextFieldState extends State<TextField> {
     }
 
     _controller.addListener(_handleControllerChanged);
+
+    // Initialize wrapped lines cache
+    _updateWrappedLines();
+    _updateRowColFromSelection();
 
     if (component.focused && component.showCursor) {
       _startCursorBlink();
@@ -209,7 +246,153 @@ class _TextFieldState extends State<TextField> {
     setState(() {
       // Update view offset for horizontal scrolling
       _updateViewOffset();
+      // Update wrapped lines cache
+      _updateWrappedLines();
+      // Update row/col position from selection
+      _updateRowColFromSelection();
     });
+  }
+
+  void _updateWrappedLines() {
+    if (component.maxLines == 1) {
+      // Single line doesn't need wrapping
+      _wrappedLines = [[_controller.text]];
+      return;
+    }
+
+    // Split text into logical lines
+    final lines = _controller.text.split('\n');
+    _wrappedLines = [];
+
+    final maxWidth = component.width?.toInt() ?? 80;
+
+    for (final line in lines) {
+      if (line.isEmpty) {
+        _wrappedLines.add(['']);
+        continue;
+      }
+
+      // Wrap each logical line
+      final wrapped = _wrapLine(line, maxWidth);
+      _wrappedLines.add(wrapped);
+    }
+  }
+
+  List<String> _wrapLine(String line, int maxWidth) {
+    if (line.isEmpty) return [''];
+
+    final result = <String>[];
+    final chars = line.characters.toList();
+    var currentLine = '';
+    var currentWidth = 0;
+
+    for (final char in chars) {
+      final charWidth = UnicodeWidth.stringWidth(char);
+
+      if (currentWidth + charWidth > maxWidth && currentLine.isNotEmpty) {
+        result.add(currentLine);
+        currentLine = char;
+        currentWidth = charWidth;
+      } else {
+        currentLine += char;
+        currentWidth += charWidth;
+      }
+    }
+
+    if (currentLine.isNotEmpty) {
+      result.add(currentLine);
+    }
+
+    return result.isEmpty ? [''] : result;
+  }
+
+  void _updateRowColFromSelection() {
+    final offset = _controller.selection.extentOffset;
+    final text = _controller.text;
+
+    // Find row and column from offset
+    int charCount = 0;
+    final lines = text.split('\n');
+
+    for (int row = 0; row < lines.length; row++) {
+      final lineLength = lines[row].length;
+
+      if (charCount + lineLength >= offset) {
+        _row = row;
+        _col = offset - charCount;
+        return;
+      }
+
+      charCount += lineLength + 1; // +1 for newline
+    }
+
+    // If we get here, cursor is at the end
+    _row = lines.length - 1;
+    _col = lines.last.length;
+  }
+
+  LineInfo _getLineInfo() {
+    if (_wrappedLines.isEmpty || _row >= _wrappedLines.length) {
+      return const LineInfo(
+        width: 0,
+        charWidth: 0,
+        height: 0,
+        startColumn: 0,
+        columnOffset: 0,
+        rowOffset: 0,
+        charOffset: 0,
+      );
+    }
+
+    final wrappedLinesForRow = _wrappedLines[_row];
+    if (wrappedLinesForRow.isEmpty) {
+      return const LineInfo(
+        width: 0,
+        charWidth: 0,
+        height: 1,
+        startColumn: 0,
+        columnOffset: 0,
+        rowOffset: 0,
+        charOffset: 0,
+      );
+    }
+
+    // Find which wrapped line we're on
+    int charCount = 0;
+    for (int i = 0; i < wrappedLinesForRow.length; i++) {
+      final wrappedLine = wrappedLinesForRow[i];
+      final lineLength = wrappedLine.length;
+
+      if (charCount + lineLength >= _col) {
+        final columnInWrappedLine = _col - charCount;
+        final textBeforeCursor = wrappedLine.substring(0, columnInWrappedLine);
+        final charOffset = UnicodeWidth.stringWidth(textBeforeCursor);
+
+        return LineInfo(
+          width: wrappedLine.length,
+          charWidth: UnicodeWidth.stringWidth(wrappedLine),
+          height: wrappedLinesForRow.length,
+          startColumn: charCount,
+          columnOffset: columnInWrappedLine,
+          rowOffset: i,
+          charOffset: charOffset,
+        );
+      }
+
+      charCount += lineLength;
+    }
+
+    // Cursor is at the end of the last wrapped line
+    final lastWrappedLine = wrappedLinesForRow.last;
+    return LineInfo(
+      width: lastWrappedLine.length,
+      charWidth: UnicodeWidth.stringWidth(lastWrappedLine),
+      height: wrappedLinesForRow.length,
+      startColumn: charCount - lastWrappedLine.length,
+      columnOffset: lastWrappedLine.length,
+      rowOffset: wrappedLinesForRow.length - 1,
+      charOffset: UnicodeWidth.stringWidth(lastWrappedLine),
+    );
   }
 
   @override
@@ -339,6 +522,15 @@ class _TextFieldState extends State<TextField> {
     } else if (key == LogicalKey.arrowRight && event.isControlPressed) {
       _moveCursorByWord(1, false);
       return true;
+    } else if (key == LogicalKey.backspace && event.isControlPressed) {
+      _deleteWordBackward();
+      return true;
+    } else if (key == LogicalKey.delete && event.isControlPressed) {
+      _deleteWordForward();
+      return true;
+    } else if (event.matches(LogicalKey.keyT, ctrl: true)) {
+      _transposeCharacters();
+      return true;
     } else {
       // Use the character from the event if available (supports UTF-8 and composed characters)
       if (event.character != null) {
@@ -412,12 +604,29 @@ class _TextFieldState extends State<TextField> {
   }
 
   void _insertText(String char) {
-    if (component.maxLength != null && _controller.text.length >= component.maxLength!) {
-      return;
-    }
-
     final text = _controller.text;
     final selection = _controller.selection;
+
+    // Check if we're at max length
+    if (component.maxLength != null) {
+      final currentLength = text.characters.length;
+      final insertLength = char.characters.length;
+      final deleteLength = selection.isCollapsed ? 0 : (selection.end - selection.start);
+
+      if (currentLength - deleteLength + insertLength > component.maxLength!) {
+        return;
+      }
+    }
+
+    // Check max lines for multi-line fields
+    if (component.maxLines != null && component.maxLines! > 1 && char.contains('\n')) {
+      final currentLines = text.split('\n').length;
+      final newLines = char.split('\n').length - 1;
+
+      if (currentLines + newLines > component.maxLines!) {
+        return;
+      }
+    }
 
     String newText;
     int newOffset;
@@ -434,6 +643,9 @@ class _TextFieldState extends State<TextField> {
 
     _controller.text = newText;
     _controller.selection = TextSelection.collapsed(offset: newOffset);
+
+    // Reset last char offset after text modification
+    _lastCharOffset = 0;
   }
 
   void _handleBackspace() {
@@ -486,6 +698,9 @@ class _TextFieldState extends State<TextField> {
     final selection = _controller.selection;
     final text = _controller.text;
 
+    // Reset last char offset when moving horizontally
+    _lastCharOffset = 0;
+
     // Use grapheme clusters for proper cursor movement
     final graphemes = text.characters.toList();
 
@@ -523,12 +738,30 @@ class _TextFieldState extends State<TextField> {
 
     if (direction < 0) {
       // Move left by word
-      while (offset > 0 && text[offset - 1] == ' ') offset--;
-      while (offset > 0 && text[offset - 1] != ' ') offset--;
+      if (offset == 0) return;
+
+      // Skip spaces backward
+      while (offset > 0 && _isSpace(text[offset - 1])) {
+        offset--;
+      }
+
+      // Skip word characters backward
+      while (offset > 0 && !_isSpace(text[offset - 1])) {
+        offset--;
+      }
     } else {
       // Move right by word
-      while (offset < text.length && text[offset] != ' ') offset++;
-      while (offset < text.length && text[offset] == ' ') offset++;
+      if (offset >= text.length) return;
+
+      // Skip current word forward
+      while (offset < text.length && !_isSpace(text[offset])) {
+        offset++;
+      }
+
+      // Skip spaces forward
+      while (offset < text.length && _isSpace(text[offset])) {
+        offset++;
+      }
     }
 
     if (extendSelection) {
@@ -536,92 +769,201 @@ class _TextFieldState extends State<TextField> {
     } else {
       _controller.selection = TextSelection.collapsed(offset: offset);
     }
+
+    // Reset last char offset when moving by word
+    _lastCharOffset = 0;
+  }
+
+  bool _isSpace(String char) {
+    return char == ' ' || char == '\t' || char == '\n' || char == '\r';
+  }
+
+  void _deleteWordBackward() {
+    final text = _controller.text;
+    final selection = _controller.selection;
+
+    if (!selection.isCollapsed) {
+      // Delete selected text
+      _controller.text = text.substring(0, selection.start) + text.substring(selection.end);
+      _controller.selection = TextSelection.collapsed(offset: selection.start);
+      return;
+    }
+
+    if (selection.extentOffset == 0) return;
+
+    int start = selection.extentOffset;
+
+    // Skip spaces backward
+    while (start > 0 && _isSpace(text[start - 1])) {
+      start--;
+    }
+
+    // Skip word characters backward
+    while (start > 0 && !_isSpace(text[start - 1])) {
+      start--;
+    }
+
+    _controller.text = text.substring(0, start) + text.substring(selection.extentOffset);
+    _controller.selection = TextSelection.collapsed(offset: start);
+  }
+
+  void _deleteWordForward() {
+    final text = _controller.text;
+    final selection = _controller.selection;
+
+    if (!selection.isCollapsed) {
+      // Delete selected text
+      _controller.text = text.substring(0, selection.start) + text.substring(selection.end);
+      _controller.selection = TextSelection.collapsed(offset: selection.start);
+      return;
+    }
+
+    if (selection.extentOffset >= text.length) return;
+
+    int end = selection.extentOffset;
+
+    // Skip current word forward
+    while (end < text.length && !_isSpace(text[end])) {
+      end++;
+    }
+
+    // Skip spaces forward
+    while (end < text.length && _isSpace(text[end])) {
+      end++;
+    }
+
+    _controller.text = text.substring(0, selection.extentOffset) + text.substring(end);
+    // Cursor position stays the same
+  }
+
+  void _transposeCharacters() {
+    final text = _controller.text;
+    final selection = _controller.selection;
+
+    if (selection.extentOffset == 0 || text.length < 2) return;
+
+    final chars = text.characters.toList();
+    int pos = selection.extentOffset;
+
+    // Find character positions
+    int charCount = 0;
+    int charIndex = 0;
+    for (int i = 0; i < chars.length; i++) {
+      if (charCount >= pos) {
+        charIndex = i;
+        break;
+      }
+      charCount += chars[i].length;
+    }
+
+    if (charIndex >= chars.length) {
+      charIndex = chars.length - 1;
+    }
+
+    // Transpose characters
+    if (charIndex > 0) {
+      final temp = chars[charIndex - 1];
+      chars[charIndex - 1] = chars[charIndex == chars.length ? charIndex - 1 : charIndex];
+      chars[charIndex == chars.length ? charIndex - 1 : charIndex] = temp;
+
+      _controller.text = chars.join();
+
+      // Move cursor forward if not at end
+      if (pos < text.length) {
+        _moveCursor(1, false);
+      }
+    }
   }
 
   void _moveCursorVertically(int direction) {
-    final text = _controller.text;
-    final selection = _controller.selection;
-    final currentOffset = selection.extentOffset;
+    final lineInfo = _getLineInfo();
+    final charOffset = math.max(_lastCharOffset, lineInfo.charOffset);
+    _lastCharOffset = charOffset;
 
-    // For multi-line text, calculate layout using TextLayoutEngine
-    final maxWidth = component.width?.toInt() ?? 80;
+    if (direction > 0) {
+      // Moving down
+      if (lineInfo.rowOffset + 1 >= lineInfo.height && _row < _wrappedLines.length - 1) {
+        // Move to next logical line
+        _row++;
+        _col = 0;
+      } else if (lineInfo.rowOffset + 1 < lineInfo.height) {
+        // Move within wrapped lines
+        final wrappedLinesForRow = _wrappedLines[_row];
+        final nextWrappedLineIndex = lineInfo.rowOffset + 1;
 
-    final config = TextLayoutConfig(
-      maxWidth: maxWidth,
-      maxLines: component.maxLines,
-      textAlign: component.textAlign,
-      overflow: TextOverflow.visible,
-      softWrap: component.maxLines != 1,
-    );
-
-    final layoutResult = TextLayoutEngine.layout(text, config);
-    final layoutLines = layoutResult.lines;
-
-    if (layoutLines.isEmpty) return;
-
-    // Build line offset mapping
-    final List<int> lineStartOffsets = [];
-    final List<int> lineEndOffsets = [];
-    int textPosition = 0;
-
-    for (final line in layoutLines) {
-      lineStartOffsets.add(textPosition);
-      // Find the actual text that corresponds to this line
-      // Account for the fact that lines might be wrapped
-      int lineLength = line.characters.length;
-      lineEndOffsets.add(textPosition + lineLength);
-      textPosition += lineLength;
-
-      // Check if there's a newline after this line in the original text
-      if (textPosition < text.length && text[textPosition] == '\n') {
-        textPosition++; // Skip the newline
-      }
-    }
-
-    // Find current line and column position
-    int currentLineIndex = 0;
-    int currentVisualColumn = 0;
-
-    for (int i = 0; i < layoutLines.length; i++) {
-      if (currentOffset >= lineStartOffsets[i] &&
-          (i == layoutLines.length - 1 || currentOffset < lineStartOffsets[i + 1])) {
-        currentLineIndex = i;
-        // Calculate visual column from start of this line
-        final lineStart = lineStartOffsets[i];
-        if (currentOffset > lineStart) {
-          final textBeforeCursor = text.substring(lineStart, currentOffset);
-          currentVisualColumn = UnicodeWidth.stringWidth(textBeforeCursor);
+        if (nextWrappedLineIndex < wrappedLinesForRow.length) {
+          // Calculate starting column for the next wrapped line
+          int startCol = 0;
+          for (int i = 0; i < nextWrappedLineIndex; i++) {
+            startCol += wrappedLinesForRow[i].length;
+          }
+          _col = startCol;
         }
-        break;
+      } else {
+        return; // Can't move down anymore
       }
-    }
+    } else {
+      // Moving up
+      if (lineInfo.rowOffset <= 0 && _row > 0) {
+        // Move to previous logical line
+        _row--;
+        final prevLineWrapped = _wrappedLines[_row];
+        _col = prevLineWrapped.map((w) => w.length).reduce((a, b) => a + b);
+      } else if (lineInfo.rowOffset > 0) {
+        // Move within wrapped lines
+        final wrappedLinesForRow = _wrappedLines[_row];
+        final prevWrappedLineIndex = lineInfo.rowOffset - 1;
 
-    // Move to new line
-    final newLineIndex = (currentLineIndex + direction).clamp(0, layoutLines.length - 1);
-    if (newLineIndex == currentLineIndex) return;
-
-    // Find the position in the new line that matches the visual column
-    final newLineStart = lineStartOffsets[newLineIndex];
-    final newLineEnd = lineEndOffsets[newLineIndex];
-    final newLineText = text.substring(newLineStart, math.min(newLineEnd, text.length));
-
-    int targetOffset = newLineStart;
-    int visualPosition = 0;
-
-    for (final char in newLineText.characters) {
-      final charWidth = UnicodeWidth.stringWidth(char);
-      if (visualPosition + charWidth > currentVisualColumn) {
-        // If we'd overshoot, decide whether to place before or after this character
-        if (visualPosition + charWidth / 2 <= currentVisualColumn) {
-          targetOffset += char.length;
+        if (prevWrappedLineIndex >= 0) {
+          // Calculate starting column for the previous wrapped line
+          int startCol = 0;
+          for (int i = 0; i < prevWrappedLineIndex; i++) {
+            startCol += wrappedLinesForRow[i].length;
+          }
+          _col = startCol + wrappedLinesForRow[prevWrappedLineIndex].length;
         }
-        break;
+      } else {
+        return; // Can't move up anymore
       }
-      visualPosition += charWidth;
-      targetOffset += char.length;
     }
 
-    _controller.selection = TextSelection.collapsed(offset: targetOffset);
+    // Now adjust column to match the visual position
+    final newLineInfo = _getLineInfo();
+    _col = newLineInfo.startColumn;
+
+    if (newLineInfo.width > 0 && _row < _wrappedLines.length) {
+      final wrappedLine = _wrappedLines[_row][newLineInfo.rowOffset];
+      int offset = 0;
+      int colInWrappedLine = 0;
+
+      for (final char in wrappedLine.characters) {
+        if (offset >= charOffset) {
+          break;
+        }
+        offset += UnicodeWidth.stringWidth(char);
+        colInWrappedLine += char.length;
+      }
+
+      _col = newLineInfo.startColumn + colInWrappedLine;
+    }
+
+    // Update selection based on new row/col
+    _updateSelectionFromRowCol();
+  }
+
+  void _updateSelectionFromRowCol() {
+    final lines = _controller.text.split('\n');
+    int offset = 0;
+
+    for (int i = 0; i < _row && i < lines.length; i++) {
+      offset += lines[i].length + 1; // +1 for newline
+    }
+
+    if (_row < lines.length) {
+      offset += math.min(_col, lines[_row].length);
+    }
+
+    _controller.selection = TextSelection.collapsed(offset: offset);
   }
 
   void _moveCursorToStart() {
