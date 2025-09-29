@@ -8,7 +8,6 @@ import '../text/text_layout_engine.dart';
 import '../utils/unicode_width.dart';
 import 'text_field/cursor_movement.dart';
 
-
 /// Controls the text being edited.
 class TextEditingController {
   TextEditingController({String? text})
@@ -125,7 +124,7 @@ class TextField extends StatefulComponent {
     this.enabled = true,
     this.cursorColor,
     this.cursorStyle = CursorStyle.block,
-    this.cursorBlinkRate = const Duration(milliseconds: 800),
+    this.cursorBlinkRate,
     this.selectionColor,
     this.showCursor = true,
     this.width,
@@ -223,14 +222,12 @@ class _TextFieldState extends State<TextField> {
     });
   }
 
-
   @override
   void didUpdateComponent(TextField oldComponent) {
     super.didUpdateComponent(oldComponent);
 
     // Handle focus changes or blink rate changes
-    if (component.focused != oldComponent.focused ||
-        component.cursorBlinkRate != oldComponent.cursorBlinkRate) {
+    if (component.focused != oldComponent.focused || component.cursorBlinkRate != oldComponent.cursorBlinkRate) {
       if (component.focused && component.showCursor) {
         _startCursorBlink();
       } else {
@@ -636,7 +633,6 @@ class _TextFieldState extends State<TextField> {
     _renderTextField?.moveCursorVertically(direction, false);
   }
 
-
   void _moveCursorToStart() {
     _controller.selection = const TextSelection.collapsed(offset: 0);
     _renderTextField?.resetTargetColumn();
@@ -740,7 +736,6 @@ class _TextFieldState extends State<TextField> {
     );
   }
 }
-
 
 /// Internal component for rendering text field content
 class _TextFieldContent extends SingleChildRenderObjectComponent {
@@ -1004,9 +999,8 @@ class RenderTextField extends RenderObject {
       direction: direction,
     );
 
-    final newSelection = extendSelection
-        ? _selection.copyWith(extentOffset: newOffset)
-        : TextSelection.collapsed(offset: newOffset);
+    final newSelection =
+        extendSelection ? _selection.copyWith(extentOffset: newOffset) : TextSelection.collapsed(offset: newOffset);
 
     if (newSelection != _selection) {
       _selection = newSelection;
@@ -1038,9 +1032,8 @@ class RenderTextField extends RenderObject {
       targetVisualColumn: _targetVisualColumn!,
     );
 
-    final newSelection = extendSelection
-        ? _selection.copyWith(extentOffset: newOffset)
-        : TextSelection.collapsed(offset: newOffset);
+    final newSelection =
+        extendSelection ? _selection.copyWith(extentOffset: newOffset) : TextSelection.collapsed(offset: newOffset);
 
     if (newSelection != _selection) {
       _selection = newSelection;
@@ -1057,9 +1050,8 @@ class RenderTextField extends RenderObject {
       direction: direction,
     );
 
-    final newSelection = extendSelection
-        ? _selection.copyWith(extentOffset: newOffset)
-        : TextSelection.collapsed(offset: newOffset);
+    final newSelection =
+        extendSelection ? _selection.copyWith(extentOffset: newOffset) : TextSelection.collapsed(offset: newOffset);
 
     if (newSelection != _selection) {
       _selection = newSelection;
@@ -1079,9 +1071,8 @@ class RenderTextField extends RenderObject {
       currentOffset: _selection.extentOffset,
     );
 
-    final newSelection = extendSelection
-        ? _selection.copyWith(extentOffset: newOffset)
-        : TextSelection.collapsed(offset: newOffset);
+    final newSelection =
+        extendSelection ? _selection.copyWith(extentOffset: newOffset) : TextSelection.collapsed(offset: newOffset);
 
     if (newSelection != _selection) {
       _selection = newSelection;
@@ -1101,9 +1092,8 @@ class RenderTextField extends RenderObject {
       currentOffset: _selection.extentOffset,
     );
 
-    final newSelection = extendSelection
-        ? _selection.copyWith(extentOffset: newOffset)
-        : TextSelection.collapsed(offset: newOffset);
+    final newSelection =
+        extendSelection ? _selection.copyWith(extentOffset: newOffset) : TextSelection.collapsed(offset: newOffset);
 
     if (newSelection != _selection) {
       _selection = newSelection;
@@ -1128,9 +1118,8 @@ class RenderTextField extends RenderObject {
       textToLayout = _obscuringCharacter * _text.length;
     }
 
-    final maxWidth = constraints.maxWidth.isFinite
-        ? constraints.maxWidth.toInt()
-        : 80; // Default width for infinite constraints
+    final maxWidth =
+        constraints.maxWidth.isFinite ? constraints.maxWidth.toInt() : 80; // Default width for infinite constraints
 
     final config = TextLayoutConfig(
       softWrap: _maxLines != 1, // Enable wrapping for multi-line fields
@@ -1168,11 +1157,12 @@ class RenderTextField extends RenderObject {
       final line = lines[i];
 
       // Calculate horizontal offset based on text alignment
-      final xOffset = offset.dx + TextLayoutEngine.calculateAlignmentOffset(
-        line,
-        alignmentWidth,
-        _textAlign,
-      );
+      final xOffset = offset.dx +
+          TextLayoutEngine.calculateAlignmentOffset(
+            line,
+            alignmentWidth,
+            _textAlign,
+          );
 
       // Apply justification if needed
       String displayLine = line;
