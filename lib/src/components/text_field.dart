@@ -345,6 +345,24 @@ class _TextFieldState extends State<TextField> {
     } else if (key == LogicalKey.delete) {
       _handleDelete();
       return true;
+    } else if (key == LogicalKey.arrowLeft && event.isShiftPressed) {
+      _moveCursor(-1, true);
+      return true;
+    } else if (key == LogicalKey.arrowRight && event.isShiftPressed) {
+      _moveCursor(1, true);
+      return true;
+    } else if (key == LogicalKey.arrowLeft && event.isControlPressed) {
+      _moveCursorByWord(-1, false);
+      return true;
+    } else if (key == LogicalKey.arrowRight && event.isControlPressed) {
+      _moveCursorByWord(1, false);
+      return true;
+    } else if (key == LogicalKey.arrowUp && event.isShiftPressed && component.maxLines != 1) {
+      _moveCursorVertically(-1, true);
+      return true;
+    } else if (key == LogicalKey.arrowDown && event.isShiftPressed && component.maxLines != 1) {
+      _moveCursorVertically(1, true);
+      return true;
     } else if (key == LogicalKey.arrowLeft) {
       _moveCursor(-1, false);
       return true;
@@ -352,10 +370,10 @@ class _TextFieldState extends State<TextField> {
       _moveCursor(1, false);
       return true;
     } else if (key == LogicalKey.arrowUp && component.maxLines != 1) {
-      _moveCursorVertically(-1);
+      _moveCursorVertically(-1, false);
       return true;
     } else if (key == LogicalKey.arrowDown && component.maxLines != 1) {
-      _moveCursorVertically(1);
+      _moveCursorVertically(1, false);
       return true;
     } else if (key == LogicalKey.home) {
       _moveCursorToStart();
@@ -374,18 +392,6 @@ class _TextFieldState extends State<TextField> {
       return true;
     } else if (event.matches(LogicalKey.keyV, ctrl: true)) {
       _paste();
-      return true;
-    } else if (key == LogicalKey.arrowLeft && event.isShiftPressed) {
-      _moveCursor(-1, true);
-      return true;
-    } else if (key == LogicalKey.arrowRight && event.isShiftPressed) {
-      _moveCursor(1, true);
-      return true;
-    } else if (key == LogicalKey.arrowLeft && event.isControlPressed) {
-      _moveCursorByWord(-1, false);
-      return true;
-    } else if (key == LogicalKey.arrowRight && event.isControlPressed) {
-      _moveCursorByWord(1, false);
       return true;
     } else if (key == LogicalKey.backspace && event.isControlPressed) {
       _deleteWordBackward();
@@ -668,8 +674,8 @@ class _TextFieldState extends State<TextField> {
     }
   }
 
-  void _moveCursorVertically(int direction) {
-    _renderTextField?.moveCursorVertically(direction, false);
+  void _moveCursorVertically(int direction, bool extendSelection) {
+    _renderTextField?.moveCursorVertically(direction, extendSelection);
   }
 
   void _moveCursorToStart() {
@@ -1269,9 +1275,10 @@ class RenderTextField extends RenderObject {
     final lineEndOffset = lineStartOffset + line.length;
 
     // Check if selection intersects with this line
-    if (!_selection.isCollapsed && _selectionColor != null) {
+    if (!_selection.isCollapsed) {
       final selStart = _selection.start;
       final selEnd = _selection.end;
+      final selectionColor = _selectionColor ?? Colors.blue;
 
       // Check if selection overlaps with this line
       if (selEnd > lineStartOffset && selStart < lineEndOffset) {
@@ -1289,7 +1296,7 @@ class RenderTextField extends RenderObject {
           // Paint selected text with selection background
           final selectedText = line.substring(localSelStart, localSelEnd);
           final beforeWidth = localSelStart > 0 ? UnicodeWidth.stringWidth(line.substring(0, localSelStart)) : 0;
-          final selectionStyle = style.copyWith(backgroundColor: _selectionColor);
+          final selectionStyle = style.copyWith(backgroundColor: selectionColor);
           canvas.drawText(offset + Offset(beforeWidth.toDouble(), 0), selectedText, style: selectionStyle);
 
           // Paint non-selected text after selection
