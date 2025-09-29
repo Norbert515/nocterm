@@ -264,13 +264,52 @@ class _TextFieldState extends State<TextField> {
   void _updateViewOffset() {
     // Simple horizontal scrolling for single-line fields
     if (component.maxLines == 1 && component.width != null) {
+      final text = _controller.text;
       final cursorPos = _controller.selection.extentOffset;
-      final maxVisible = component.width!.toInt() - 2; // Account for borders
 
-      if (cursorPos < _viewOffset) {
+      // Account for borders and padding to get actual content width
+      final decoration = component.decoration ?? const InputDecoration();
+      final padding = decoration.contentPadding ?? const EdgeInsets.symmetric(horizontal: 1);
+      final horizontalPadding = padding.left + padding.right;
+      final borderWidth = decoration.border != null ? 2.0 : 0.0; // 1 on each side
+      // Reserve 1 column for cursor display
+      final maxVisibleWidth = (component.width! - borderWidth - horizontalPadding - 1).toInt();
+
+      if (maxVisibleWidth <= 0) return; // No space to display text
+
+      // Calculate visual column position of cursor (accounting for wide characters)
+      final textBeforeCursor = text.substring(0, math.min(cursorPos, text.length));
+      final cursorVisualColumn = UnicodeWidth.stringWidth(textBeforeCursor);
+
+      // Calculate visual width of currently visible text
+      int viewOffsetVisualColumn = 0;
+      if (_viewOffset > 0 && _viewOffset <= text.length) {
+        viewOffsetVisualColumn = UnicodeWidth.stringWidth(text.substring(0, _viewOffset));
+      }
+
+      // Adjust view offset to keep cursor visible
+      if (cursorVisualColumn < viewOffsetVisualColumn) {
+        // Cursor moved before visible area - scroll left
+        // Find the character offset that corresponds to the cursor's visual position
         _viewOffset = cursorPos;
-      } else if (cursorPos >= _viewOffset + maxVisible) {
-        _viewOffset = (cursorPos - maxVisible + 1).toInt();
+      } else if (cursorVisualColumn >= viewOffsetVisualColumn + maxVisibleWidth) {
+        // Cursor moved after visible area - scroll right
+        // We need to find a view offset such that the cursor is visible
+        int newOffset = 0;
+        int visualWidth = 0;
+
+        // Find the rightmost offset that still shows the cursor
+        final graphemes = text.characters.toList();
+        for (int i = 0; i <= math.min(cursorPos, graphemes.length); i++) {
+          if (i < graphemes.length) {
+            final graphemeWidth = UnicodeWidth.graphemeWidth(graphemes[i]);
+            if (cursorVisualColumn - visualWidth <= maxVisibleWidth - 1) {
+              newOffset = i;
+            }
+            visualWidth += graphemeWidth;
+          }
+        }
+        _viewOffset = newOffset;
       }
     }
   }
@@ -685,9 +724,38 @@ class _TextFieldState extends State<TextField> {
 
     // Handle view offset for single-line fields
     if (component.maxLines == 1 && component.width != null) {
-      final maxVisible = component.width!.toInt() - 2;
-      if (displayText.length > maxVisible) {
-        displayText = displayText.substring(_viewOffset, math.min(_viewOffset + maxVisible, displayText.length));
+      final padding = decoration.contentPadding ?? const EdgeInsets.symmetric(horizontal: 1);
+      final horizontalPadding = padding.left + padding.right;
+      final borderWidth = decoration.border != null ? 2.0 : 0.0;
+      // Reserve 1 column for cursor display
+      final maxVisibleWidth = (component.width! - borderWidth - horizontalPadding - 1).toInt();
+
+      if (maxVisibleWidth > 0 && _viewOffset < displayText.length) {
+        // Extract the visible portion based on visual width, not character count
+        // We need to iterate through grapheme clusters, not individual chars
+        final graphemes = displayText.characters.toList();
+
+        if (_viewOffset < graphemes.length) {
+          int startIdx = _viewOffset;
+          int endIdx = _viewOffset;
+          int visualWidth = 0;
+
+          // Find how many graphemes fit in the visible width
+          while (endIdx < graphemes.length && visualWidth < maxVisibleWidth) {
+            final graphemeWidth = UnicodeWidth.graphemeWidth(graphemes[endIdx]);
+            if (visualWidth + graphemeWidth <= maxVisibleWidth) {
+              visualWidth += graphemeWidth;
+              endIdx++;
+            } else {
+              break;
+            }
+          }
+
+          // Reconstruct the visible text from graphemes
+          displayText = graphemes.sublist(startIdx, endIdx).join();
+        } else {
+          displayText = '';
+        }
       }
     }
 
@@ -1118,8 +1186,10 @@ class RenderTextField extends RenderObject {
       textToLayout = _obscuringCharacter * _text.length;
     }
 
-    final maxWidth =
-        constraints.maxWidth.isFinite ? constraints.maxWidth.toInt() : 80; // Default width for infinite constraints
+    // Reserve 1 column for the cursor block to be displayed within bounds
+    // This ensures the cursor doesn't appear to go "into the wall" at line ends
+    final availableWidth = constraints.maxWidth.isFinite ? constraints.maxWidth.toInt() : 80;
+    final maxWidth = (availableWidth - 1).clamp(1, double.infinity).toInt(); // Reserve space for cursor
 
     final config = TextLayoutConfig(
       softWrap: _maxLines != 1, // Enable wrapping for multi-line fields
@@ -1186,9 +1256,8 @@ class RenderTextField extends RenderObject {
       // Sum up the character count of all previous lines
       for (int i = 0; i < lineIndex && i < _layoutResult!.lines.length; i++) {
         lineStartOffset += _layoutResult!.lines[i].length;
-        // Add 1 for the newline character if not a wrapped line
-        if (i < _layoutResult!.lines.length - 1 && _text.contains('\n')) {
-          // Check if this is a natural line break or wrapped
+        // Only add 1 for actual newline characters in the text, not wrapped lines
+        if (i < _layoutResult!.lines.length - 1) {
           final textUpToLine = _text.substring(0, math.min(lineStartOffset, _text.length));
           if (textUpToLine.endsWith('\n')) {
             lineStartOffset++;
@@ -1275,8 +1344,14 @@ class RenderTextField extends RenderObject {
       }
 
       charCount += lineLength;
-      // Add 1 for the newline if not the last line
-      if (i < lines.length - 1) charCount++;
+      // Only add 1 for actual newline characters, not wrapped lines
+      // Check if the accumulated text so far ends with a newline
+      if (i < lines.length - 1) {
+        final textSoFar = _text.substring(0, math.min(charCount, _text.length));
+        if (textSoFar.endsWith('\n')) {
+          charCount++; // Account for the newline character
+        }
+      }
     }
   }
 

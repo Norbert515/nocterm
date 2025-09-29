@@ -60,8 +60,7 @@ class _TextFieldDemoState extends State<TextFieldDemo> {
       },
       child: Container(
         padding: const EdgeInsets.all(2),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
           children: [
             Text(
               'TextField Demo',
