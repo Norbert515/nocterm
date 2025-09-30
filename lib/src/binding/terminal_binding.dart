@@ -124,13 +124,6 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
           // Route the event through the component tree
           _routeKeyboardEvent(event);
 
-          // After handling keyboard events, immediately process any pending builds
-          // This ensures UI updates happen synchronously with keyboard events like ESC
-          // which might trigger navigation changes (e.g., closing dialogs)
-          if (buildOwner.hasDirtyElements) {
-            drawFrame();
-          }
-
           // Note: Ctrl+C is handled by SIGINT signal handler, not here
           // This prevents double-handling and ensures proper cleanup
         } else if (inputEvent is MouseInputEvent) {
@@ -141,6 +134,13 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
           // Route the mouse event through the component tree
           _routeMouseEvent(event);
         }
+      }
+
+      // After processing ALL events in the buffer, draw the frame once
+      // This ensures that pasted text (multiple characters) gets processed
+      // completely before rendering, rather than blocking after each character
+      if (buildOwner.hasDirtyElements) {
+        drawFrame();
       }
 
       // Also add raw string for backwards compatibility

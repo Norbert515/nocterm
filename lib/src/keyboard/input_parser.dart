@@ -95,55 +95,62 @@ class InputParser {
     }
 
     // Try to parse as keyboard event
-    final keyEvent = _parseKeyboardEvent();
-    if (keyEvent != null) {
-      // For keyboard events, we consume the whole buffer
-      return (KeyboardInputEvent(keyEvent), _buffer.length);
+    final result = _parseKeyboardEvent();
+    if (result != null) {
+      final (keyEvent, bytesConsumed) = result;
+      return (KeyboardInputEvent(keyEvent), bytesConsumed);
     }
 
     return null;
   }
 
-  KeyboardEvent? _parseKeyboardEvent() {
+  (KeyboardEvent, int)? _parseKeyboardEvent() {
     if (_buffer.isEmpty) return null;
 
     final first = _buffer[0];
 
     // ESC sequences
     if (first == 0x1B) {
-      return _parseEscapeSequence();
+      final result = _parseEscapeSequence();
+      if (result != null) {
+        return result; // Returns (KeyboardEvent, bytesConsumed)
+      }
+      return null;
     }
 
     // Tab
     if (first == 0x09) {
-      return KeyboardEvent(
+      return (KeyboardEvent(
         logicalKey: LogicalKey.tab,
         character: '\t',
         modifiers: const ModifierKeys(),
-      );
+      ), 1);
     }
 
     // Enter/Return - check before control characters since 0x0A and 0x0D are in control range
     if (first == 0x0D || first == 0x0A) {
-      return KeyboardEvent(
+      return (KeyboardEvent(
         logicalKey: LogicalKey.enter,
         character: '\n',
         modifiers: const ModifierKeys(),
-      );
+      ), 1);
     }
 
     // Backspace - check before control characters since 0x08 (Ctrl+H) and 0x7F are backspace
     if (first == 0x7F || first == 0x08) {
-      return KeyboardEvent(
+      return (KeyboardEvent(
         logicalKey: LogicalKey.backspace,
         modifiers: const ModifierKeys(),
-      );
+      ), 1);
     }
 
     // Control characters (Ctrl+A through Ctrl+Z)
     // Note: 0x08 (Ctrl+H), 0x09 (Ctrl+I/Tab), 0x0A (Ctrl+J), 0x0D (Ctrl+M/Enter) are handled above
     if (first >= 0x01 && first <= 0x1A) {
-      return _parseControlChar(first);
+      final event = _parseControlChar(first);
+      if (event != null) {
+        return (event, 1);
+      }
     }
 
     // Try to decode as UTF-8
@@ -197,36 +204,33 @@ class InputParser {
     }
 
     if (decodedChar != null && bytesConsumed > 0) {
-      // Remove consumed bytes from buffer
-      _buffer.removeRange(0, bytesConsumed - 1); // Keep one byte for the main parser to clear
-
       // Regular character
       final key = LogicalKey.fromCharacter(decodedChar);
       // Check if it's uppercase to infer shift was pressed
       final code = decodedChar.codeUnitAt(0);
       final isUpperCase = (code >= 0x41 && code <= 0x5A) || // A-Z
           (decodedChar != decodedChar.toLowerCase()); // Other uppercase chars
-      return KeyboardEvent(
+      return (KeyboardEvent(
         logicalKey: key ?? LogicalKey(code, 'unknown'),
         character: decodedChar,
         modifiers: ModifierKeys(shift: isUpperCase),
-      );
+      ), bytesConsumed);
     }
 
-    // Unknown character - create a generic key
-    return KeyboardEvent(
+    // Unknown character - create a generic key, consume 1 byte
+    return (KeyboardEvent(
       logicalKey: LogicalKey(first, 'unknown'),
       modifiers: const ModifierKeys(),
-    );
+    ), 1);
   }
 
-  KeyboardEvent? _parseEscapeSequence() {
+  (KeyboardEvent, int)? _parseEscapeSequence() {
     if (_buffer.length == 1) {
       // Just ESC key pressed
-      return KeyboardEvent(
+      return (KeyboardEvent(
         logicalKey: LogicalKey.escape,
         modifiers: const ModifierKeys(),
-      );
+      ), 1);
     }
 
     // Check for Alt+key combinations (ESC followed by character)
@@ -238,20 +242,20 @@ class InputParser {
         // Return the base key with Alt modifier
         final char = String.fromCharCode(second);
         final baseKey = LogicalKey.fromCharacter(char) ?? LogicalKey(second, 'unknown');
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: baseKey,
           character: char,
           modifiers: const ModifierKeys(alt: true),
-        );
+        ), 2);
       }
 
       // If it's not a complete Alt sequence, might be start of longer sequence
       if (second != 0x5B && second != 0x4F) {
         // Not a CSI or SS3 sequence, treat as ESC + char
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: LogicalKey.escape,
           modifiers: const ModifierKeys(),
-        );
+        ), 1);
       }
     }
 
@@ -269,54 +273,54 @@ class InputParser {
     return null;
   }
 
-  KeyboardEvent? _parseCSISequence() {
+  (KeyboardEvent, int)? _parseCSISequence() {
     // Skip mouse sequences - they're handled elsewhere
     if (_buffer.length >= 3 && (_buffer[2] == 0x3C || _buffer[2] == 0x4D)) {
       return null;
     }
 
-    // Arrow keys: ESC [ A/B/C/D
+    // Arrow keys: ESC [ A/B/C/D (3 bytes)
     if (_buffer.length == 3) {
       switch (_buffer[2]) {
         case 0x41:
-          return KeyboardEvent(
+          return (KeyboardEvent(
             logicalKey: LogicalKey.arrowUp,
             modifiers: const ModifierKeys(),
-          );
+          ), 3);
         case 0x42:
-          return KeyboardEvent(
+          return (KeyboardEvent(
             logicalKey: LogicalKey.arrowDown,
             modifiers: const ModifierKeys(),
-          );
+          ), 3);
         case 0x43:
-          return KeyboardEvent(
+          return (KeyboardEvent(
             logicalKey: LogicalKey.arrowRight,
             modifiers: const ModifierKeys(),
-          );
+          ), 3);
         case 0x44:
-          return KeyboardEvent(
+          return (KeyboardEvent(
             logicalKey: LogicalKey.arrowLeft,
             modifiers: const ModifierKeys(),
-          );
+          ), 3);
         case 0x48:
-          return KeyboardEvent(
+          return (KeyboardEvent(
             logicalKey: LogicalKey.home,
             modifiers: const ModifierKeys(),
-          );
+          ), 3);
         case 0x46:
-          return KeyboardEvent(
+          return (KeyboardEvent(
             logicalKey: LogicalKey.end,
             modifiers: const ModifierKeys(),
-          );
+          ), 3);
         case 0x5A:
-          return KeyboardEvent(
+          return (KeyboardEvent(
             logicalKey: LogicalKey.tab,
             modifiers: const ModifierKeys(shift: true),
-          ); // ESC [ Z is Shift+Tab
+          ), 3); // ESC [ Z is Shift+Tab
       }
     }
 
-    // Modified arrow keys and other sequences
+    // Modified arrow keys and other sequences (6 bytes: ESC [ 1 ; X Y)
     if (_buffer.length >= 6) {
       final sequence = String.fromCharCodes(_buffer);
 
@@ -324,25 +328,25 @@ class InputParser {
       if (sequence.startsWith('\x1B[1;2')) {
         switch (_buffer[5]) {
           case 0x41:
-            return KeyboardEvent(
+            return (KeyboardEvent(
               logicalKey: LogicalKey.arrowUp,
               modifiers: const ModifierKeys(shift: true),
-            );
+            ), 6);
           case 0x42:
-            return KeyboardEvent(
+            return (KeyboardEvent(
               logicalKey: LogicalKey.arrowDown,
               modifiers: const ModifierKeys(shift: true),
-            );
+            ), 6);
           case 0x43:
-            return KeyboardEvent(
+            return (KeyboardEvent(
               logicalKey: LogicalKey.arrowRight,
               modifiers: const ModifierKeys(shift: true),
-            );
+            ), 6);
           case 0x44:
-            return KeyboardEvent(
+            return (KeyboardEvent(
               logicalKey: LogicalKey.arrowLeft,
               modifiers: const ModifierKeys(shift: true),
-            );
+            ), 6);
         }
       }
 
@@ -350,25 +354,25 @@ class InputParser {
       if (sequence.startsWith('\x1B[1;3')) {
         switch (_buffer[5]) {
           case 0x41:
-            return KeyboardEvent(
+            return (KeyboardEvent(
               logicalKey: LogicalKey.arrowUp,
               modifiers: const ModifierKeys(alt: true),
-            );
+            ), 6);
           case 0x42:
-            return KeyboardEvent(
+            return (KeyboardEvent(
               logicalKey: LogicalKey.arrowDown,
               modifiers: const ModifierKeys(alt: true),
-            );
+            ), 6);
           case 0x43:
-            return KeyboardEvent(
+            return (KeyboardEvent(
               logicalKey: LogicalKey.arrowRight,
               modifiers: const ModifierKeys(alt: true),
-            );
+            ), 6);
           case 0x44:
-            return KeyboardEvent(
+            return (KeyboardEvent(
               logicalKey: LogicalKey.arrowLeft,
               modifiers: const ModifierKeys(alt: true),
-            );
+            ), 6);
         }
       }
 
@@ -376,25 +380,25 @@ class InputParser {
       if (sequence.startsWith('\x1B[1;5')) {
         switch (_buffer[5]) {
           case 0x41:
-            return KeyboardEvent(
+            return (KeyboardEvent(
               logicalKey: LogicalKey.arrowUp,
               modifiers: const ModifierKeys(ctrl: true),
-            );
+            ), 6);
           case 0x42:
-            return KeyboardEvent(
+            return (KeyboardEvent(
               logicalKey: LogicalKey.arrowDown,
               modifiers: const ModifierKeys(ctrl: true),
-            );
+            ), 6);
           case 0x43:
-            return KeyboardEvent(
+            return (KeyboardEvent(
               logicalKey: LogicalKey.arrowRight,
               modifiers: const ModifierKeys(ctrl: true),
-            );
+            ), 6);
           case 0x44:
-            return KeyboardEvent(
+            return (KeyboardEvent(
               logicalKey: LogicalKey.arrowLeft,
               modifiers: const ModifierKeys(ctrl: true),
-            );
+            ), 6);
         }
       }
     }
@@ -404,68 +408,70 @@ class InputParser {
       final sequence = String.fromCharCodes(_buffer);
 
       // Parse sequences like ESC [ 2 ~ (Insert), ESC [ 3 ~ (Delete), etc.
+      // ESC [ X ~ = 4 bytes
       if (sequence == '\x1B[2~')
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: LogicalKey.insert,
           modifiers: const ModifierKeys(),
-        );
+        ), 4);
       if (sequence == '\x1B[3~')
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: LogicalKey.delete,
           modifiers: const ModifierKeys(),
-        );
+        ), 4);
       if (sequence == '\x1B[5~')
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: LogicalKey.pageUp,
           modifiers: const ModifierKeys(),
-        );
+        ), 4);
       if (sequence == '\x1B[6~')
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: LogicalKey.pageDown,
           modifiers: const ModifierKeys(),
-        );
+        ), 4);
 
       // F5-F12
+      // ESC [ 1 X ~ = 5 bytes
       if (sequence == '\x1B[15~')
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: LogicalKey.f5,
           modifiers: const ModifierKeys(),
-        );
+        ), 5);
       if (sequence == '\x1B[17~')
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: LogicalKey.f6,
           modifiers: const ModifierKeys(),
-        );
+        ), 5);
       if (sequence == '\x1B[18~')
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: LogicalKey.f7,
           modifiers: const ModifierKeys(),
-        );
+        ), 5);
       if (sequence == '\x1B[19~')
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: LogicalKey.f8,
           modifiers: const ModifierKeys(),
-        );
+        ), 5);
       if (sequence == '\x1B[20~')
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: LogicalKey.f9,
           modifiers: const ModifierKeys(),
-        );
+        ), 5);
       if (sequence == '\x1B[21~')
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: LogicalKey.f10,
           modifiers: const ModifierKeys(),
-        );
+        ), 5);
       if (sequence == '\x1B[23~')
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: LogicalKey.f11,
           modifiers: const ModifierKeys(),
-        );
+        ), 5);
       if (sequence == '\x1B[24~')
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: LogicalKey.f12,
           modifiers: const ModifierKeys(),
-        );
+        ), 5);
 
       // Sequence complete but unknown
       return null;
@@ -483,31 +489,31 @@ class InputParser {
     return null;
   }
 
-  KeyboardEvent? _parseSS3Sequence() {
+  (KeyboardEvent, int)? _parseSS3Sequence() {
     if (_buffer.length != 3) return null;
 
-    // F1-F4 use SS3 sequences
+    // F1-F4 use SS3 sequences (all are 3 bytes: ESC O X)
     switch (_buffer[2]) {
       case 0x50:
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: LogicalKey.f1,
           modifiers: const ModifierKeys(),
-        );
+        ), 3);
       case 0x51:
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: LogicalKey.f2,
           modifiers: const ModifierKeys(),
-        );
+        ), 3);
       case 0x52:
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: LogicalKey.f3,
           modifiers: const ModifierKeys(),
-        );
+        ), 3);
       case 0x53:
-        return KeyboardEvent(
+        return (KeyboardEvent(
           logicalKey: LogicalKey.f4,
           modifiers: const ModifierKeys(),
-        );
+        ), 3);
     }
 
     return null;

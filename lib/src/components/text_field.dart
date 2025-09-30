@@ -699,24 +699,37 @@ class _TextFieldState extends State<TextField> {
   }
 
   void _copy() {
-    // TODO: Implement clipboard integration
-    // For now, just a placeholder
-  }
-
-  void _cut() {
-    // TODO: Implement clipboard integration
-    // For now, just delete selected text
+    // Copy selected text to clipboard using OSC 52
     if (!_controller.selection.isCollapsed) {
       final text = _controller.text;
       final selection = _controller.selection;
+      final selectedText = text.substring(selection.start, selection.end);
+      ClipboardManager.copy(selectedText);
+    }
+  }
+
+  void _cut() {
+    // Copy selected text to clipboard and then delete it
+    if (!_controller.selection.isCollapsed) {
+      final text = _controller.text;
+      final selection = _controller.selection;
+      final selectedText = text.substring(selection.start, selection.end);
+
+      // Copy to clipboard using OSC 52
+      ClipboardManager.copy(selectedText);
+
+      // Delete the selected text
       _controller.text = text.substring(0, selection.start) + text.substring(selection.end);
       _controller.selection = TextSelection.collapsed(offset: selection.start);
     }
   }
 
   void _paste() {
-    // TODO: Implement clipboard integration
-    // For now, just a placeholder
+    // Paste text from clipboard
+    final clipboardText = ClipboardManager.paste();
+    if (clipboardText != null && clipboardText.isNotEmpty) {
+      _insertText(clipboardText);
+    }
   }
 
   @override
