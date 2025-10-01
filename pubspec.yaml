@@ -1,6 +1,6 @@
 name: nocterm
 description: A Flutter-like framework for terminal UIs.
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/norbert515/nocterm
 homepage: https://nocterm.dev
 
@@ -21,6 +21,8 @@ dependencies:
   quiver: ^3.0.0
   equatable: ^2.0.3
   zmodem: ^0.0.6
+  win32: ^5.14.0
+  ffi: ^2.1.4
 
 dev_dependencies:
   test: ^1.25.6

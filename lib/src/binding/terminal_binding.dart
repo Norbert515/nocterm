@@ -7,6 +7,7 @@ import 'package:nocterm/src/framework/terminal_canvas.dart';
 import 'package:nocterm/src/navigation/render_theater.dart';
 import 'package:nocterm/src/rectangle.dart';
 import 'package:nocterm/src/rendering/scrollable_render_object.dart';
+import 'package:nocterm/src/win32_ansi_stdin.dart';
 
 import '../backend/terminal.dart' as term;
 import '../buffer.dart' as buf;
@@ -18,7 +19,7 @@ import 'hot_reload_mixin.dart';
 
 /// Terminal UI binding that handles terminal input/output and event loop
 class TerminalBinding extends NoctermBinding with HotReloadBinding {
-  TerminalBinding(this.terminal) {
+  TerminalBinding(this.terminal, { this.logSink}) {
     _instance = this;
     _initializePipelineOwner();
   }
@@ -27,6 +28,7 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
   static TerminalBinding get instance => _instance!;
 
   final term.Terminal terminal;
+  final IOSink? logSink;
   PipelineOwner? _pipelineOwner;
   PipelineOwner get pipelineOwner => _pipelineOwner!;
 
@@ -96,12 +98,14 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
     _startSignalHandling();
   }
 
+  final Stdin platformStdin = Platform.isWindows ? Win32AnsiStdin() : stdin;
+
   void _startInputHandling() {
     // Only set stdin mode if we have a terminal
     try {
-      if (stdin.hasTerminal) {
-        stdin.echoMode = false;
-        stdin.lineMode = false;
+      if (platformStdin.hasTerminal) {
+        platformStdin.echoMode = false;
+        platformStdin.lineMode = false;
       }
     } catch (e) {
       // Ignore errors when running without a proper terminal
@@ -109,14 +113,22 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
     }
 
     // Listen for input at the byte level for proper escape sequence handling
-    _inputSubscription = stdin.listen((bytes) {
+    _inputSubscription = platformStdin.listen((bytes) {
       // Parse the bytes and process ALL events in the buffer
       _inputParser.addBytes(bytes);
+  
+      // For debugging, show raw input (replace ESC and ENTER for visibility)
+      final data = utf8.decode(bytes);
+      final visual = data.replaceAll('\x1b', 'ESC').replaceAll('\r', 'ENTER\n');
+      logSink?.writeln('RAW Received: $visual');
 
       // Process all available events
       InputEvent? inputEvent;
       while ((inputEvent = _inputParser.parseNext()) != null) {
         if (inputEvent is KeyboardInputEvent) {
+
+          logSink?.writeln('KeyboardInputEvent: ${inputEvent.event}');
+
           final event = inputEvent.event;
           // Add to keyboard event stream
           _keyboardEventController.add(event);
@@ -134,6 +146,10 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
           // Note: Ctrl+C is handled by SIGINT signal handler, not here
           // This prevents double-handling and ensures proper cleanup
         } else if (inputEvent is MouseInputEvent) {
+
+          logSink?.writeln('MouseInputEvent: ${inputEvent.event}');
+
+  
           final event = inputEvent.event;
           // Add to mouse event stream
           _mouseEventController.add(event);
@@ -172,7 +188,7 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
 
   void _startSignalHandling() {
     // Listen for termination signals to ensure cleanup runs
-    if (Platform.isLinux || Platform.isMacOS) {
+    if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
       // Handle SIGINT (Ctrl+C)
       _sigintSubscription = ProcessSignal.sigint.watch().listen((_) {
         // Perform cleanup synchronously
@@ -182,7 +198,8 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
         // This ensures single Ctrl+C quits the app
         exit(0);
       });
-
+    }
+    if (Platform.isLinux || Platform.isMacOS) {
       // Handle SIGTERM (kill command)
       _sigtermSubscription = ProcessSignal.sigterm.watch().listen((_) {
         // Perform cleanup synchronously
@@ -199,6 +216,11 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
     // Prevent multiple shutdowns
     if (_shouldExit) return;
     _shouldExit = true;
+
+    // if we are using the win32 stdin, close it
+    if (platformStdin is Win32AnsiStdin) {
+      (platformStdin as Win32AnsiStdin).close();
+    }
 
     // Cancel all timers and subscriptions immediately
     _frameTimer?.cancel();
@@ -240,9 +262,9 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
       terminal.clear();
 
       // Restore stdin
-      if (stdin.hasTerminal) {
-        stdin.echoMode = true;
-        stdin.lineMode = true;
+      if (platformStdin.hasTerminal) {
+        platformStdin.echoMode = true;
+        platformStdin.lineMode = true;
       }
     } catch (_) {
       // Ignore any errors during cleanup
@@ -522,9 +544,9 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
 
     // Restore stdin if we have a terminal
     try {
-      if (stdin.hasTerminal) {
-        stdin.echoMode = true;
-        stdin.lineMode = true;
+      if (platformStdin.hasTerminal) {
+        platformStdin.echoMode = true;
+        platformStdin.lineMode = true;
       }
     } catch (e) {
       // Ignore errors when running without a proper terminal
@@ -659,7 +681,7 @@ Future<void> runApp(Component app, {bool enableHotReload = true}) async {
   try {
     await runZoned(() async {
       final terminal = term.Terminal();
-      binding = TerminalBinding(terminal);
+      binding = TerminalBinding(terminal, logSink: logSink);
 
       binding!.initialize();
       binding!.attachRootComponent(app);

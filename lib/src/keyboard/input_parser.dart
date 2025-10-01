@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:nocterm/nocterm.dart' show TerminalBinding;
+
 import 'logical_key.dart';
 import 'keyboard_event.dart';
 import 'mouse_parser.dart';
@@ -270,6 +272,9 @@ class InputParser {
   }
 
   KeyboardEvent? _parseCSISequence() {
+
+    TerminalBinding.instance.logSink?.writeln('_parseCSISequence _buffer: $_buffer');
+
     // Skip mouse sequences - they're handled elsewhere
     if (_buffer.length >= 3 && (_buffer[2] == 0x3C || _buffer[2] == 0x4D)) {
       return null;
@@ -278,37 +283,37 @@ class InputParser {
     // Arrow keys: ESC [ A/B/C/D
     if (_buffer.length == 3) {
       switch (_buffer[2]) {
-        case 0x41:
+        case 0x41: // A
           return KeyboardEvent(
             logicalKey: LogicalKey.arrowUp,
             modifiers: const ModifierKeys(),
           );
-        case 0x42:
+        case 0x42: // B
           return KeyboardEvent(
             logicalKey: LogicalKey.arrowDown,
             modifiers: const ModifierKeys(),
           );
-        case 0x43:
+        case 0x43: // C
           return KeyboardEvent(
             logicalKey: LogicalKey.arrowRight,
             modifiers: const ModifierKeys(),
           );
-        case 0x44:
+        case 0x44: // D
           return KeyboardEvent(
             logicalKey: LogicalKey.arrowLeft,
             modifiers: const ModifierKeys(),
           );
-        case 0x48:
+        case 0x48: // H
           return KeyboardEvent(
             logicalKey: LogicalKey.home,
             modifiers: const ModifierKeys(),
           );
-        case 0x46:
+        case 0x46: // F
           return KeyboardEvent(
             logicalKey: LogicalKey.end,
             modifiers: const ModifierKeys(),
           );
-        case 0x5A:
+        case 0x5A: // Z
           return KeyboardEvent(
             logicalKey: LogicalKey.tab,
             modifiers: const ModifierKeys(shift: true),
@@ -323,22 +328,22 @@ class InputParser {
       // Shift+Arrow: ESC [ 1 ; 2 A/B/C/D
       if (sequence.startsWith('\x1B[1;2')) {
         switch (_buffer[5]) {
-          case 0x41:
+          case 0x41: // A
             return KeyboardEvent(
               logicalKey: LogicalKey.arrowUp,
               modifiers: const ModifierKeys(shift: true),
             );
-          case 0x42:
+          case 0x42: // B
             return KeyboardEvent(
               logicalKey: LogicalKey.arrowDown,
               modifiers: const ModifierKeys(shift: true),
             );
-          case 0x43:
+          case 0x43: // C
             return KeyboardEvent(
               logicalKey: LogicalKey.arrowRight,
               modifiers: const ModifierKeys(shift: true),
             );
-          case 0x44:
+          case 0x44: // D
             return KeyboardEvent(
               logicalKey: LogicalKey.arrowLeft,
               modifiers: const ModifierKeys(shift: true),
@@ -349,22 +354,22 @@ class InputParser {
       // Alt+Arrow: ESC [ 1 ; 3 A/B/C/D
       if (sequence.startsWith('\x1B[1;3')) {
         switch (_buffer[5]) {
-          case 0x41:
+          case 0x41: // A
             return KeyboardEvent(
               logicalKey: LogicalKey.arrowUp,
               modifiers: const ModifierKeys(alt: true),
             );
-          case 0x42:
+          case 0x42: // B
             return KeyboardEvent(
               logicalKey: LogicalKey.arrowDown,
               modifiers: const ModifierKeys(alt: true),
             );
-          case 0x43:
+          case 0x43: // C
             return KeyboardEvent(
               logicalKey: LogicalKey.arrowRight,
               modifiers: const ModifierKeys(alt: true),
             );
-          case 0x44:
+          case 0x44: // D
             return KeyboardEvent(
               logicalKey: LogicalKey.arrowLeft,
               modifiers: const ModifierKeys(alt: true),
@@ -375,22 +380,22 @@ class InputParser {
       // Ctrl+Arrow: ESC [ 1 ; 5 A/B/C/D
       if (sequence.startsWith('\x1B[1;5')) {
         switch (_buffer[5]) {
-          case 0x41:
+          case 0x41: // A
             return KeyboardEvent(
               logicalKey: LogicalKey.arrowUp,
               modifiers: const ModifierKeys(ctrl: true),
             );
-          case 0x42:
+          case 0x42: // B
             return KeyboardEvent(
               logicalKey: LogicalKey.arrowDown,
               modifiers: const ModifierKeys(ctrl: true),
             );
-          case 0x43:
+          case 0x43: // C
             return KeyboardEvent(
               logicalKey: LogicalKey.arrowRight,
               modifiers: const ModifierKeys(ctrl: true),
             );
-          case 0x44:
+          case 0x44: // D
             return KeyboardEvent(
               logicalKey: LogicalKey.arrowLeft,
               modifiers: const ModifierKeys(ctrl: true),
@@ -400,7 +405,7 @@ class InputParser {
     }
 
     // Function keys and special keys with ~ terminator
-    if (_buffer.contains(0x7E)) {
+    if (_buffer.contains(0x7E)) { // ~
       final sequence = String.fromCharCodes(_buffer);
 
       // Parse sequences like ESC [ 2 ~ (Insert), ESC [ 3 ~ (Delete), etc.
