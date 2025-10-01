@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import '../binding/terminal_binding.dart';
 
 /// Clipboard utility for terminal applications using OSC 52 control sequences.
 ///
@@ -45,8 +46,7 @@ class Clipboard {
   ///
   /// Returns true if the sequence was written successfully.
   static bool copy(String text, {bool useStringTerminator = true}) {
-    return _copyToTarget(text, _clipboardTarget,
-        useStringTerminator: useStringTerminator);
+    return _copyToTarget(text, _clipboardTarget, useStringTerminator: useStringTerminator);
   }
 
   /// Copy text to the primary selection (X11 systems).
@@ -61,13 +61,11 @@ class Clipboard {
   ///
   /// Returns true if the sequence was written successfully.
   static bool copyToPrimary(String text, {bool useStringTerminator = true}) {
-    return _copyToTarget(text, _primaryTarget,
-        useStringTerminator: useStringTerminator);
+    return _copyToTarget(text, _primaryTarget, useStringTerminator: useStringTerminator);
   }
 
   /// Internal method to copy text to a specific target (clipboard or primary).
-  static bool _copyToTarget(String text, String target,
-      {required bool useStringTerminator}) {
+  static bool _copyToTarget(String text, String target, {required bool useStringTerminator}) {
     try {
       // Encode the text in base64
       final base64Text = base64Encode(utf8.encode(text));
@@ -163,14 +161,10 @@ class Clipboard {
     final buffer = StringBuffer();
     buffer.writeln('Clipboard Diagnostics:');
     buffer.writeln('  Has Terminal: ${stdout.hasTerminal}');
-    buffer.writeln(
-        '  TERM: ${Platform.environment['TERM'] ?? 'not set'}');
-    buffer.writeln(
-        '  TERM_PROGRAM: ${Platform.environment['TERM_PROGRAM'] ?? 'not set'}');
-    buffer.writeln(
-        '  TMUX: ${Platform.environment['TMUX'] != null ? 'yes' : 'no'}');
-    buffer.writeln(
-        '  SSH: ${Platform.environment['SSH_CONNECTION'] != null ? 'yes' : 'no'}');
+    buffer.writeln('  TERM: ${Platform.environment['TERM'] ?? 'not set'}');
+    buffer.writeln('  TERM_PROGRAM: ${Platform.environment['TERM_PROGRAM'] ?? 'not set'}');
+    buffer.writeln('  TMUX: ${Platform.environment['TMUX'] != null ? 'yes' : 'no'}');
+    buffer.writeln('  SSH: ${Platform.environment['SSH_CONNECTION'] != null ? 'yes' : 'no'}');
     buffer.writeln('  OSC 52 Likely Supported: ${isSupported()}');
     return buffer.toString();
   }
@@ -192,12 +186,9 @@ class ClipboardManager {
     _buffer = text;
 
     // Try to also copy to system clipboard via OSC 52
-    // Ignore failures as we still have the internal buffer
-    try {
-      Clipboard.copy(text, useStringTerminator: useStringTerminator);
-    } catch (_) {
-      // Silently fail - internal buffer is our fallback
-    }
+    // Use the Terminal's write buffer to avoid corrupting output
+    final binding = TerminalBinding.instance;
+    binding.terminal.writeClipboardCopy(text);
 
     return true;
   }

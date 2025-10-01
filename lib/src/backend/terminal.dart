@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:nocterm/src/size.dart';
 
@@ -100,7 +101,9 @@ class Terminal {
 
   void flush() {
     if (_writeBuffer.isNotEmpty) {
-      stdout.write(_writeBuffer.toString());
+      final bufferContent = _writeBuffer.toString();
+      // DEBUG: Check if buffer contains OSC 52
+      stdout.write(bufferContent);
       _writeBuffer.clear();
     }
     stdout.flush();
@@ -110,5 +113,22 @@ class Terminal {
     showCursor();
     leaveAlternateScreen();
     stdout.write('\x1b[0m'); // Reset all attributes
+  }
+
+  /// Write OSC 52 clipboard sequence to copy text to system clipboard.
+  /// This must be written to the write buffer and flushed with the frame
+  /// to avoid corrupting the terminal output.
+  void writeClipboardCopy(String text) {
+    // Encode the text in base64 (base64Encode doesn't add newlines in Dart)
+    final base64Text = base64Encode(utf8.encode(text));
+
+    // Build the OSC 52 sequence: ESC ] 52 ; c ; <base64-data> BEL
+    // Format: \033]52;c;<base64>\a
+    const osc = '\x1b]';
+    const bel = '\x07'; // Use BEL terminator (more compatible than ST)
+    final sequence = '${osc}52;c;$base64Text$bel';
+
+    // Add to write buffer - will be flushed with next frame
+    write(sequence);
   }
 }
