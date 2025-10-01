@@ -136,13 +136,6 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
           // Route the event through the component tree
           _routeKeyboardEvent(event);
 
-          // After handling keyboard events, immediately process any pending builds
-          // This ensures UI updates happen synchronously with keyboard events like ESC
-          // which might trigger navigation changes (e.g., closing dialogs)
-          if (buildOwner.hasDirtyElements) {
-            drawFrame();
-          }
-
           // Note: Ctrl+C is handled by SIGINT signal handler, not here
           // This prevents double-handling and ensures proper cleanup
         } else if (inputEvent is MouseInputEvent) {
@@ -157,6 +150,13 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
           // Route the mouse event through the component tree
           _routeMouseEvent(event);
         }
+      }
+
+      // After processing ALL events in the buffer, draw the frame once
+      // This ensures that pasted text (multiple characters) gets processed
+      // completely before rendering, rather than blocking after each character
+      if (buildOwner.hasDirtyElements) {
+        drawFrame();
       }
 
       // Also add raw string for backwards compatibility
@@ -666,6 +666,22 @@ class TerminalBinding extends NoctermBinding with HotReloadBinding {
     _postFrameCallbacks.add(callback);
     // Schedule a frame if one isn't already scheduled
     scheduleFrame();
+  }
+
+  /// Request application shutdown with proper cleanup
+  ///
+  /// This is the recommended way to exit a nocterm application.
+  /// It ensures all terminal cleanup (including mouse tracking disable)
+  /// happens before the process exits.
+  ///
+  /// IMPORTANT: Do NOT call dart:io's exit() directly, as it will bypass
+  /// terminal cleanup and may leave the terminal in a broken state (e.g.,
+  /// mouse movement producing escape sequences).
+  ///
+  /// Instead, always use this method or set [_shouldExit] to true.
+  void requestShutdown([int exitCode = 0]) {
+    _performImmediateShutdown();
+    exit(exitCode);
   }
 }
 

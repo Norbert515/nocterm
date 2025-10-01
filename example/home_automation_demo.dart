@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 import 'package:nocterm/nocterm.dart';
 
@@ -92,7 +91,7 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
       focused: true,
       onKeyEvent: (event) {
         if (event.logicalKey == LogicalKey.keyQ) {
-          exit(0);
+          shutdownApp();
         } else if (event.logicalKey == LogicalKey.digit1) {
           setState(() => _selectedRoom = 0);
           return true;

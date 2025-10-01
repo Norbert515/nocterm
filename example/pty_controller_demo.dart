@@ -77,7 +77,7 @@ class _PtyControllerDemoState extends State<PtyControllerDemo> {
           return true;
         case LogicalKey.keyQ:
           // Ctrl+Q: Quit application
-          exit(0);
+          shutdownApp();
       }
     }
     return true;

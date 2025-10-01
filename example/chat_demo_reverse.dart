@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:nocterm/nocterm.dart';
 
 /// Demo showing AutoScrollController working correctly with reverse ListView
@@ -60,7 +59,7 @@ class _ChatDemoReverseState extends State<ChatDemoReverse> {
       focused: true,
       onKeyEvent: (event) {
         if (event.logicalKey == LogicalKey.escape) {
-          exit(0);
+          shutdownApp();
         }
         return false;
       },

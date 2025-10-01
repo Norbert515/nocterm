@@ -4,6 +4,7 @@ export 'src/buffer.dart';
 export 'src/frame.dart';
 export 'src/style.dart';
 export 'src/win32_ansi_stdin.dart';
+export 'src/shutdown.dart';
 export 'src/components/progress_bar.dart';
 export 'src/components/scrollbar.dart';
 export 'src/test/nocterm_tester.dart';
@@ -41,3 +42,6 @@ export 'src/navigation/navigator_observer.dart';
 export 'src/navigation/overlay.dart';
 
 export 'src/components/markdown_text.dart';
+
+// Utilities
+export 'src/utils/clipboard.dart';

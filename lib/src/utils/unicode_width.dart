@@ -1,20 +1,68 @@
+import 'package:characters/characters.dart';
+
 /// Utility class for handling Unicode character display width in terminals
-/// 
+///
 /// This implementation handles the display width of Unicode characters,
 /// including emojis and other multi-column characters.
 class UnicodeWidth {
   /// Calculate the display width of a string in terminal columns
   static int stringWidth(String text) {
     if (text.isEmpty) return 0;
-    
+
+    // Use grapheme clusters for accurate width calculation
     int totalWidth = 0;
-    final runes = text.runes.toList();
-    
-    for (int i = 0; i < runes.length; i++) {
-      totalWidth += runeWidth(runes[i]);
+    for (final grapheme in text.characters) {
+      totalWidth += graphemeWidth(grapheme);
     }
-    
+
     return totalWidth;
+  }
+
+  /// Calculate the display width of a single grapheme cluster
+  static int graphemeWidth(String grapheme) {
+    if (grapheme.isEmpty) return 0;
+
+    // Handle ZWJ sequences (emoji families, professions, etc.)
+    if (grapheme.contains('\u200D')) {
+      // ZWJ emoji sequences are typically 2 columns wide
+      if (_containsEmoji(grapheme)) {
+        return 2;
+      }
+    }
+
+    // For single-rune graphemes, use existing logic
+    final runes = grapheme.runes.toList();
+    if (runes.length == 1) {
+      return runeWidth(runes[0]);
+    }
+
+    // For multi-rune graphemes, calculate the base character width
+    // and ignore combining marks
+    int width = 0;
+    bool foundBase = false;
+
+    for (final rune in runes) {
+      final runeW = runeWidth(rune);
+
+      // Skip zero-width characters (combining marks, etc.)
+      if (runeW == 0) continue;
+
+      // Use the width of the first non-zero-width character as the base
+      if (!foundBase && runeW > 0) {
+        width = runeW;
+        foundBase = true;
+      }
+    }
+
+    return width;
+  }
+
+  /// Check if a string contains emoji characters
+  static bool _containsEmoji(String text) {
+    for (final rune in text.runes) {
+      if (_isEmoji(rune)) return true;
+    }
+    return false;
   }
   
   /// Calculate the display width of a single rune/codepoint

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 import 'package:nocterm/nocterm.dart';
 
@@ -45,7 +44,7 @@ class _ShowcaseAppState extends State<ShowcaseApp> {
       focused: true,
       onKeyEvent: (event) {
         if (event.logicalKey == LogicalKey.keyQ) {
-          exit(0);
+          shutdownApp();
         } else if (event.logicalKey == LogicalKey.digit1) {
           setState(() => _selectedTab = 0);
           return true;

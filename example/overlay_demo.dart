@@ -1,5 +1,4 @@
 import 'package:nocterm/nocterm.dart';
-import 'dart:io';
 
 void main() {
   runApp(const OverlayDemo());
@@ -78,7 +77,7 @@ class _OverlayDemoState extends State<OverlayDemo> {
                     if (_overlayEntry != null) {
                       _hideOverlay();
                     } else {
-                      exit(0);
+                      shutdownApp();
                     }
                     return true;
                   } else if (event == LogicalKey.keyO) {
