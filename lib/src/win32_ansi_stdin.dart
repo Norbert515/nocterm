@@ -46,7 +46,7 @@ class Win32AnsiStdin extends StreamView<List<int>> implements Stdin {
   // Backing fields for required Stdin properties
   bool _lineMode = false;
   bool _echoMode = false;
-  bool _echoNewlineMode = false; // New property
+  bool _echoNewlineMode = false;
 
   // Factory constructor for proper initialization
   factory Win32AnsiStdin() {
@@ -87,7 +87,6 @@ class Win32AnsiStdin extends StreamView<List<int>> implements Stdin {
   }
 
   // --- Overriding the Stdin interface properties ---
-
   @override
   bool get hasTerminal => true;
 
@@ -103,7 +102,6 @@ class Win32AnsiStdin extends StreamView<List<int>> implements Stdin {
   @override
   set echoMode(bool mode) => _echoMode = mode;
 
-  // --- New Required Implementations ---
   @override
   bool get echoNewlineMode => _echoNewlineMode;
 
@@ -112,7 +110,6 @@ class Win32AnsiStdin extends StreamView<List<int>> implements Stdin {
 
   @override
   bool get supportsAnsiEscapes => true;
-  // --- End of New Implementations ---
 
   @override
   int readByteSync() {
@@ -160,31 +157,7 @@ class Win32AnsiStdin extends StreamView<List<int>> implements Stdin {
     }
   }
 
-  void _translateKeyEventORIG(win32.KEY_EVENT_RECORD keyEvent) {
-    if (keyEvent.bKeyDown == 0) return;
-    final charCode = keyEvent.uChar.UnicodeChar;
-    
-    if (charCode >= 32 && charCode != 127) {
-      _addAnsiSequence(String.fromCharCode(charCode));
-      return;
-    }
-    
-    switch (keyEvent.wVirtualKeyCode) {
-      case win32.VK_UP: _addAnsiSequence('\x1b[A'); break;
-      case win32.VK_DOWN: _addAnsiSequence('\x1b[B'); break;
-      case win32.VK_RIGHT: _addAnsiSequence('\x1b[C'); break;
-      case win32.VK_LEFT: _addAnsiSequence('\x1b[D'); break;
-      case win32.VK_HOME: _addAnsiSequence('\x1b[H'); break;
-      case win32.VK_END: _addAnsiSequence('\x1b[F'); break;
-      case win32.VK_DELETE: _addAnsiSequence('\x1b[3~'); break;
-      case win32.VK_BACK: _addAnsiSequence('\x7f'); break;
-      case win32.VK_RETURN: _addAnsiSequence('\r'); break;
-      case win32.VK_ESCAPE: _addAnsiSequence('\x1b'); break;
-      //case 
-    }
-  }
-
-    /*
+  /*
     ANSI CSI (Control Sequence Introducer) for extended keys with modifiers
     ┌─────────────────────────┬─────────────┬─────────────┬─────────────┬─────────────┐
     │ Key                     │ Code        │ SHIFT+code  │ CTRL+code   │ ALT+code    │
@@ -289,7 +262,7 @@ class Win32AnsiStdin extends StreamView<List<int>> implements Stdin {
     └─────────────────────────┴─────────────┴─────────────┴─────────────┴─────────────┘
     */
 
- /// Calculates the ANSI modifier value based on the key state.
+  /// Calculates the ANSI modifier value based on the key state.
   /// ANSI modifiers are 1-based: 1=None, 2=Shift, 3=Alt, 5=Ctrl, etc.
   int _getAnsiModifier(int controlKeyState) {
     int modifier = 1; // Base value for no modifier
