@@ -2,28 +2,203 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
+import 'package:nocterm/nocterm.dart' show TerminalBinding;
 import 'package:win32/win32.dart' as win32;
 import 'package:ffi/ffi.dart' as ffi;
 
 
-// I have a PR #1009 open on the win32 package to add these missing constants
+//~====================================================================================
+//^ I have a PR #1009 open on the win32 package to add these missing constants
+//~ START OF missing win32 constants that will be included AFTER PR #1009 is merged
 
-// Manually define the missing Windows event type constants.
-const int KEY_EVENT = 0x0001;
-const int MOUSE_EVENT = 0x0002;
+// INPUT_RECORD structure `EventType` flags
 
-// For the dwControlKeyState member of the KEY_EVENT_RECORD struct
-const int RIGHT_ALT_PRESSED = 0x0001;
-const int LEFT_ALT_PRESSED = 0x0002;
-const int RIGHT_CTRL_PRESSED = 0x0004;
-const int LEFT_CTRL_PRESSED = 0x0008;
-const int SHIFT_PRESSED = 0x0010;
+/// INPUT_RECORD structure `EventType` flag: Event contains key event record.
+const KEY_EVENT = 0x0001;
 
-const int  FROM_LEFT_1ST_BUTTON_PRESSED = 0x0001;
-const int  RIGHTMOST_BUTTON_PRESSED     = 0x0002;
-const int  FROM_LEFT_2ND_BUTTON_PRESSED = 0x0004;
-const int  FROM_LEFT_3RD_BUTTON_PRESSED = 0x0008;
-const int  FROM_LEFT_4TH_BUTTON_PRESSED = 0x0010;
+/// INPUT_RECORD structure `EventType` flag: Event contains mouse event record.
+const MOUSE_EVENT = 0x0002;
+
+/// INPUT_RECORD structure `EventType` flag: Event contains window change event record.
+const WINDOW_BUFFER_SIZE_EVENT = 0x0004;
+
+/// INPUT_RECORD structure `EventType` flag: Event contains menu event record.
+const MENU_EVENT = 0x0008;
+
+/// INPUT_RECORD structure `EventType` flag: Event contains focus change.
+const FOCUS_EVENT = 0x0010;
+
+// KEY_EVENT_RECORD structure `dwControlKeyState` flags
+
+/// KEY_EVENT_RECORD structure `dwControlKeyState` flag: The right alt key is pressed.
+const RIGHT_ALT_PRESSED = 0x0001;
+
+/// KEY_EVENT_RECORD structure `dwControlKeyState` flag: The left alt key is pressed.
+const LEFT_ALT_PRESSED = 0x0002;
+
+/// KEY_EVENT_RECORD structure `dwControlKeyState` flag: The right ctrl key is pressed.
+const RIGHT_CTRL_PRESSED = 0x0004;
+
+/// KEY_EVENT_RECORD structure `dwControlKeyState` flag: The left ctrl key is pressed.
+const LEFT_CTRL_PRESSED = 0x0008;
+
+/// KEY_EVENT_RECORD structure `dwControlKeyState` flag: The shift key is pressed.
+const SHIFT_PRESSED = 0x0010;
+
+/// KEY_EVENT_RECORD structure `dwControlKeyState` flag: The numlock light is on.
+const NUMLOCK_ON = 0x0020;
+
+/// KEY_EVENT_RECORD structure `dwControlKeyState` flag: The scrolllock light is on.
+const SCROLLLOCK_ON = 0x0040;
+
+/// KEY_EVENT_RECORD structure `dwControlKeyState` flag: The capslock light is on.
+const CAPSLOCK_ON = 0x0080;
+
+/// KEY_EVENT_RECORD structure `dwControlKeyState` flag: The key is enhanced.
+/// Enhanced keys for the IBM® 101- and 102-key keyboards are the INS, DEL, HOME, END,
+/// PAGE UP, PAGE DOWN, and direction keys in the clusters to the left of the keypad;
+/// and the divide (/) and ENTER keys in the keypad.
+const ENHANCED_KEY = 0x0100;
+
+// MOUSE_EVENT_RECORD structure `dwButtonState` flags
+
+/// MOUSE_EVENT_RECORD structure `dwButtonState` flag: First mouse button from left depressed.
+const FROM_LEFT_1ST_BUTTON_PRESSED = 0x0001;
+
+/// MOUSE_EVENT_RECORD structure `dwButtonState` flag: Rightmost mouse button depressed.
+const RIGHTMOST_BUTTON_PRESSED = 0x0002;
+
+/// MOUSE_EVENT_RECORD structure `dwButtonState` flag: Second mouse button from left depressed.
+const FROM_LEFT_2ND_BUTTON_PRESSED = 0x0004;
+
+/// MOUSE_EVENT_RECORD structure `dwButtonState` flag: Third mouse button from left depressed.
+const FROM_LEFT_3RD_BUTTON_PRESSED = 0x0008;
+
+/// MOUSE_EVENT_RECORD structure `dwButtonState` flag: Fourth mouse button from left depressed.
+const FROM_LEFT_4TH_BUTTON_PRESSED = 0x0010;
+
+/// MOUSE_EVENT_RECORD structure `dwButtonState` flag: Mouse wheel rolled up or tilted right (`dwEventFlags` member will hold `MOUSE_WHEELED` or `MOUSE_HWHEELED` flag)
+const MOUSED_WHEELED_UP_OR_RIGHT = 0x00800000;
+
+/// MOUSE_EVENT_RECORD structure `dwButtonState` flag: Mouse wheel rolled down or tilted left (`dwEventFlags` member will hold `MOUSE_WHEELED` or `MOUSE_HWHEELED` flag)
+const MOUSE_WHEELED_DOWN_OR_LEFT = 0xff800000;
+
+// MOUSE_EVENT_RECORD structure `dwEventFlags` flags
+
+/// MOUSE_EVENT_RECORD structure `dwEventFlags` flag: Mouse moved.
+const MOUSE_MOVED = 0x0001;
+
+/// MOUSE_EVENT_RECORD structure `dwEventFlags` flag: Double click.
+const DOUBLE_CLICK = 0x0002;
+
+/// MOUSE_EVENT_RECORD structure `dwEventFlags` flag: Mouse wheel rolled.
+const MOUSE_WHEELED = 0x0004;
+
+/// MOUSE_EVENT_RECORD structure `dwEventFlags` flag: Mouse wheel horizontal tilt.
+const MOUSE_HWHEELED = 0x0008;
+
+// CHAR_INFO structure `Attributes` flags
+
+/// CHAR_INFO structure `Attributes` flag: text color contains blue.
+const FOREGROUND_BLUE = 0x0001;
+
+/// CHAR_INFO structure `Attributes` flag: text color contains green.
+const FOREGROUND_GREEN = 0x0002;
+
+/// CHAR_INFO structure `Attributes` flag: text color contains red.
+const FOREGROUND_RED = 0x0004;
+
+/// CHAR_INFO structure `Attributes` flag: text color is intensified.
+const FOREGROUND_INTENSITY = 0x0008;
+
+/// CHAR_INFO structure `Attributes` flag: background color contains blue.
+const BACKGROUND_BLUE = 0x0010;
+
+/// CHAR_INFO structure `Attributes` flag: background color contains green.
+const BACKGROUND_GREEN = 0x0020;
+
+/// CHAR_INFO structure `Attributes` flag: background color contains red.
+const BACKGROUND_RED = 0x0040;
+
+/// CHAR_INFO structure `Attributes` flag: background color is intensified.
+const BACKGROUND_INTENSITY = 0x0080;
+
+/// CHAR_INFO structure `Attributes` flag: Leading Byte of DBCS (Double Byte Character Set)
+const COMMON_LVB_LEADING_BYTE    = 0x0100;
+
+/// CHAR_INFO structure `Attributes` flag: Trailing Byte of DBCS (Double Byte Character Set)
+const COMMON_LVB_TRAILING_BYTE   = 0x0200;
+
+/// CHAR_INFO structure `Attributes` flag: DBCS (Double Byte Character Set): Grid attribute: top horizontal.
+const COMMON_LVB_GRID_HORIZONTAL = 0x0400;
+
+/// CHAR_INFO structure `Attributes` flag: DBCS (Double Byte Character Set): Grid attribute: left vertical.
+const COMMON_LVB_GRID_LVERTICAL  = 0x0800;
+
+/// CHAR_INFO structure `Attributes` flag: DBCS (Double Byte Character Set): Grid attribute: right vertical.
+const COMMON_LVB_GRID_RVERTICAL  = 0x1000;
+
+/// CHAR_INFO structure `Attributes` flag: DBCS (Double Byte Character Set): Reverse fore/back ground attribute.
+const COMMON_LVB_REVERSE_VIDEO   = 0x4000;
+
+/// CHAR_INFO structure `Attributes` flag: DBCS (Double Byte Character Set): Underscore.
+const COMMON_LVB_UNDERSCORE      = 0x8000;
+
+/// CHAR_INFO structure `Attributes` flag: SBCS (Single Byte Character Set) or DBCS (Double Byte Character Set) flag.
+const COMMON_LVB_SBCSDBCS = 0x0300;
+
+// CONSOLE_SELECTION_INFO structure `dwFlags` flags
+
+/// CONSOLE_SELECTION_INFO structure `dwFlags` flag: No selection.
+const CONSOLE_NO_SELECTION          = 0x0000;
+
+/// CONSOLE_SELECTION_INFO structure `dwFlags` flag: Selection has begun.
+const CONSOLE_SELECTION_IN_PROGRESS = 0x0001;
+
+/// CONSOLE_SELECTION_INFO structure `dwFlags` flag: Non-null select rectangle.
+const CONSOLE_SELECTION_NOT_EMPTY   = 0x0002;
+
+/// CONSOLE_SELECTION_INFO structure `dwFlags` flag: Selecting with mouse.
+const CONSOLE_MOUSE_SELECTION       = 0x0004;
+
+/// CONSOLE_SELECTION_INFO structure `dwFlags` flag: Mouse is down.
+const CONSOLE_MOUSE_DOWN            = 0x0008;
+
+// PHANDLER_ROUTINE callback function `dwCtrlType` parameter flags
+
+/// PHANDLER_ROUTINE callback function `dwCtrlType` parameter flag: A CTRL+C signal was received,
+/// either from keyboard input or from a signal generated by the `GenerateConsoleCtrlEvent` function.
+const CTRL_C_EVENT = 0;
+
+/// PHANDLER_ROUTINE callback function `dwCtrlType` parameter flag: A CTRL+BREAK signal was received,
+/// either from keyboard input or from a signal generated by `GenerateConsoleCtrlEvent`.
+const CTRL_BREAK_EVENT = 1;
+
+/// PHANDLER_ROUTINE callback function `dwCtrlType` parameter flag: A signal that the system sends
+/// to all processes attached to a console when the user closes the console (either by clicking Close
+/// on the console window's window menu, or by clicking the End Task button command from Task Manager).
+const CTRL_CLOSE_EVENT = 2;
+
+/// PHANDLER_ROUTINE callback function `dwCtrlType` parameter flag: A signal that the system sends
+/// to all console processes when a user is logging off. This signal does not indicate which user
+/// is logging off, so no assumptions can be made.
+/// 
+/// Note that this signal is received only by services. Interactive applications are terminated at logoff,
+/// so they are not present when the system sends this signal.
+const CTRL_LOGOFF_EVENT = 5;
+
+/// PHANDLER_ROUTINE callback function `dwCtrlType` parameter flag: A signal that the system sends
+/// when the system is shutting down. Interactive applications are not present by the time the system
+/// sends this signal, therefore it can be received only be services in this situation. Services also have
+/// their own notification mechanism for shutdown events. For more information, see `LphandlerFunction` handler.
+const CTRL_SHUTDOWN_EVENT = 6;
+
+
+//~ END OF missing win32 constants that will be included AFTER PR #1009 is merged
+//~====================================================================================
+
+
+
 
 /// A class that emulates a Unix-style Stdin by extending StreamView to behave
 /// like a Stream and implementing the Stdin interface - but specifically sending
@@ -150,15 +325,103 @@ class Win32AnsiStdin extends StreamView<List<int>> implements Stdin {
   }
 
   void _translateAndFire(win32.INPUT_RECORD event) {
+
+    TerminalBinding.instance.logSink?.writeln('_translateAndFire() event.EventType=${event.EventType}');
+
     if (event.EventType == MOUSE_EVENT) {
       _translateMouseEvent(event.Event.MouseEvent);
     } else if (event.EventType == KEY_EVENT) {
       _translateKeyEvent(event.Event.KeyEvent);
+    } else if (event.EventType == WINDOW_BUFFER_SIZE_EVENT) {
+      // Handle window resize if needed
+      final windowBufferSizeRecord = event.Event.WindowBufferSizeEvent;
+      TerminalBinding.instance.logSink?.writeln('UNHANDLED event.EventType == WINDOW_BUFFER_SIZE_EVENT  windowBufferSizeRecord.dwSize=${windowBufferSizeRecord.dwSize}');
+    } else if (event.EventType == MENU_EVENT) {
+      // Handle menu event if needed
+      final menuEventRecord = event.Event.MenuEvent;
+      TerminalBinding.instance.logSink?.writeln('UNHANDLED event.EventType == MENU_EVENT  menuEventRecord.dwCommandId=${menuEventRecord.dwCommandId}');
+    } else if (event.EventType == FOCUS_EVENT) {
+      // Handle focus event if needed
+      final focusEventRecord = event.Event.FocusEvent;
+      TerminalBinding.instance.logSink?.writeln('UNHANDLED event.EventType == FOCUS_EVENT  focusEventRecord.bSetFocus=${focusEventRecord.bSetFocus}');
     }
   }
 
   /*
-    ANSI CSI (Control Sequence Introducer) for extended keys with modifiers
+ =================================================================================
+ | ASCII Table
+ | =================================================================================
+ | Represents the 7-bit ASCII (American Standard Code for Information Interchange).
+ | It includes control characters (0-31), printable characters (32-126), and DEL (127).
+ |
+ | Char | Dec | Hex   ||  Char | Dec | Hex
+ | -----|-----|------ || -----|-----|------
+ | NUL  |   0 | 0x00  ||  @    |  64 | 0x40
+ | SOH  |   1 | 0x01  ||  A    |  65 | 0x41
+ | STX  |   2 | 0x02  ||  B    |  66 | 0x42
+ | ETX  |   3 | 0x03  ||  C    |  67 | 0x43
+ | EOT  |   4 | 0x04  ||  D    |  68 | 0x44
+ | ENQ  |   5 | 0x05  ||  E    |  69 | 0x45
+ | ACK  |   6 | 0x06  ||  F    |  70 | 0x46
+ | BEL  |   7 | 0x07  ||  G    |  71 | 0x47
+ | BS   |   8 | 0x08  ||  H    |  72 | 0x48
+ | HT   |   9 | 0x09  ||  I    |  73 | 0x49
+ | LF   |  10 | 0x0A  ||  J    |  74 | 0x4A
+ | VT   |  11 | 0x0B  ||  K    |  75 | 0x4B
+ | FF   |  12 | 0x0C  ||  L    |  76 | 0x4C
+ | CR   |  13 | 0x0D  ||  M    |  77 | 0x4D
+ | SO   |  14 | 0x0E  ||  N    |  78 | 0x4E
+ | SI   |  15 | 0x0F  ||  O    |  79 | 0x4F
+ | DLE  |  16 | 0x10  ||  P    |  80 | 0x50
+ | DC1  |  17 | 0x11  ||  Q    |  81 | 0x51
+ | DC2  |  18 | 0x12  ||  R    |  82 | 0x52
+ | DC3  |  19 | 0x13  ||  S    |  83 | 0x53
+ | DC4  |  20 | 0x14  ||  T    |  84 | 0x54
+ | NAK  |  21 | 0x15  ||  U    |  85 | 0x55
+ | SYN  |  22 | 0x16  ||  V    |  86 | 0x56
+ | ETB  |  23 | 0x17  ||  W    |  87 | 0x57
+ | CAN  |  24 | 0x18  ||  X    |  88 | 0x58
+ | EM   |  25 | 0x19  ||  Y    |  89 | 0x59
+ | SUB  |  26 | 0x1A  ||  Z    |  90 | 0x5A
+ | ESC  |  27 | 0x1B  ||  [    |  91 | 0x5B
+ | FS   |  28 | 0x1C  ||  \    |  92 | 0x5C
+ | GS   |  29 | 0x1D  ||  ]    |  93 | 0x5D
+ | RS   |  30 | 0x1E  ||  ^    |  94 | 0x5E
+ | US   |  31 | 0x1F  ||  _    |  95 | 0x5F
+ | SP   |  32 | 0x20  ||  `    |  96 | 0x60
+ | !    |  33 | 0x21  ||  a    |  97 | 0x61
+ | "    |  34 | 0x22  ||  b    |  98 | 0x62
+ | #    |  35 | 0x23  ||  c    |  99 | 0x63
+ | $    |  36 | 0x24  ||  d    | 100 | 0x64
+ | %    |  37 | 0x25  ||  e    | 101 | 0x65
+ | &    |  38 | 0x26  ||  f    | 102 | 0x66
+ | '    |  39 | 0x27  ||  g    | 103 | 0x67
+ | (    |  40 | 0x28  ||  h    | 104 | 0x68
+ | )    |  41 | 0x29  ||  i    | 105 | 0x69
+ | *    |  42 | 0x2A  ||  j    | 106 | 0x6A
+ | +    |  43 | 0x2B  ||  k    | 107 | 0x6B
+ | ,    |  44 | 0x2C  ||  l    | 108 | 0x6C
+ | -    |  45 | 0x2D  ||  m    | 109 | 0x6D
+ | .    |  46 | 0x2E  ||  n    | 110 | 0x6E
+ | /    |  47 | 0x2F  ||  o    | 111 | 0x6F
+ | 0    |  48 | 0x30  ||  p    | 112 | 0x70
+ | 1    |  49 | 0x31  ||  q    | 113 | 0x71
+ | 2    |  50 | 0x32  ||  r    | 114 | 0x72
+ | 3    |  51 | 0x33  ||  s    | 115 | 0x73
+ | 4    |  52 | 0x34  ||  t    | 116 | 0x74
+ | 5    |  53 | 0x35  ||  u    | 117 | 0x75
+ | 6    |  54 | 0x36  ||  v    | 118 | 0x76
+ | 7    |  55 | 0x37  ||  w    | 119 | 0x77
+ | 8    |  56 | 0x38  ||  x    | 120 | 0x78
+ | 9    |  57 | 0x39  ||  y    | 121 | 0x79
+ | :    |  58 | 0x3A  ||  z    | 122 | 0x7A
+ | ;    |  59 | 0x3B  ||  {    | 123 | 0x7B
+ | <    |  60 | 0x3C  ||  |    | 124 | 0x7C
+ | =    |  61 | 0x3D  ||  }    | 125 | 0x7D
+ | >    |  62 | 0x3E  ||  ~    | 126 | 0x7E
+ | ?    |  63 | 0x3F  ||  DEL  | 127 | 0x7F
+ |===========================================
+     ANSI CSI (Control Sequence Introducer) for extended keys with modifiers
     ┌─────────────────────────┬─────────────┬─────────────┬─────────────┬─────────────┐
     │ Key                     │ Code        │ SHIFT+code  │ CTRL+code   │ ALT+code    │
     ├─────────────────────────┼─────────────┼─────────────┼─────────────┼─────────────┤
@@ -288,13 +551,20 @@ class Win32AnsiStdin extends StreamView<List<int>> implements Stdin {
     final isCtrl = (controlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) != 0;
     final isAlt = (controlKeyState & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED)) != 0;
     
+    TerminalBinding.instance.logSink?.writeln('_translateKeyEvent()  KeyEvent: vKey=$virtualKeyCode char=${keyEvent.uChar.UnicodeChar} ctrl=$controlKeyState (isCtrl=$isCtrl isAlt=$isAlt)');
+
     if (isCtrl && !isAlt && virtualKeyCode >= 'A'.codeUnitAt(0) && virtualKeyCode <= 'Z'.codeUnitAt(0)) {
       final charCode = virtualKeyCode - 'A'.codeUnitAt(0) + 1;
+
+      TerminalBinding.instance.logSink?.writeln(' isCtrl && !isAlt virtualKeyCode>=A <=Z: RETURNING charCode=$charCode');
+
       _addAnsiSequence(String.fromCharCode(charCode));
       return;
     }
 
     final modifier = _getAnsiModifier(controlKeyState);
+
+    TerminalBinding.instance.logSink?.writeln('_getAnsiModifier(controlKeyState) returned modifier = $modifier');
 
     // Map of Virtual Key Codes to their ANSI escape character codes.
     // This handles keys that use the '~' suffix format.
@@ -312,6 +582,9 @@ class Win32AnsiStdin extends StreamView<List<int>> implements Stdin {
 
     if (keyMap.containsKey(virtualKeyCode)) {
       final code = keyMap[virtualKeyCode]!;
+
+      TerminalBinding.instance.logSink?.writeln('keyMap has virtualKeyCode MAPPED code=$code   modifier=$modifier');
+
       // Modified keys use the format: ESC [ <keycode> ; <modifier> ~
       if (modifier > 1) {
         _addAnsiSequence('\x1b[${code};${modifier}~');
@@ -329,6 +602,9 @@ class Win32AnsiStdin extends StreamView<List<int>> implements Stdin {
 
     if (letterSuffixMap.containsKey(virtualKeyCode)) {
       final char = letterSuffixMap[virtualKeyCode]!;
+
+      TerminalBinding.instance.logSink?.writeln('letterSuffixMap has virtualKeyCode MAPPED char=$char   modifier=$modifier');
+
       // Modified arrows use the format: ESC [ 1 ; <modifier> <char>
       if (modifier > 1) {
         _addAnsiSequence('\x1b[1;${modifier}$char');
@@ -357,20 +633,40 @@ class Win32AnsiStdin extends StreamView<List<int>> implements Stdin {
 
   void _translateMouseEvent(win32.MOUSE_EVENT_RECORD mouseEvent) {
     final pos = mouseEvent.dwMousePosition;
-    final flags = mouseEvent.dwEventFlags;
+    final eventFlags = mouseEvent.dwEventFlags;
     final buttonState = mouseEvent.dwButtonState;
 
     final col = pos.X + 1;
     final row = pos.Y + 1;
 
-    if (flags & win32.MOUSEEVENTF_WHEEL != 0) {
-      final isUp = (buttonState >> 16) > 0;
-      final button = isUp ? 64 : 65;
+    TerminalBinding.instance.logSink?.writeln('_translateMouseEvent()  MouseEvent: pos=($col,$row) flags=$eventFlags buttonState=${buttonState.toHexString(32)} lastButtonState=${_lastButtonState.toHexString(32)}');
+
+    if ((eventFlags & MOUSE_WHEELED) != 0) { // mouse wheel event roll up/down event
+      // buttons 4 and 5, changed to 0 and 1, then add 64 for wheel up/down
+      // Wheel mice may return buttons 4 and 5. Those buttons are represented by the same event codes as buttons 1 and 2
+      // respectively, except that 64 is added to the event code. Release events for the wheel buttons are not reported.
+      // By default, the wheel mouse events (buttons 4 and 5) are translated to scroll−back and scroll−forw actions, respectively. 
+      final isDown = (buttonState & MOUSE_WHEELED_DOWN_OR_LEFT) == MOUSE_WHEELED_DOWN_OR_LEFT;
+      final button = isDown ? 65 : 64;
+
+      TerminalBinding.instance.logSink?.writeln('VERTICAL wheel event detected: isDown=$isDown button=$button');
+
+      _addAnsiSequence('\x1b[<${button};${col};${row}M');
+      return;
+    } else if ((eventFlags & MOUSE_HWHEELED) != 0) { // horizontal mouse wheel tilt left/right
+      final isLeft = (buttonState & MOUSE_WHEELED_DOWN_OR_LEFT) == MOUSE_WHEELED_DOWN_OR_LEFT;
+      // Xterm says horizontal mouse wheel - button 7 (left) and button 6 (right)
+      // and then changed to 2 and 3, then add 64 for wheel right/left
+      // (https://stackoverflow.com/questions/46627983/what-is-the-correct-xterm-ansi-sequence-for-mouse-wheel-and-or-scroll-prefera )
+      final button = isLeft ? 67 : 66;
+
+      TerminalBinding.instance.logSink?.writeln('HORIZONTAL wheel event detected: isLeft=$isLeft button=$button');
+
       _addAnsiSequence('\x1b[<${button};${col};${row}M');
       return;
     }
 
-    if (flags & win32.MOUSEEVENTF_MOVE != 0) {
+    if (eventFlags & MOUSE_MOVED != 0) {
       if (buttonState != 0) {
         final button = 32 + _getButtonCode(buttonState);
         _addAnsiSequence('\x1b[<${button};${col};${row}M');

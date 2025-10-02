@@ -12,6 +12,7 @@ log.txt
 
 CLAUDE.md
 .claude/
+.vscode/
 
 .DS_Store
 

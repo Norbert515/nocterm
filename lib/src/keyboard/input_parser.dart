@@ -6,6 +6,94 @@ import 'keyboard_event.dart';
 import 'mouse_parser.dart';
 import 'input_event.dart';
 
+/// Dumps a number as a binary string, padded to 8 bits.
+///
+/// Example: `dumpBinary(65)` returns `0b01000001`.
+///
+/// [number] The integer to format.
+/// Returns a formatted binary string.
+String dumpBinary(int number) {
+  // Ensure the number is treated as an 8-bit value for consistency.
+  final byte = number & 0xFF;
+  // Convert to binary and pad with leading zeros to make it 8 digits long.
+  final binaryString = byte.toRadixString(2).padLeft(8, '0');
+  return '0b$binaryString';
+}
+
+/// Dumps a list of integers into a formatted string.
+///
+/// Each integer is represented in the format [DECIMAL [ASCII](HEX)].
+/// For example, `[65, 66]` becomes `[ 65 [A](0x41), 66 [B](0x42) ]`.
+///
+/// Non-printable ASCII characters (those outside the range 32-126) are
+/// represented by a period ('.').
+///
+/// [data] The list of integers to format.
+/// Returns a formatted string representation of the list.
+String dumpList(List<int> data) {
+  if (data.isEmpty) {
+    return '[ ]';
+  }
+
+  // Use map to transform each integer into the desired string format.
+  final formattedParts = data.map((byte) {
+    // Ensure the byte value is within the valid 8-bit range.
+    final validByte = byte & 0xFF;
+
+    // Convert the byte to its two-digit hexadecimal representation (e.g., 65 -> "41").
+    final hexString = validByte.toRadixString(16).padLeft(2, '0').toUpperCase();
+
+    // Determine the ASCII character. If it's not a printable character (32-126),
+    // use a '.' as a placeholder.
+    final char = (validByte >= 32 && validByte <= 126)
+        ? String.fromCharCode(validByte)
+        : switch(validByte) {
+            0x00 => 'NUL',
+            0x01 => 'SOH',
+            0x02 => 'STX',
+            0x03 => 'ETX',
+            0x04 => 'EOT',
+            0x05 => 'ENQ',
+            0x06 => 'ACK',
+            0x07 => 'BEL',
+            0x08 => 'BS',
+            0x09 => 'HT',
+            0x0A => 'LF',
+            0x0B => 'VT',
+            0x0C => 'FF',
+            0x0D => 'CR',
+            0x0E => 'SO',
+            0x0F => 'SI',
+            0x10 => 'DLE',
+            0x11 => 'DC1',
+            0x12 => 'DC2',
+            0x13 => 'DC3',
+            0x14 => 'DC4',
+            0x15 => 'NAK',
+            0x16 => 'SYN',
+            0x17 => 'ETB',
+            0x18 => 'CAN',
+            0x19 => 'EM',
+            0x1A => 'SUB',
+            0x1B => 'ESC',
+            0x1C => 'FS',
+            0x1D => 'GS',
+            0x1E => 'RS',
+            0x1F => 'US',
+            0x20 => 'SP',
+            0x7F => 'DEL',
+            _ => '.'
+          };
+
+    // Assemble the final string for this byte.
+    //return '$validByte [$char](0x$hexString)';
+    return '$char (0x$hexString)';
+  });
+
+  // Join all the parts with a comma and a space, and wrap them in brackets.
+  return '[ ${formattedParts.join(', ')} ]';
+}
+
 /// Parses raw terminal input bytes into input events (keyboard and mouse).
 class InputParser {
   final List<int> _buffer = [];
@@ -53,12 +141,14 @@ class InputParser {
 
     final first = _buffer[0];
 
-    // Check for mouse sequences first
+    TerminalBinding.instance.logSink?.writeln('_parseBufferWithLength _buffer: ${dumpList(_buffer)}');
+
+    // Check for mouse sequences first (0x1B = ESC, 0x5B = '[')
     if (first == 0x1B && _buffer.length >= 2) {
       // Check for mouse escape sequences
       if (_buffer[1] == 0x5B && _buffer.length >= 3) {
-        // SGR mouse mode: ESC [ <
-        if (_buffer[2] == 0x3C) {
+        // SGR mouse mode: ESC [ <   (0x3C = '<', 0x4D = 'M', 0x6D = 'm')
+        if (_buffer[2] == 0x3C) { 
           // Find the terminator to know how many bytes this event uses
           int terminatorIndex = -1;
           for (int i = 3; i < _buffer.length; i++) {
@@ -67,11 +157,14 @@ class InputParser {
               break;
             }
           }
-
+          TerminalBinding.instance.logSink?.writeln('_parseBufferWithLength SGR mouse terminatorIndex: $terminatorIndex');
           if (terminatorIndex != -1) {
             // Parse only the bytes for this event
-            final eventBytes = _buffer.sublist(0, terminatorIndex + 1);
-            final mouseEvent = MouseParser.parseSGR(eventBytes);
+            //DONT BOTHER COPYING, SLOW, and why?? final eventBytes = _buffer.sublist(0, terminatorIndex + 1);
+            final mouseEvent = MouseParser.parseSGR(_buffer, terminatorIndex);
+
+            TerminalBinding.instance.logSink?.writeln('MouseParser.parseSGR() returned mouseEvent=$mouseEvent');
+
             if (mouseEvent != null) {
               return (MouseInputEvent(mouseEvent), terminatorIndex + 1);
             } else {
@@ -89,6 +182,7 @@ class InputParser {
         else if (_buffer[2] == 0x4D && _buffer.length >= 6) {
           final eventBytes = _buffer.sublist(0, 6);
           final mouseEvent = MouseParser.parseX10(eventBytes);
+          TerminalBinding.instance.logSink?.writeln('MouseParser.parseX10() returned mouseEvent=$mouseEvent');
           if (mouseEvent != null) {
             return (MouseInputEvent(mouseEvent), 6);
           }
@@ -100,6 +194,7 @@ class InputParser {
     final result = _parseKeyboardEvent();
     if (result != null) {
       final (keyEvent, bytesConsumed) = result;
+      TerminalBinding.instance.logSink?.writeln('_parseKeyboardEvent() returned keyEvent=$keyEvent  bytesConsumed=$bytesConsumed  ');
       return (KeyboardInputEvent(keyEvent), bytesConsumed);
     }
 
@@ -110,6 +205,8 @@ class InputParser {
     if (_buffer.isEmpty) return null;
 
     final first = _buffer[0];
+
+    TerminalBinding.instance.logSink?.writeln('_parseKeyboardEvent()  first = ${dumpList([first])}');
 
     // ESC sequences
     if (first == 0x1B) {
@@ -227,6 +324,8 @@ class InputParser {
   }
 
   (KeyboardEvent, int)? _parseEscapeSequence() {
+
+    TerminalBinding.instance.logSink?.writeln('_parseEscapeSequence _buffer.length=${_buffer.length} _buffer: ${dumpList(_buffer)}');
     if (_buffer.length == 1) {
       // Just ESC key pressed
       return (KeyboardEvent(
@@ -275,11 +374,12 @@ class InputParser {
     return null;
   }
 
+  // Parse CSI sequences (starting with ESC [)
   (KeyboardEvent, int)? _parseCSISequence() {
 
-    TerminalBinding.instance.logSink?.writeln('_parseCSISequence _buffer: $_buffer');
+    TerminalBinding.instance.logSink?.writeln('_parseCSISequence _buffer: ${dumpList(_buffer)}');
   
-    // Skip mouse sequences - they're handled elsewhere
+    // Skip mouse sequences - they're handled elsewhere (0x3C = '<', 0x4D = 'M')
     if (_buffer.length >= 3 && (_buffer[2] == 0x3C || _buffer[2] == 0x4D)) {
       return null;
     }

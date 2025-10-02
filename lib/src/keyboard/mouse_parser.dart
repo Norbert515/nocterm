@@ -1,32 +1,51 @@
+import 'package:nocterm/nocterm.dart' show TerminalBinding;
+import 'package:nocterm/src/keyboard/input_parser.dart';
+import 'package:win32/win32.dart';
+
 import 'mouse_event.dart';
 
 /// Parses mouse escape sequences from terminal input
 class MouseParser {
   /// Parse SGR mouse sequence (ESC [ < button ; x ; y M/m)
   /// Returns null if not a valid mouse sequence
-  static MouseEvent? parseSGR(List<int> buffer) {
-    if (buffer.length < 9) return null; // Minimum: ESC [ < 0 ; 1 ; 1 M
+  static MouseEvent? parseSGR(List<int> buffer, int terminatorIndex) {
+
+    TerminalBinding.instance.logSink?.writeln('MouseParser.parseSGR() terminatorIndex=$terminatorIndex buffer=${dumpList(buffer.sublist(0,terminatorIndex+1))}');
+
+    int mouseSequenceLength = terminatorIndex + 1;
+    if (mouseSequenceLength<9 || buffer.length < mouseSequenceLength) return null; // Minimum: ESC [ < 0 ; 1 ; 1 M
     
-    // Check for ESC [ <
+    // Check for ESC [ <  (0x1B = ESC, 0x5B = [, 0x3C = '<', 0x4D = 'M', 0x6D = 'm')
     if (buffer[0] != 0x1B || buffer[1] != 0x5B || buffer[2] != 0x3C) {
       return null;
     }
-    
-    // Find the terminator (M or m)
-    int terminatorIndex = -1;
-    for (int i = 3; i < buffer.length; i++) {
-      if (buffer[i] == 0x4D || buffer[i] == 0x6D) { // 'M' or 'm'
-        terminatorIndex = i;
-        break;
-      }
+    if(buffer[3]==0x33 && buffer[4]==0x35) { // `ESC [ < 35`  THIS IS button code==NONE
+      TerminalBinding.instance.logSink?.writeln('MouseParser.parseSGR() Ignoring mouse move - button code of NONE');
+      return null;
     }
+
+
+    final terminatorChar =String.fromCharCodes(buffer.sublist(terminatorIndex, terminatorIndex+1));
+    TerminalBinding.instance.logSink?.writeln('parseSGR terminatorChar: $terminatorChar terminatorIndex: $terminatorIndex');
     
-    if (terminatorIndex == -1) return null;
+
+    // Find the terminator (M or m)
+    //int terminatorIndex = -1;
+    //for (int i = 3; i < mouseSequenceLength; i++) {
+    //  if (buffer[i] == 0x4D || buffer[i] == 0x6D) { // 'M' or 'm'
+    //    terminatorIndex = i;
+    //    break;
+    //  }
+    //}
+    
+    //if (terminatorIndex == -1) return null;
     
     // Parse the parameters between < and M/m
     final params = String.fromCharCodes(buffer.sublist(3, terminatorIndex));
     final parts = params.split(';');
-    
+
+    TerminalBinding.instance.logSink?.writeln('params: $params parts: $parts ');
+
     if (parts.length != 3) return null;
     
     try {
@@ -34,27 +53,32 @@ class MouseParser {
       final x = int.parse(parts[1]) - 1; // Convert to 0-based
       final y = int.parse(parts[2]) - 1; // Convert to 0-based
       final pressed = buffer[terminatorIndex] == 0x4D; // 'M' = press, 'm' = release
-      
+
+      TerminalBinding.instance.logSink?.writeln('buttonCode: ${dumpBinary(buttonCode)} col x: $x row y: $y pressed: $pressed');
+
       // Decode button from SGR button code
       MouseButton? button;
       
       // In SGR mode:
       // Bits 0-1: button number (0=left, 1=middle, 2=right, 3=release/none)
-      // Bit 5 (32): motion/drag flag
-      // Bit 6 (64): shift for wheel (64=up, 65=down)
+      // Bit 5 (32 (0x20)): motion/drag flag
+      // Bit 6 (64 (0x40)): shift for wheel (64=up, 65=down)
       
       // Check for wheel events first (64 and 65)
-      if (buttonCode == 64) {
+      if (buttonCode == 0x40) { // 64 (0x40) = 0b1000000 (bit 6 set)
         button = MouseButton.wheelUp;
-      } else if (buttonCode == 65) {
+      } else if (buttonCode == 0x41) { // 65 (0x41) = 0b1000001 (bits 6 and 0 set)
         button = MouseButton.wheelDown;
       } else {
         // For motion events (bit 5 set) with no button (bits 0-1 = 3), ignore
-        final baseButton = buttonCode & 0x3;
+        final baseButton = buttonCode & 0x03;
         final isMotion = (buttonCode & 0x20) != 0; // Bit 5
-        
+
+        TerminalBinding.instance.logSink?.writeln('baseButton: $baseButton isMotion: $isMotion');
+
         if (isMotion && baseButton == 3) {
           // Mouse motion without button press - ignore for now
+          TerminalBinding.instance.logSink?.writeln('MouseMotion without button press - ignoring');
           return null;
         }
         
@@ -71,12 +95,18 @@ class MouseParser {
             break;
           case 3:
             // Release or no button
+            TerminalBinding.instance.logSink?.writeln('MouseMotion RELEASE or NO button - ignoring');
             return null;
         }
       }
-      
-      if (button == null) return null;
-      
+
+      if (button == null) {
+        TerminalBinding.instance.logSink?.writeln('MouseMotion button==null - ignoring');
+        return null;
+      }
+
+      TerminalBinding.instance.logSink?.writeln('Returning MouseEvent: button=$button x=$x y=$y pressed=$pressed ');
+
       return MouseEvent(
         button: button,
         x: x,
@@ -84,6 +114,7 @@ class MouseParser {
         pressed: pressed,
       );
     } catch (e) {
+      TerminalBinding.instance.logSink?.writeln('MouseParser.parseSGR() Exception parsing SGR mouse event: $e');
       return null;
     }
   }
