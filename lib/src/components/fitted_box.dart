@@ -128,7 +128,6 @@ class RenderFittedBox extends RenderObject
 
   @override
   void paint(TerminalCanvas context, Offset offset) {
-    super.paint(context, offset);
     if (child == null) {
       return;
     }
@@ -139,7 +138,6 @@ class RenderFittedBox extends RenderObject
     // Get a new canvas that is clipped to the rect
     final clippedCanvas = context.clip(clipRect);
 
-    // Paint the child
-    child!.paintWithContext(clippedCanvas, offset);
+    super.paint(clippedCanvas, offset);
   }
 }
