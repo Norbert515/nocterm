@@ -10,6 +10,7 @@ export 'src/test/nocterm_tester.dart';
 export 'src/test/terminal_state.dart';
 export 'src/test/matchers.dart';
 export 'src/size.dart';
+export 'src/rectangle.dart';
 export 'src/test/nocterm_test_binding.dart';
 export 'src/binding/terminal_binding.dart';
 export 'src/components/basic.dart';
