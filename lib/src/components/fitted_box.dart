@@ -53,7 +53,7 @@ class RenderFittedBox extends RenderObject
     }
 
     // Layout child with unbounded constraints to determine its intrinsic size
-    child!.layout(const BoxConstraints(), parentUsesSize: true);
+    child?.layout(const BoxConstraints(), parentUsesSize: true);
     final childSize = child!.size;
 
     // Calculate the aspect ratio of the child and the available space
@@ -117,12 +117,23 @@ class RenderFittedBox extends RenderObject
     // Constrain the fitted size and set the render object size
     size = constraints.constrain(fittedSize);
 
-    // Calculate the alignment offset
-    final double xOffset = alignment.x * (size.width - childSize.width) / 2;
-    final double yOffset = alignment.y * (size.height - childSize.height) / 2;
+    final double xOffset =
+        child != null ? alignment.x * (size.width - childSize.width) / 2 : 0.0;
+
+    final double yOffset = child != null
+        ? alignment.y * (size.height - childSize.height) / 2
+        : 0.0;
+
+    if (child == null) return;
 
     // Set the child's parent data offset
+    if (child?.parentData == null) {
+      child!.parentData = BoxParentData();
+    }
     final BoxParentData childParentData = child!.parentData as BoxParentData;
+    childParentData.offset = Offset(xOffset, yOffset);
+
+    childParentData.offset = Offset.zero;
     childParentData.offset = Offset(xOffset, yOffset);
   }
 
@@ -133,11 +144,11 @@ class RenderFittedBox extends RenderObject
     }
 
     // Create a clip rect
-    final clipRect = Rect.fromLTWH(0, 0, size.width, size.height);
+    final clipRect =
+        Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
 
-    // Get a new canvas that is clipped to the rect
     final clippedCanvas = context.clip(clipRect);
-
-    super.paint(clippedCanvas, offset);
+    child!.paint(
+        clippedCanvas, offset + (child?.parentData as BoxParentData).offset);
   }
 }
