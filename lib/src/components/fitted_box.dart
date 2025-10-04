@@ -150,5 +150,6 @@ class RenderFittedBox extends RenderObject
     final clippedCanvas = context.clip(clipRect);
     child!.paint(
         clippedCanvas, offset + (child?.parentData as BoxParentData).offset);
+    super.paint(context, offset);
   }
 }
