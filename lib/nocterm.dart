@@ -14,6 +14,7 @@ export 'src/rectangle.dart';
 export 'src/test/nocterm_test_binding.dart';
 export 'src/binding/terminal_binding.dart';
 export 'src/components/basic.dart';
+export 'src/components/fitted_box.dart';
 export 'src/components/focusable.dart';
 export 'src/components/focus_scope.dart';
 export 'src/components/block_focus.dart';
