@@ -1,6 +1,4 @@
-import 'package:nocterm/src/framework/framework.dart';
-
-typedef ComponentBuilder = Component Function(BuildContext context);
+import '../framework/framework.dart';
 
 class Builder extends StatelessComponent {
   /// Creates a widget that delegates its build to a callback.

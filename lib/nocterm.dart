@@ -22,6 +22,7 @@ export 'src/binding/run_app.dart' show runApp;
 export 'src/binding/scheduler_binding.dart';
 export 'src/binding/scheduler_phase.dart';
 export 'src/components/basic.dart';
+export 'src/components/builder.dart';
 export 'src/components/focusable.dart';
 export 'src/components/focus_scope.dart';
 export 'src/components/block_focus.dart';
