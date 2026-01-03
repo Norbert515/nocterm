@@ -7,12 +7,15 @@ import 'terminal_backend.dart';
 
 /// Backend for native terminal I/O via stdin/stdout.
 /// Handles Unix signals (SIGWINCH, SIGINT, SIGTERM) for resize and shutdown.
+/// On Windows, uses polling for resize detection and SIGINT for Ctrl+C.
 class StdioBackend implements TerminalBackend {
   StreamController<Size>? _resizeController;
   StreamController<void>? _shutdownController;
   StreamSubscription? _sigwinchSubscription;
   StreamSubscription? _sigintSubscription;
   StreamSubscription? _sigtermSubscription;
+  Timer? _windowsResizeTimer;
+  Size? _lastKnownSize;
   bool _disposed = false;
 
   StdioBackend() {
@@ -20,10 +23,34 @@ class StdioBackend implements TerminalBackend {
   }
 
   void _initializeSignalHandling() {
-    // Only set up signal handling on Unix systems
-    if (Platform.isLinux || Platform.isMacOS) {
-      // Resize signal
-      _resizeController = StreamController<Size>.broadcast();
+    _resizeController = StreamController<Size>.broadcast();
+    _shutdownController = StreamController<void>.broadcast();
+
+    if (Platform.isWindows) {
+      // Windows: Use polling for resize detection since SIGWINCH is not available
+      _lastKnownSize = getSize();
+      _windowsResizeTimer = Timer.periodic(const Duration(milliseconds: 250), (_) {
+        if (!_disposed && stdout.hasTerminal) {
+          final currentSize = getSize();
+          if (_lastKnownSize != currentSize) {
+            _lastKnownSize = currentSize;
+            _resizeController?.add(currentSize);
+          }
+        }
+      });
+
+      // Windows: SIGINT works for Ctrl+C
+      try {
+        _sigintSubscription = ProcessSignal.sigint.watch().listen((_) {
+          if (!_disposed) {
+            _shutdownController?.add(null);
+          }
+        });
+      } catch (e) {
+        // SIGINT may not be available in all Windows environments
+      }
+    } else if (Platform.isLinux || Platform.isMacOS) {
+      // Unix: Use signals
       _sigwinchSubscription = ProcessSignal.sigwinch.watch().listen((_) {
         if (!_disposed && stdout.hasTerminal) {
           final size = Size(
@@ -34,8 +61,6 @@ class StdioBackend implements TerminalBackend {
         }
       });
 
-      // Shutdown signals
-      _shutdownController = StreamController<void>.broadcast();
       _sigintSubscription = ProcessSignal.sigint.watch().listen((_) {
         if (!_disposed) {
           _shutdownController?.add(null);
@@ -107,7 +132,7 @@ class StdioBackend implements TerminalBackend {
   @override
   void notifySizeChanged(Size newSize) {
     // StdioBackend doesn't track size via protocol, so this is a no-op.
-    // Size changes are detected via SIGWINCH signal which emits on resizeStream.
+    // Size changes are detected via SIGWINCH signal (Unix) or polling (Windows).
   }
 
   @override
@@ -118,6 +143,7 @@ class StdioBackend implements TerminalBackend {
   @override
   void dispose() {
     _disposed = true;
+    _windowsResizeTimer?.cancel();
     _sigwinchSubscription?.cancel();
     _sigintSubscription?.cancel();
     _sigtermSubscription?.cancel();
