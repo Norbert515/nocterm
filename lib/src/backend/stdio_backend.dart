@@ -4,10 +4,12 @@ import 'dart:io';
 import 'package:nocterm/src/size.dart';
 
 import 'terminal_backend.dart';
+import 'win32_ansi_stdin.dart';
 
 /// Backend for native terminal I/O via stdin/stdout.
 /// Handles Unix signals (SIGWINCH, SIGINT, SIGTERM) for resize and shutdown.
-/// On Windows, uses polling for resize detection and SIGINT for Ctrl+C.
+/// On Windows, uses polling for resize detection, SIGINT for Ctrl+C,
+/// and Win32AnsiStdin for proper keyboard input (arrow keys, etc.).
 class StdioBackend implements TerminalBackend {
   StreamController<Size>? _resizeController;
   StreamController<void>? _shutdownController;
@@ -17,6 +19,7 @@ class StdioBackend implements TerminalBackend {
   Timer? _windowsResizeTimer;
   Size? _lastKnownSize;
   bool _disposed = false;
+  Win32AnsiStdin? _win32Stdin;
 
   StdioBackend() {
     _initializeSignalHandling();
@@ -27,6 +30,9 @@ class StdioBackend implements TerminalBackend {
     _shutdownController = StreamController<void>.broadcast();
 
     if (Platform.isWindows) {
+      // Windows: Use Win32AnsiStdin for proper keyboard input
+      _win32Stdin = Win32AnsiStdin();
+
       // Windows: Use polling for resize detection since SIGWINCH is not available
       _lastKnownSize = getSize();
       _windowsResizeTimer = Timer.periodic(const Duration(milliseconds: 250), (_) {
@@ -94,7 +100,13 @@ class StdioBackend implements TerminalBackend {
   bool get supportsSize => stdout.hasTerminal;
 
   @override
-  Stream<List<int>>? get inputStream => stdin;
+  Stream<List<int>>? get inputStream {
+    // On Windows, use Win32AnsiStdin for proper keyboard input
+    if (Platform.isWindows && _win32Stdin != null) {
+      return _win32Stdin;
+    }
+    return stdin;
+  }
 
   @override
   Stream<Size>? get resizeStream => _resizeController?.stream;
@@ -149,5 +161,6 @@ class StdioBackend implements TerminalBackend {
     _sigtermSubscription?.cancel();
     _resizeController?.close();
     _shutdownController?.close();
+    _win32Stdin?.close();
   }
 }
