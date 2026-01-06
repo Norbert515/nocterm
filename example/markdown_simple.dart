@@ -15,10 +15,7 @@ class SimpleMarkdownExample extends StatelessComponent {
           children: [
             const Text(
               'Simple Markdown Example',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.cyan,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyan),
             ),
             const SizedBox(height: 2),
             const MarkdownText('''# Hello Markdown!

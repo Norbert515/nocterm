@@ -294,8 +294,10 @@ class AlignmentDirectional extends AlignmentGeometry {
   static const AlignmentDirectional topEnd = AlignmentDirectional(1.0, -1.0);
 
   /// The center point along the "start" edge.
-  static const AlignmentDirectional centerStart =
-      AlignmentDirectional(-1.0, 0.0);
+  static const AlignmentDirectional centerStart = AlignmentDirectional(
+    -1.0,
+    0.0,
+  );
 
   /// The center point, both horizontally and vertically.
   static const AlignmentDirectional center = AlignmentDirectional(0.0, 0.0);
@@ -304,20 +306,26 @@ class AlignmentDirectional extends AlignmentGeometry {
   static const AlignmentDirectional centerEnd = AlignmentDirectional(1.0, 0.0);
 
   /// The bottom corner on the "start" side.
-  static const AlignmentDirectional bottomStart =
-      AlignmentDirectional(-1.0, 1.0);
+  static const AlignmentDirectional bottomStart = AlignmentDirectional(
+    -1.0,
+    1.0,
+  );
 
   /// The center point along the bottom edge.
-  static const AlignmentDirectional bottomCenter =
-      AlignmentDirectional(0.0, 1.0);
+  static const AlignmentDirectional bottomCenter = AlignmentDirectional(
+    0.0,
+    1.0,
+  );
 
   /// The bottom corner on the "end" side.
   static const AlignmentDirectional bottomEnd = AlignmentDirectional(1.0, 1.0);
 
   @override
   Alignment resolve(TextDirection? direction) {
-    assert(direction != null,
-        'Cannot resolve $runtimeType without a TextDirection.');
+    assert(
+      direction != null,
+      'Cannot resolve $runtimeType without a TextDirection.',
+    );
     switch (direction!) {
       case TextDirection.rtl:
         return Alignment(-start, y);
@@ -410,40 +418,37 @@ class Positioned extends ParentDataComponent<StackParentData> {
     this.width,
     this.height,
     required super.child,
-  })  : assert(left == null || right == null || width == null),
-        assert(top == null || bottom == null || height == null),
-        super(
-          data: StackParentData()
-            ..left = left
-            ..top = top
-            ..right = right
-            ..bottom = bottom
-            ..width = width
-            ..height = height,
-        );
+  }) : assert(left == null || right == null || width == null),
+       assert(top == null || bottom == null || height == null),
+       super(
+         data: StackParentData()
+           ..left = left
+           ..top = top
+           ..right = right
+           ..bottom = bottom
+           ..width = width
+           ..height = height,
+       );
 
   /// Creates a Positioned object with the values from the given [Rect].
   ///
   /// This sets the [left], [top], [width], and [height] properties
   /// from the given [Rect]. The [right] and [bottom] properties are
   /// set to null.
-  Positioned.fromRect({
-    super.key,
-    required Rect rect,
-    required super.child,
-  })  : left = rect.left,
-        top = rect.top,
-        width = rect.width,
-        height = rect.height,
-        right = null,
-        bottom = null,
-        super(
-          data: StackParentData()
-            ..left = rect.left
-            ..top = rect.top
-            ..width = rect.width
-            ..height = rect.height,
-        );
+  Positioned.fromRect({super.key, required Rect rect, required super.child})
+    : left = rect.left,
+      top = rect.top,
+      width = rect.width,
+      height = rect.height,
+      right = null,
+      bottom = null,
+      super(
+        data: StackParentData()
+          ..left = rect.left
+          ..top = rect.top
+          ..width = rect.width
+          ..height = rect.height,
+      );
 
   /// Creates a Positioned object with the values from the given [RelativeRect].
   ///
@@ -453,19 +458,19 @@ class Positioned extends ParentDataComponent<StackParentData> {
     super.key,
     required RelativeRect rect,
     required super.child,
-  })  : left = rect.left,
-        top = rect.top,
-        right = rect.right,
-        bottom = rect.bottom,
-        width = null,
-        height = null,
-        super(
-          data: StackParentData()
-            ..left = rect.left
-            ..top = rect.top
-            ..right = rect.right
-            ..bottom = rect.bottom,
-        );
+  }) : left = rect.left,
+       top = rect.top,
+       right = rect.right,
+       bottom = rect.bottom,
+       width = null,
+       height = null,
+       super(
+         data: StackParentData()
+           ..left = rect.left
+           ..top = rect.top
+           ..right = rect.right
+           ..bottom = rect.bottom,
+       );
 
   /// Creates a Positioned object with [left], [top], [right], and [bottom] set
   /// to 0.0 unless a value for them is passed.
@@ -476,15 +481,15 @@ class Positioned extends ParentDataComponent<StackParentData> {
     this.right = 0.0,
     this.bottom = 0.0,
     required super.child,
-  })  : width = null,
-        height = null,
-        super(
-          data: StackParentData()
-            ..left = left
-            ..top = top
-            ..right = right
-            ..bottom = bottom,
-        );
+  }) : width = null,
+       height = null,
+       super(
+         data: StackParentData()
+           ..left = left
+           ..top = top
+           ..right = right
+           ..bottom = bottom,
+       );
 
   /// Creates a widget that controls where a child of a [Stack] is positioned.
   ///

@@ -20,7 +20,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     'Dashboard',
     'Processes',
     'Performance',
-    'Network'
+    'Network',
   ];
   Timer? _updateTimer;
 
@@ -64,12 +64,27 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     // Generate mock network connections
     _connections = [
       NetworkConnection('TCP', '127.0.0.1:8080', '0.0.0.0:*', 'LISTEN', 'dart'),
-      NetworkConnection('TCP', '192.168.1.100:52341', '142.250.185.46:443',
-          'ESTABLISHED', 'chrome'),
-      NetworkConnection('TCP', '127.0.0.1:5432', '127.0.0.1:54321',
-          'ESTABLISHED', 'postgres'),
       NetworkConnection(
-          'UDP', '0.0.0.0:53', '*:*', 'LISTEN', 'systemd-resolved'),
+        'TCP',
+        '192.168.1.100:52341',
+        '142.250.185.46:443',
+        'ESTABLISHED',
+        'chrome',
+      ),
+      NetworkConnection(
+        'TCP',
+        '127.0.0.1:5432',
+        '127.0.0.1:54321',
+        'ESTABLISHED',
+        'postgres',
+      ),
+      NetworkConnection(
+        'UDP',
+        '0.0.0.0:53',
+        '*:*',
+        'LISTEN',
+        'systemd-resolved',
+      ),
       NetworkConnection('TCP', ':::80', ':::*', 'LISTEN', 'nginx'),
     ];
 
@@ -91,7 +106,8 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
       _systemStats.networkIn = random.nextDouble() * 100;
       _systemStats.networkOut = random.nextDouble() * 50;
       _systemStats.uptime = DateTime.now().difference(
-          DateTime.now().subtract(Duration(days: 5, hours: 12, minutes: 34)));
+        DateTime.now().subtract(Duration(days: 5, hours: 12, minutes: 34)),
+      );
 
       // Update CPU/Memory history
       _cpuHistory.removeAt(0);
@@ -101,8 +117,10 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
 
       // Randomly update process CPU usage
       for (var process in _processes) {
-        process.cpu =
-            math.max(0, process.cpu + (random.nextDouble() - 0.5) * 5);
+        process.cpu = math.max(
+          0,
+          process.cpu + (random.nextDouble() - 0.5) * 5,
+        );
       }
     });
   }
@@ -135,9 +153,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
         return false;
       },
       child: Container(
-        decoration: BoxDecoration(
-          color: Color(0xFF0D1117),
-        ),
+        decoration: BoxDecoration(color: Color(0xFF0D1117)),
         child: Column(
           children: [
             _buildHeader(),
@@ -175,15 +191,19 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
             children: [
               Text('⚡', style: TextStyle(color: Color(0xFF60A5FA))),
               SizedBox(width: 1),
-              Text('System Monitor',
-                  style: TextStyle(
-                    color: Color(0xFFF3F4F6),
-                    fontWeight: FontWeight.bold,
-                  )),
+              Text(
+                'System Monitor',
+                style: TextStyle(
+                  color: Color(0xFFF3F4F6),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
-          Text(DateTime.now().toString().substring(11, 19),
-              style: TextStyle(color: Color(0xFF9CA3AF))),
+          Text(
+            DateTime.now().toString().substring(11, 19),
+            style: TextStyle(color: Color(0xFF9CA3AF)),
+          ),
         ],
       ),
     );
@@ -223,16 +243,15 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
       padding: EdgeInsets.symmetric(horizontal: 2, vertical: 1),
       child: Row(
         children: [
-          Text('[$shortcut]',
-              style: TextStyle(
-                color: Color(0xFF6B7280),
-              )),
+          Text('[$shortcut]', style: TextStyle(color: Color(0xFF6B7280))),
           SizedBox(width: 1),
-          Text(title,
-              style: TextStyle(
-                color: isSelected ? Color(0xFFF3F4F6) : Color(0xFF9CA3AF),
-                fontWeight: isSelected ? FontWeight.bold : null,
-              )),
+          Text(
+            title,
+            style: TextStyle(
+              color: isSelected ? Color(0xFFF3F4F6) : Color(0xFF9CA3AF),
+              fontWeight: isSelected ? FontWeight.bold : null,
+            ),
+          ),
         ],
       ),
     );
@@ -259,39 +278,40 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
         Row(
           children: [
             Expanded(
-                child: _buildStatCard(
-                    'CPU',
-                    '${_systemStats.cpuUsage.toStringAsFixed(1)}%',
-                    _systemStats.cpuUsage,
-                    Color(0xFF3B82F6))),
+              child: _buildStatCard(
+                'CPU',
+                '${_systemStats.cpuUsage.toStringAsFixed(1)}%',
+                _systemStats.cpuUsage,
+                Color(0xFF3B82F6),
+              ),
+            ),
             SizedBox(width: 1),
             Expanded(
-                child: _buildStatCard(
-                    'Memory',
-                    '${_systemStats.memoryUsage.toStringAsFixed(1)}%',
-                    _systemStats.memoryUsage,
-                    Color(0xFF8B5CF6))),
+              child: _buildStatCard(
+                'Memory',
+                '${_systemStats.memoryUsage.toStringAsFixed(1)}%',
+                _systemStats.memoryUsage,
+                Color(0xFF8B5CF6),
+              ),
+            ),
             SizedBox(width: 1),
             Expanded(
-                child: _buildStatCard(
-                    'Disk',
-                    '${_systemStats.diskUsage.toStringAsFixed(1)}%',
-                    _systemStats.diskUsage,
-                    Color(0xFF10B981))),
+              child: _buildStatCard(
+                'Disk',
+                '${_systemStats.diskUsage.toStringAsFixed(1)}%',
+                _systemStats.diskUsage,
+                Color(0xFF10B981),
+              ),
+            ),
           ],
         ),
         SizedBox(height: 1),
         Expanded(
           child: Row(
             children: [
-              Expanded(
-                flex: 2,
-                child: _buildQuickInfo(),
-              ),
+              Expanded(flex: 2, child: _buildQuickInfo()),
               SizedBox(width: 1),
-              Expanded(
-                child: _buildTopProcesses(),
-              ),
+              Expanded(child: _buildTopProcesses()),
             ],
           ),
         ),
@@ -300,7 +320,11 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
   }
 
   Component _buildStatCard(
-      String label, String value, double percentage, Color color) {
+    String label,
+    String value,
+    double percentage,
+    Color color,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF1F2937),
@@ -312,11 +336,10 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: TextStyle(color: Color(0xFF9CA3AF))),
-          Text(value,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.bold,
-              )),
+          Text(
+            value,
+            style: TextStyle(color: color, fontWeight: FontWeight.bold),
+          ),
           SizedBox(height: 1),
           _buildMiniProgressBar(percentage, color),
         ],
@@ -327,21 +350,14 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
   Component _buildMiniProgressBar(double percentage, Color color) {
     return Container(
       height: 1,
-      decoration: BoxDecoration(
-        color: Color(0xFF374151),
-      ),
+      decoration: BoxDecoration(color: Color(0xFF374151)),
       child: Row(
         children: [
           Expanded(
             flex: percentage.round(),
-            child: Container(
-              decoration: BoxDecoration(color: color),
-            ),
+            child: Container(decoration: BoxDecoration(color: color)),
           ),
-          Expanded(
-            flex: (100 - percentage).round(),
-            child: Container(),
-          ),
+          Expanded(flex: (100 - percentage).round(), child: Container()),
         ],
       ),
     );
@@ -357,18 +373,24 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('System Information',
-              style: TextStyle(
-                color: Color(0xFFF3F4F6),
-                fontWeight: FontWeight.bold,
-              )),
+          Text(
+            'System Information',
+            style: TextStyle(
+              color: Color(0xFFF3F4F6),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           SizedBox(height: 1),
           _buildInfoRow('Uptime', _formatDuration(_systemStats.uptime)),
           _buildInfoRow('Processes', '${_processes.length} running'),
           _buildInfoRow(
-              'Network ↓', '${_systemStats.networkIn.toStringAsFixed(1)} MB/s'),
-          _buildInfoRow('Network ↑',
-              '${_systemStats.networkOut.toStringAsFixed(1)} MB/s'),
+            'Network ↓',
+            '${_systemStats.networkIn.toStringAsFixed(1)} MB/s',
+          ),
+          _buildInfoRow(
+            'Network ↑',
+            '${_systemStats.networkOut.toStringAsFixed(1)} MB/s',
+          ),
           _buildInfoRow('Load Average', '2.14, 1.89, 1.95'),
           _buildInfoRow('Temperature', '${45 + _systemStats.cpuUsage / 10}°C'),
         ],
@@ -403,11 +425,13 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Top Processes',
-              style: TextStyle(
-                color: Color(0xFFF3F4F6),
-                fontWeight: FontWeight.bold,
-              )),
+          Text(
+            'Top Processes',
+            style: TextStyle(
+              color: Color(0xFFF3F4F6),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           SizedBox(height: 1),
           Expanded(
             child: Column(
@@ -425,9 +449,10 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
                               style: TextStyle(color: Color(0xFF9CA3AF)),
                             ),
                           ),
-                          Text('${process.cpu.toStringAsFixed(1)}%',
-                              style:
-                                  TextStyle(color: _getCpuColor(process.cpu))),
+                          Text(
+                            '${process.cpu.toStringAsFixed(1)}%',
+                            style: TextStyle(color: _getCpuColor(process.cpu)),
+                          ),
                         ],
                       ),
                     ),
@@ -452,9 +477,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
       children: [
         _buildProcessHeader(),
         SizedBox(height: 1),
-        Expanded(
-          child: _buildProcessList(),
-        ),
+        Expanded(child: _buildProcessList()),
       ],
     );
   }
@@ -471,34 +494,64 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
       child: Row(
         children: [
           SizedBox(
-              width: 15,
-              child: Text('Name',
-                  style: TextStyle(
-                      color: Color(0xFF9CA3AF), fontWeight: FontWeight.bold))),
+            width: 15,
+            child: Text(
+              'Name',
+              style: TextStyle(
+                color: Color(0xFF9CA3AF),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
           SizedBox(
-              width: 8,
-              child: Text('PID',
-                  style: TextStyle(
-                      color: Color(0xFF9CA3AF), fontWeight: FontWeight.bold))),
+            width: 8,
+            child: Text(
+              'PID',
+              style: TextStyle(
+                color: Color(0xFF9CA3AF),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
           SizedBox(
-              width: 8,
-              child: Text('CPU %',
-                  style: TextStyle(
-                      color: Color(0xFF9CA3AF), fontWeight: FontWeight.bold))),
+            width: 8,
+            child: Text(
+              'CPU %',
+              style: TextStyle(
+                color: Color(0xFF9CA3AF),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
           SizedBox(
-              width: 10,
-              child: Text('Memory',
-                  style: TextStyle(
-                      color: Color(0xFF9CA3AF), fontWeight: FontWeight.bold))),
+            width: 10,
+            child: Text(
+              'Memory',
+              style: TextStyle(
+                color: Color(0xFF9CA3AF),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
           SizedBox(
-              width: 10,
-              child: Text('Status',
-                  style: TextStyle(
-                      color: Color(0xFF9CA3AF), fontWeight: FontWeight.bold))),
+            width: 10,
+            child: Text(
+              'Status',
+              style: TextStyle(
+                color: Color(0xFF9CA3AF),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
           Expanded(
-              child: Text('User',
-                  style: TextStyle(
-                      color: Color(0xFF9CA3AF), fontWeight: FontWeight.bold))),
+            child: Text(
+              'User',
+              style: TextStyle(
+                color: Color(0xFF9CA3AF),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -512,35 +565,51 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
         final isEven = index % 2 == 0;
 
         return Container(
-          decoration: BoxDecoration(
-            color: isEven ? Color(0xFF1F2937) : null,
-          ),
+          decoration: BoxDecoration(color: isEven ? Color(0xFF1F2937) : null),
           padding: EdgeInsets.symmetric(horizontal: 2, vertical: 0.5),
           child: Row(
             children: [
               SizedBox(
-                  width: 15,
-                  child: Text(process.name,
-                      style: TextStyle(color: Color(0xFFF3F4F6)))),
+                width: 15,
+                child: Text(
+                  process.name,
+                  style: TextStyle(color: Color(0xFFF3F4F6)),
+                ),
+              ),
               SizedBox(
-                  width: 8,
-                  child: Text(process.pid.toString(),
-                      style: TextStyle(color: Color(0xFF9CA3AF)))),
+                width: 8,
+                child: Text(
+                  process.pid.toString(),
+                  style: TextStyle(color: Color(0xFF9CA3AF)),
+                ),
+              ),
               SizedBox(
-                  width: 8,
-                  child: Text(process.cpu.toStringAsFixed(1),
-                      style: TextStyle(color: _getCpuColor(process.cpu)))),
+                width: 8,
+                child: Text(
+                  process.cpu.toStringAsFixed(1),
+                  style: TextStyle(color: _getCpuColor(process.cpu)),
+                ),
+              ),
               SizedBox(
-                  width: 10,
-                  child: Text('${process.memory.toStringAsFixed(1)}M',
-                      style: TextStyle(color: Color(0xFF9CA3AF)))),
+                width: 10,
+                child: Text(
+                  '${process.memory.toStringAsFixed(1)}M',
+                  style: TextStyle(color: Color(0xFF9CA3AF)),
+                ),
+              ),
               SizedBox(
-                  width: 10,
-                  child: Text(process.status,
-                      style: TextStyle(color: Color(0xFF10B981)))),
+                width: 10,
+                child: Text(
+                  process.status,
+                  style: TextStyle(color: Color(0xFF10B981)),
+                ),
+              ),
               Expanded(
-                  child: Text(process.user,
-                      style: TextStyle(color: Color(0xFF9CA3AF)))),
+                child: Text(
+                  process.user,
+                  style: TextStyle(color: Color(0xFF9CA3AF)),
+                ),
+              ),
             ],
           ),
         );
@@ -561,11 +630,13 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('CPU Usage History',
-                    style: TextStyle(
-                      color: Color(0xFFF3F4F6),
-                      fontWeight: FontWeight.bold,
-                    )),
+                Text(
+                  'CPU Usage History',
+                  style: TextStyle(
+                    color: Color(0xFFF3F4F6),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 SizedBox(height: 1),
                 Expanded(child: _buildGraph(_cpuHistory, Color(0xFF3B82F6))),
               ],
@@ -583,11 +654,13 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Memory Usage History',
-                    style: TextStyle(
-                      color: Color(0xFFF3F4F6),
-                      fontWeight: FontWeight.bold,
-                    )),
+                Text(
+                  'Memory Usage History',
+                  style: TextStyle(
+                    color: Color(0xFFF3F4F6),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 SizedBox(height: 1),
                 Expanded(child: _buildGraph(_memoryHistory, Color(0xFF8B5CF6))),
               ],
@@ -621,9 +694,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
       children: [
         _buildNetworkHeader(),
         SizedBox(height: 1),
-        Expanded(
-          child: _buildConnectionList(),
-        ),
+        Expanded(child: _buildConnectionList()),
       ],
     );
   }
@@ -640,29 +711,54 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
       child: Row(
         children: [
           SizedBox(
-              width: 8,
-              child: Text('Proto',
-                  style: TextStyle(
-                      color: Color(0xFF9CA3AF), fontWeight: FontWeight.bold))),
+            width: 8,
+            child: Text(
+              'Proto',
+              style: TextStyle(
+                color: Color(0xFF9CA3AF),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
           SizedBox(
-              width: 25,
-              child: Text('Local Address',
-                  style: TextStyle(
-                      color: Color(0xFF9CA3AF), fontWeight: FontWeight.bold))),
+            width: 25,
+            child: Text(
+              'Local Address',
+              style: TextStyle(
+                color: Color(0xFF9CA3AF),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
           SizedBox(
-              width: 25,
-              child: Text('Remote Address',
-                  style: TextStyle(
-                      color: Color(0xFF9CA3AF), fontWeight: FontWeight.bold))),
+            width: 25,
+            child: Text(
+              'Remote Address',
+              style: TextStyle(
+                color: Color(0xFF9CA3AF),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
           SizedBox(
-              width: 12,
-              child: Text('State',
-                  style: TextStyle(
-                      color: Color(0xFF9CA3AF), fontWeight: FontWeight.bold))),
+            width: 12,
+            child: Text(
+              'State',
+              style: TextStyle(
+                color: Color(0xFF9CA3AF),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
           Expanded(
-              child: Text('Process',
-                  style: TextStyle(
-                      color: Color(0xFF9CA3AF), fontWeight: FontWeight.bold))),
+            child: Text(
+              'Process',
+              style: TextStyle(
+                color: Color(0xFF9CA3AF),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -676,31 +772,44 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
         final isEven = index % 2 == 0;
 
         return Container(
-          decoration: BoxDecoration(
-            color: isEven ? Color(0xFF1F2937) : null,
-          ),
+          decoration: BoxDecoration(color: isEven ? Color(0xFF1F2937) : null),
           padding: EdgeInsets.symmetric(horizontal: 2, vertical: 0.5),
           child: Row(
             children: [
               SizedBox(
-                  width: 8,
-                  child: Text(conn.protocol,
-                      style: TextStyle(color: Color(0xFFF3F4F6)))),
+                width: 8,
+                child: Text(
+                  conn.protocol,
+                  style: TextStyle(color: Color(0xFFF3F4F6)),
+                ),
+              ),
               SizedBox(
-                  width: 25,
-                  child: Text(conn.localAddress,
-                      style: TextStyle(color: Color(0xFF60A5FA)))),
+                width: 25,
+                child: Text(
+                  conn.localAddress,
+                  style: TextStyle(color: Color(0xFF60A5FA)),
+                ),
+              ),
               SizedBox(
-                  width: 25,
-                  child: Text(conn.remoteAddress,
-                      style: TextStyle(color: Color(0xFF9CA3AF)))),
+                width: 25,
+                child: Text(
+                  conn.remoteAddress,
+                  style: TextStyle(color: Color(0xFF9CA3AF)),
+                ),
+              ),
               SizedBox(
-                  width: 12,
-                  child: Text(conn.state,
-                      style: TextStyle(color: _getStateColor(conn.state)))),
+                width: 12,
+                child: Text(
+                  conn.state,
+                  style: TextStyle(color: _getStateColor(conn.state)),
+                ),
+              ),
               Expanded(
-                  child: Text(conn.process,
-                      style: TextStyle(color: Color(0xFF9CA3AF)))),
+                child: Text(
+                  conn.process,
+                  style: TextStyle(color: Color(0xFF9CA3AF)),
+                ),
+              ),
             ],
           ),
         );
@@ -725,9 +834,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF1F2937),
-        border: BoxBorder(
-          top: BorderSide(color: Color(0xFF374151), width: 1),
-        ),
+        border: BoxBorder(top: BorderSide(color: Color(0xFF374151), width: 1)),
       ),
       padding: EdgeInsets.symmetric(horizontal: 2, vertical: 1),
       child: Row(
@@ -735,11 +842,15 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
         children: [
           Row(
             children: [
-              Text('[TAB] Navigate',
-                  style: TextStyle(color: Color(0xFF6B7280))),
+              Text(
+                '[TAB] Navigate',
+                style: TextStyle(color: Color(0xFF6B7280)),
+              ),
               SizedBox(width: 2),
-              Text('[1-4] Jump to tab',
-                  style: TextStyle(color: Color(0xFF6B7280))),
+              Text(
+                '[1-4] Jump to tab',
+                style: TextStyle(color: Color(0xFF6B7280)),
+              ),
               SizedBox(width: 2),
               Text('[Q] Quit', style: TextStyle(color: Color(0xFF6B7280))),
             ],
@@ -768,7 +879,13 @@ class ProcessInfo {
   final String user;
 
   ProcessInfo(
-      this.name, this.pid, this.cpu, this.memory, this.status, this.user);
+    this.name,
+    this.pid,
+    this.cpu,
+    this.memory,
+    this.status,
+    this.user,
+  );
 }
 
 class SystemStats {
@@ -787,6 +904,11 @@ class NetworkConnection {
   final String state;
   final String process;
 
-  NetworkConnection(this.protocol, this.localAddress, this.remoteAddress,
-      this.state, this.process);
+  NetworkConnection(
+    this.protocol,
+    this.localAddress,
+    this.remoteAddress,
+    this.state,
+    this.process,
+  );
 }

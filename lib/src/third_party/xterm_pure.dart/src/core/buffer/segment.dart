@@ -17,7 +17,7 @@ class BufferSegment {
   final int? end;
 
   const BufferSegment(this.range, this.line, this.start, this.end)
-      : assert((start != null && end != null) ? start <= end : true);
+    : assert((start != null && end != null) ? start <= end : true);
 
   bool isWithin(CellOffset position) {
     if (position.y != line) {

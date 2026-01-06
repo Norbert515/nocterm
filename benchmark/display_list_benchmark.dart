@@ -138,7 +138,8 @@ void _runBufferDiffBenchmarks() {
     sw.stop();
     final avgMs = sw.elapsedMicroseconds / iterations / 1000;
     print(
-        '  $changePercent% changed ($changedCount cells): ${avgMs.toStringAsFixed(3)}ms');
+      '  $changePercent% changed ($changedCount cells): ${avgMs.toStringAsFixed(3)}ms',
+    );
   }
 }
 
@@ -146,8 +147,12 @@ void _runDirectPaintingBenchmark() {
   print('Test: Direct Painting to Buffer');
   print('-------------------------------');
 
-  final screenRect =
-      Rect.fromLTWH(0, 0, terminalWidth.toDouble(), terminalHeight.toDouble());
+  final screenRect = Rect.fromLTWH(
+    0,
+    0,
+    terminalWidth.toDouble(),
+    terminalHeight.toDouble(),
+  );
 
   for (final opCount in [10, 100, 1000]) {
     final buffer = Buffer(terminalWidth, terminalHeight);
@@ -199,8 +204,12 @@ void _runFullRenderPipelineBenchmark() {
   print('Test: Full Render Pipeline (Paint + Diff)');
   print('-----------------------------------------');
 
-  final screenRect =
-      Rect.fromLTWH(0, 0, terminalWidth.toDouble(), terminalHeight.toDouble());
+  final screenRect = Rect.fromLTWH(
+    0,
+    0,
+    terminalWidth.toDouble(),
+    terminalHeight.toDouble(),
+  );
 
   final style = TextStyle(
     color: Color.fromRGB(255, 255, 255),
@@ -217,8 +226,11 @@ void _runFullRenderPipelineBenchmark() {
     for (int i = 0; i < opCount; i++) {
       final x = (i * 7) % terminalWidth;
       final y = (i * 3) % terminalHeight;
-      canvas.drawText(Offset(x.toDouble(), y.toDouble()), 'Item$i',
-          style: style);
+      canvas.drawText(
+        Offset(x.toDouble(), y.toDouble()),
+        'Item$i',
+        style: style,
+      );
     }
   }
 

@@ -19,9 +19,7 @@ class StackDemo extends StatelessComponent {
               decoration: BoxDecoration(
                 border: BoxBorder.all(style: BoxBorderStyle.double),
               ),
-              child: const Center(
-                child: Text('Background Layer'),
-              ),
+              child: const Center(child: Text('Background Layer')),
             ),
           ),
 
@@ -63,9 +61,7 @@ class StackDemo extends StatelessComponent {
               decoration: BoxDecoration(
                 border: BoxBorder.all(style: BoxBorderStyle.double),
               ),
-              child: const Center(
-                child: Text('Centered'),
-              ),
+              child: const Center(child: Text('Centered')),
             ),
           ),
         ],

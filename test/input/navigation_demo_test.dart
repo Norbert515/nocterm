@@ -2,12 +2,11 @@ import 'package:test/test.dart';
 import 'package:nocterm/nocterm.dart';
 
 void main() {
-  test('navigation demo dialog receives focus correctly',
-      skip: 'Known issue: Dialog focus management not working correctly',
-      () async {
-    await testNocterm(
-      'navigation demo test',
-      (tester) async {
+  test(
+    'navigation demo dialog receives focus correctly',
+    skip: 'Known issue: Dialog focus management not working correctly',
+    () async {
+      await testNocterm('navigation demo test', (tester) async {
         print('\n=== Testing Navigation Demo Focus ===\n');
 
         // Track which component received events
@@ -30,9 +29,7 @@ void main() {
                       navState.showDialog<void>(
                         builder: (context) => Container(
                           padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            border: BoxBorder.all(),
-                          ),
+                          decoration: BoxDecoration(border: BoxBorder.all()),
                           child: KeyboardListener(
                             onKeyEvent: (key) {
                               eventLog.add('Dialog: $key');
@@ -65,9 +62,7 @@ void main() {
               ],
             ),
           ),
-          popBehavior: const PopBehavior(
-            escapeEnabled: true,
-          ),
+          popBehavior: const PopBehavior(escapeEnabled: true),
         );
 
         await tester.pumpComponent(navigator);
@@ -117,8 +112,7 @@ void main() {
         await tester.pump();
 
         expect(eventLog, contains('Main: ${LogicalKey.keyA}'));
-      },
-      debugPrintAfterPump: false,
-    );
-  });
+      }, debugPrintAfterPump: false);
+    },
+  );
 }

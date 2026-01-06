@@ -101,7 +101,8 @@ abstract final class NoctermTimeline {
   static PerformanceMetrics collectMetrics() {
     if (!_metricsEnabled) {
       throw StateError(
-          'Metrics collection not enabled. Set metricsEnabled = true first.');
+        'Metrics collection not enabled. Set metricsEnabled = true first.',
+      );
     }
     final metrics = PerformanceMetrics._(_buffer.computeTimings());
     resetMetrics();
@@ -116,11 +117,8 @@ abstract final class NoctermTimeline {
 
 /// A single timed block of code.
 class TimedBlock {
-  const TimedBlock({
-    required this.name,
-    required this.start,
-    required this.end,
-  }) : assert(end >= start);
+  const TimedBlock({required this.name, required this.start, required this.end})
+    : assert(end >= start);
 
   final String name;
   final int start; // microseconds
@@ -147,14 +145,12 @@ class PerformanceMetrics {
       final previous = aggregate[block.name] ?? (0, 0);
       aggregate[block.name] = (previous.$1 + block.duration, previous.$2 + 1);
     }
-    return aggregate.map((name, value) => MapEntry(
-          name,
-          AggregatedBlock(
-            name: name,
-            totalDuration: value.$1,
-            count: value.$2,
-          ),
-        ));
+    return aggregate.map(
+      (name, value) => MapEntry(
+        name,
+        AggregatedBlock(name: name, totalDuration: value.$1, count: value.$2),
+      ),
+    );
   }
 
   /// Get aggregated metrics for a named block.
@@ -171,7 +167,8 @@ class PerformanceMetrics {
     for (final entry in aggregated.entries) {
       final avg = entry.value.averageDuration.toStringAsFixed(1);
       buffer.writeln(
-          '  ${entry.key}: ${entry.value.totalDuration}µs (${entry.value.count}x, avg: $avgµs)');
+        '  ${entry.key}: ${entry.value.totalDuration}µs (${entry.value.count}x, avg: $avgµs)',
+      );
     }
     return buffer.toString();
   }
@@ -236,11 +233,7 @@ class _BlockBuffer {
 
     final result = <TimedBlock>[];
     for (int i = 0; i < _starts.length; i++) {
-      result.add(TimedBlock(
-        name: _names[i],
-        start: _starts[i],
-        end: _ends[i],
-      ));
+      result.add(TimedBlock(name: _names[i], start: _starts[i], end: _ends[i]));
     }
     return result;
   }

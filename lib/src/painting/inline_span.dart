@@ -10,9 +10,7 @@ typedef InlineSpanVisitor = bool Function(InlineSpan span);
 /// complex text metrics.
 abstract class InlineSpan {
   /// Creates an [InlineSpan] with the given style.
-  const InlineSpan({
-    this.style,
-  });
+  const InlineSpan({this.style});
 
   /// The [TextStyle] to apply to this span.
   ///
@@ -22,8 +20,10 @@ abstract class InlineSpan {
   /// Returns the plain text representation of this span.
   String toPlainText({bool includePlaceholderOffsets = true}) {
     final StringBuffer buffer = StringBuffer();
-    computeToPlainText(buffer,
-        includePlaceholderOffsets: includePlaceholderOffsets);
+    computeToPlainText(
+      buffer,
+      includePlaceholderOffsets: includePlaceholderOffsets,
+    );
     return buffer.toString();
   }
 

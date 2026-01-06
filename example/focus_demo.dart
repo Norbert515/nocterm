@@ -12,11 +12,7 @@ class FocusDemo extends StatefulComponent {
   State<FocusDemo> createState() => _FocusDemoState();
 }
 
-enum FocusArea {
-  sidebar,
-  main,
-  footer,
-}
+enum FocusArea { sidebar, main, footer }
 
 class _FocusDemoState extends State<FocusDemo> {
   FocusArea focusedArea = FocusArea.sidebar;
@@ -28,7 +24,7 @@ class _FocusDemoState extends State<FocusDemo> {
     'Settings',
     'Profile',
     'Help',
-    'About'
+    'About',
   ];
   final List<String> mainTabs = ['Overview', 'Details', 'Analytics'];
 
@@ -48,9 +44,7 @@ class _FocusDemoState extends State<FocusDemo> {
         // Header
         Container(
           height: 3,
-          decoration: BoxDecoration(
-            border: BoxBorder.all(color: Colors.cyan),
-          ),
+          decoration: BoxDecoration(border: BoxBorder.all(color: Colors.cyan)),
           child: Center(
             child: Text(
               'Focus Demo - Use Arrow Keys to Navigate, Tab to Switch Areas $lastKeyPressed',
@@ -84,9 +78,11 @@ class _FocusDemoState extends State<FocusDemo> {
                     return true;
                   } else if (event.logicalKey == LogicalKey.arrowRight ||
                       event.logicalKey == LogicalKey.tab) {
-                    _updateLastKey(event.logicalKey == LogicalKey.tab
-                        ? 'Tab'
-                        : 'Arrow Right');
+                    _updateLastKey(
+                      event.logicalKey == LogicalKey.tab
+                          ? 'Tab'
+                          : 'Arrow Right',
+                    );
                     setState(() {
                       focusedArea = FocusArea.main;
                     });
@@ -124,12 +120,14 @@ class _FocusDemoState extends State<FocusDemo> {
                           children: [
                             for (int i = 0; i < sidebarItems.length; i++)
                               Container(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 1),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 1,
+                                ),
                                 child: Text(
                                   ' ${i == sidebarIndex && focusedArea == FocusArea.sidebar ? '>' : ' '} ${sidebarItems[i]}',
                                   style: TextStyle(
-                                    color: i == sidebarIndex &&
+                                    color:
+                                        i == sidebarIndex &&
                                             focusedArea == FocusArea.sidebar
                                         ? Colors.white
                                         : Colors.gray,
@@ -207,27 +205,33 @@ class _FocusDemoState extends State<FocusDemo> {
                             children: [
                               for (int i = 0; i < mainTabs.length; i++) ...[
                                 Container(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 2),
-                                  decoration: i == mainTabIndex &&
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 2,
+                                  ),
+                                  decoration:
+                                      i == mainTabIndex &&
                                           focusedArea == FocusArea.main
                                       ? BoxDecoration(
                                           color: Colors.blue,
-                                          border:
-                                              BoxBorder.all(color: Colors.cyan),
+                                          border: BoxBorder.all(
+                                            color: Colors.cyan,
+                                          ),
                                         )
                                       : BoxDecoration(
-                                          border:
-                                              BoxBorder.all(color: Colors.gray),
+                                          border: BoxBorder.all(
+                                            color: Colors.gray,
+                                          ),
                                         ),
                                   child: Text(
                                     mainTabs[i],
                                     style: TextStyle(
-                                      color: i == mainTabIndex &&
+                                      color:
+                                          i == mainTabIndex &&
                                               focusedArea == FocusArea.main
                                           ? Colors.white
                                           : Colors.gray,
-                                      fontWeight: i == mainTabIndex &&
+                                      fontWeight:
+                                          i == mainTabIndex &&
                                               focusedArea == FocusArea.main
                                           ? FontWeight.bold
                                           : FontWeight.normal,
@@ -260,14 +264,18 @@ class _FocusDemoState extends State<FocusDemo> {
                                 const SizedBox(height: 2),
                                 Text('Selected Tab: ${mainTabs[mainTabIndex]}'),
                                 Text(
-                                    'Selected Sidebar: ${sidebarItems[sidebarIndex]}'),
+                                  'Selected Sidebar: ${sidebarItems[sidebarIndex]}',
+                                ),
                                 const SizedBox(height: 2),
-                                Text('Last Key Pressed: $lastKeyPressed',
-                                    style: TextStyle(color: Colors.yellow)),
+                                Text(
+                                  'Last Key Pressed: $lastKeyPressed',
+                                  style: TextStyle(color: Colors.yellow),
+                                ),
                                 const SizedBox(height: 2),
-                                Text('Controls:',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold)),
+                                Text(
+                                  'Controls:',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
                                 Text('• Arrow Keys: Navigate within area'),
                                 Text('• Tab: Move to next area'),
                                 Text('• Shift+Tab: Move to previous area'),

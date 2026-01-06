@@ -10,8 +10,8 @@ class OverlayEntry {
     required this.builder,
     bool opaque = false,
     bool maintainState = false,
-  })  : _opaque = opaque,
-        _maintainState = maintainState;
+  }) : _opaque = opaque,
+       _maintainState = maintainState;
 
   /// The builder for the widget to display in the overlay.
   final ComponentBuilder builder;
@@ -57,10 +57,7 @@ class OverlayEntry {
 /// A stack of entries that can be managed independently.
 class Overlay extends StatefulComponent {
   /// Creates an overlay.
-  const Overlay({
-    super.key,
-    this.initialEntries = const <OverlayEntry>[],
-  });
+  const Overlay({super.key, this.initialEntries = const <OverlayEntry>[]});
 
   /// The entries to include in the overlay initially.
   final List<OverlayEntry> initialEntries;
@@ -108,8 +105,11 @@ class OverlayState extends State<Overlay> {
   }
 
   /// Insert all the entries in the given iterable.
-  void insertAll(Iterable<OverlayEntry> entries,
-      {OverlayEntry? below, OverlayEntry? above}) {
+  void insertAll(
+    Iterable<OverlayEntry> entries, {
+    OverlayEntry? below,
+    OverlayEntry? above,
+  }) {
     assert(above == null || below == null);
     if (entries.isEmpty) {
       return;

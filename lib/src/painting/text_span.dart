@@ -16,11 +16,7 @@ class TextSpan extends InlineSpan {
   ///
   /// For the object to be useful, at least one of [text] or
   /// [children] should be set.
-  const TextSpan({
-    this.text,
-    this.children,
-    super.style,
-  });
+  const TextSpan({this.text, this.children, super.style});
 
   /// The text contained in this span.
   ///

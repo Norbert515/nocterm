@@ -73,10 +73,7 @@ void main() {
     });
 
     test('TextField calls onFocusChange when tapped', () {
-      final field = TextField(
-        focused: false,
-        onFocusChange: (focused) {},
-      );
+      final field = TextField(focused: false, onFocusChange: (focused) {});
 
       // Verify onFocusChange callback is provided
       expect(field.onFocusChange, isNotNull);
@@ -109,10 +106,7 @@ void main() {
 
     test('TextField no longer uses FocusNode', () {
       // Verify that TextField constructor doesn't accept FocusNode
-      final field = TextField(
-        focused: true,
-        onFocusChange: (_) {},
-      );
+      final field = TextField(focused: true, onFocusChange: (_) {});
 
       // The field should not have any focus node related properties
       // This test confirms our refactoring removed FocusNode dependency

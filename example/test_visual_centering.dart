@@ -16,8 +16,10 @@ class VisualCenteringDemo extends StatelessComponent {
           // Show centering with different emoji positions
           DecoratedBox(
             decoration: BoxDecoration(
-              border:
-                  BoxBorder.all(color: Color.fromRGB(255, 255, 255), width: 1),
+              border: BoxBorder.all(
+                color: Color.fromRGB(255, 255, 255),
+                width: 1,
+              ),
             ),
             child: SizedBox(
               width: 45,
@@ -39,8 +41,10 @@ class VisualCenteringDemo extends StatelessComponent {
           // Compare actual vs expected
           DecoratedBox(
             decoration: BoxDecoration(
-              border:
-                  BoxBorder.all(color: Color.fromRGB(255, 255, 255), width: 1),
+              border: BoxBorder.all(
+                color: Color.fromRGB(255, 255, 255),
+                width: 1,
+              ),
             ),
             child: SizedBox(
               width: 45,

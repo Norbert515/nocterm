@@ -32,9 +32,7 @@ class _InfiniteHoverableListDemoState extends State<InfiniteHoverableListDemo> {
   @override
   Component build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        border: BoxBorder.all(),
-      ),
+      decoration: BoxDecoration(border: BoxBorder.all()),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -152,8 +150,8 @@ class _InfiniteHoverableListDemoState extends State<InfiniteHoverableListDemo> {
                     color.blue,
                   )
                 : isHovered
-                    ? const Color(0xFF333333)
-                    : null,
+                ? const Color(0xFF333333)
+                : null,
             border: const BoxBorder(bottom: BorderSide()),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
@@ -177,9 +175,7 @@ class _InfiniteHoverableListDemoState extends State<InfiniteHoverableListDemo> {
               // Icon
               Text(
                 icon,
-                style: TextStyle(
-                  color: isSelected || isHovered ? color : null,
-                ),
+                style: TextStyle(color: isSelected || isHovered ? color : null),
               ),
               const SizedBox(width: 2),
               // Label
@@ -190,8 +186,9 @@ class _InfiniteHoverableListDemoState extends State<InfiniteHoverableListDemo> {
                     color: isSelected || isHovered
                         ? const Color(0xFFFFFFFF)
                         : null,
-                    fontWeight:
-                        isSelected || isHovered ? FontWeight.bold : null,
+                    fontWeight: isSelected || isHovered
+                        ? FontWeight.bold
+                        : null,
                   ),
                 ),
               ),
@@ -207,10 +204,7 @@ class _InfiniteHoverableListDemoState extends State<InfiniteHoverableListDemo> {
               else if (isHovered)
                 Text(
                   '→',
-                  style: TextStyle(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(color: color, fontWeight: FontWeight.bold),
                 ),
             ],
           ),
@@ -228,7 +222,7 @@ class _InfiniteHoverableListDemoState extends State<InfiniteHoverableListDemo> {
       'audio',
       'code',
       'document',
-      'archive'
+      'archive',
     ];
     return types[index % types.length];
   }

@@ -104,30 +104,30 @@ class Color {
   ///
   /// The alpha channel defaults to 255 (fully opaque).
   const Color(int value)
-      : alpha = 255,
-        red = (value >> 16) & 0xFF,
-        green = (value >> 8) & 0xFF,
-        blue = value & 0xFF,
-        isDefault = false;
+    : alpha = 255,
+      red = (value >> 16) & 0xFF,
+      green = (value >> 8) & 0xFF,
+      blue = value & 0xFF,
+      isDefault = false;
 
   /// Creates the default terminal color
   const Color._default()
-      : alpha = 255,
-        red = 0,
-        green = 0,
-        blue = 0,
-        isDefault = true;
+    : alpha = 255,
+      red = 0,
+      green = 0,
+      blue = 0,
+      isDefault = true;
 
   /// Creates a color from red, green, and blue components.
   ///
   /// The values must be between 0 and 255 inclusive.
   /// The alpha channel defaults to 255 (fully opaque).
   const Color.fromRGB(this.red, this.green, this.blue)
-      : alpha = 255,
-        assert(red >= 0 && red <= 255),
-        assert(green >= 0 && green <= 255),
-        assert(blue >= 0 && blue <= 255),
-        isDefault = false;
+    : alpha = 255,
+      assert(red >= 0 && red <= 255),
+      assert(green >= 0 && green <= 255),
+      assert(blue >= 0 && blue <= 255),
+      isDefault = false;
 
   /// Creates a color from alpha, red, green, and blue components.
   ///
@@ -137,11 +137,11 @@ class Color {
   /// - [green]: Green component
   /// - [blue]: Blue component
   const Color.fromARGB(this.alpha, this.red, this.green, this.blue)
-      : assert(alpha >= 0 && alpha <= 255),
-        assert(red >= 0 && red <= 255),
-        assert(green >= 0 && green <= 255),
-        assert(blue >= 0 && blue <= 255),
-        isDefault = false;
+    : assert(alpha >= 0 && alpha <= 255),
+      assert(red >= 0 && red <= 255),
+      assert(green >= 0 && green <= 255),
+      assert(blue >= 0 && blue <= 255),
+      isDefault = false;
 
   /// Converts this color to an ANSI escape code.
   ///
@@ -281,8 +281,8 @@ class Color {
   String toString() => isDefault
       ? 'Color.defaultColor'
       : alpha == 255
-          ? 'Color(r: $red, g: $green, b: $blue)'
-          : 'Color(a: $alpha, r: $red, g: $green, b: $blue)';
+      ? 'Color(r: $red, g: $green, b: $blue)'
+      : 'Color(a: $alpha, r: $red, g: $green, b: $blue)';
 }
 
 /// A color represented using [alpha], [hue], [saturation], and [value].
@@ -290,10 +290,10 @@ class Color {
 /// Useful for color computations like rotating through the color spectrum.
 class HSVColor {
   const HSVColor.fromAHSV(this.alpha, this.hue, this.saturation, this.value)
-      : assert(alpha >= 0.0 && alpha <= 1.0),
-        assert(hue >= 0.0 && hue <= 360.0),
-        assert(saturation >= 0.0 && saturation <= 1.0),
-        assert(value >= 0.0 && value <= 1.0);
+    : assert(alpha >= 0.0 && alpha <= 1.0),
+      assert(hue >= 0.0 && hue <= 360.0),
+      assert(saturation >= 0.0 && saturation <= 1.0),
+      assert(value >= 0.0 && value <= 1.0);
 
   final double alpha;
   final double hue;
@@ -546,16 +546,17 @@ class TextStyle {
 
   @override
   int get hashCode => Object.hash(
-        color,
-        backgroundColor,
-        fontWeight,
-        fontStyle,
-        decoration,
-        reverse,
-      );
+    color,
+    backgroundColor,
+    fontWeight,
+    fontStyle,
+    decoration,
+    reverse,
+  );
 
   @override
-  String toString() => 'TextStyle('
+  String toString() =>
+      'TextStyle('
       '${color != null ? 'color: $color, ' : ''}'
       '${backgroundColor != null ? 'backgroundColor: $backgroundColor, ' : ''}'
       '${fontWeight != null ? 'fontWeight: $fontWeight, ' : ''}'

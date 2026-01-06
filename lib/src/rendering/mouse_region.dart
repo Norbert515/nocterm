@@ -15,10 +15,10 @@ class RenderMouseRegion extends RenderObject
     MouseEventCallback? onExit,
     MouseEventCallback? onHover,
     bool opaque = true,
-  })  : _onEnter = onEnter,
-        _onExit = onExit,
-        _onHover = onHover,
-        _opaque = opaque {
+  }) : _onEnter = onEnter,
+       _onExit = onExit,
+       _onHover = onHover,
+       _opaque = opaque {
     _updateAnnotation();
   }
 

@@ -14,9 +14,7 @@ class MouseScrollTest extends StatelessComponent {
         Container(
           height: 3,
           width: double.infinity,
-          decoration: BoxDecoration(
-            border: BoxBorder.all(color: Colors.cyan),
-          ),
+          decoration: BoxDecoration(border: BoxBorder.all(color: Colors.cyan)),
           child: Center(
             child: Text(
               'Mouse Scroll Test - Use mouse wheel or trackpad to scroll',

@@ -35,14 +35,17 @@ class _ResizeTestAppState extends State<ResizeTestApp> {
   void _updateSize() {
     if (stdout.hasTerminal) {
       final newSize = Size(
-          stdout.terminalColumns.toDouble(), stdout.terminalLines.toDouble());
+        stdout.terminalColumns.toDouble(),
+        stdout.terminalLines.toDouble(),
+      );
       if (_currentSize == null ||
           _currentSize!.width != newSize.width ||
           _currentSize!.height != newSize.height) {
         setState(() {
           _currentSize = newSize;
           _sizeHistory.add(
-              '[${DateTime.now().toString().substring(11, 19)}] ${newSize.width}x${newSize.height}');
+            '[${DateTime.now().toString().substring(11, 19)}] ${newSize.width}x${newSize.height}',
+          );
           if (_sizeHistory.length > 10) {
             _sizeHistory.removeAt(0);
           }
@@ -56,20 +59,18 @@ class _ResizeTestAppState extends State<ResizeTestApp> {
     final size = _currentSize ?? Size(80.0, 24.0);
 
     return Container(
-      decoration: BoxDecoration(
-        border: BoxBorder.all(color: Colors.blue),
-      ),
+      decoration: BoxDecoration(border: BoxBorder.all(color: Colors.blue)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            decoration: BoxDecoration(
-              color: Colors.blue,
-            ),
+            decoration: BoxDecoration(color: Colors.blue),
             child: Text(
               ' Terminal Resize Test ',
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           SizedBox(height: 1),

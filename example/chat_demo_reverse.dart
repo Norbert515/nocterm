@@ -64,9 +64,7 @@ class _ChatDemoReverseState extends State<ChatDemoReverse> {
         return false;
       },
       child: Container(
-        decoration: BoxDecoration(
-          border: BoxBorder.all(color: Colors.blue),
-        ),
+        decoration: BoxDecoration(border: BoxBorder.all(color: Colors.blue)),
         padding: EdgeInsets.all(1),
         child: Column(
           children: [
@@ -74,9 +72,7 @@ class _ChatDemoReverseState extends State<ChatDemoReverse> {
             Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(vertical: 1),
-              decoration: BoxDecoration(
-                color: Colors.blue,
-              ),
+              decoration: BoxDecoration(color: Colors.blue),
               child: Center(
                 child: Text(
                   'Chat Demo with Reverse ListView',
@@ -120,9 +116,7 @@ class _ChatDemoReverseState extends State<ChatDemoReverse> {
                           ),
                           child: Text(
                             message,
-                            style: TextStyle(
-                              color: Colors.brightWhite,
-                            ),
+                            style: TextStyle(color: Colors.brightWhite),
                           ),
                         ),
                       );
@@ -137,10 +131,7 @@ class _ChatDemoReverseState extends State<ChatDemoReverse> {
               padding: EdgeInsets.symmetric(vertical: 1),
               child: Row(
                 children: [
-                  Text(
-                    'Auto-scroll: ',
-                    style: TextStyle(color: Colors.gray),
-                  ),
+                  Text('Auto-scroll: ', style: TextStyle(color: Colors.gray)),
                   Text(
                     scrollController.isAutoScrollEnabled ? 'ON' : 'OFF',
                     style: TextStyle(
@@ -178,9 +169,7 @@ class _ChatDemoReverseState extends State<ChatDemoReverse> {
                   ),
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 1),
-                    decoration: BoxDecoration(
-                      color: Colors.cyan,
-                    ),
+                    decoration: BoxDecoration(color: Colors.cyan),
                     child: Text(
                       'ENTER',
                       style: TextStyle(

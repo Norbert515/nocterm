@@ -44,6 +44,7 @@ class LoggingNavigatorObserver extends NavigatorObserver {
   @override
   void didReplace({Route? newRoute, Route? oldRoute}) {
     print(
-        'Navigator: Replaced ${oldRoute?.settings.name ?? 'unnamed route'} with ${newRoute?.settings.name ?? 'unnamed route'}');
+      'Navigator: Replaced ${oldRoute?.settings.name ?? 'unnamed route'} with ${newRoute?.settings.name ?? 'unnamed route'}',
+    );
   }
 }

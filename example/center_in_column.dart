@@ -9,13 +9,11 @@ class CenterInColumn extends StatelessComponent {
 
   @override
   Component build(BuildContext context) {
-    return Column(children: [
-      Center(
-        child: Text('Hello, World!'),
-      ),
-      Center(
-        child: Text('Hello, World!'),
-      ),
-    ]);
+    return Column(
+      children: [
+        Center(child: Text('Hello, World!')),
+        Center(child: Text('Hello, World!')),
+      ],
+    );
   }
 }

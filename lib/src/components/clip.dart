@@ -9,11 +9,7 @@ class ClipRect extends SingleChildRenderObjectComponent {
   /// Creates a rectangular clip.
   ///
   /// If [clipBehavior] is [Clip.none], no clipping will be applied.
-  const ClipRect({
-    super.key,
-    this.clipBehavior = Clip.hardEdge,
-    super.child,
-  });
+  const ClipRect({super.key, this.clipBehavior = Clip.hardEdge, super.child});
 
   /// Controls how to clip.
   ///
@@ -35,9 +31,8 @@ class ClipRect extends SingleChildRenderObjectComponent {
 class RenderClipRect extends RenderObject
     with RenderObjectWithChildMixin<RenderObject> {
   /// Creates a rectangular clip.
-  RenderClipRect({
-    Clip clipBehavior = Clip.hardEdge,
-  }) : _clipBehavior = clipBehavior;
+  RenderClipRect({Clip clipBehavior = Clip.hardEdge})
+    : _clipBehavior = clipBehavior;
 
   Clip _clipBehavior;
 
@@ -150,7 +145,9 @@ class OverflowBox extends SingleChildRenderObjectComponent {
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderOverflowBox renderObject) {
+    BuildContext context,
+    RenderOverflowBox renderObject,
+  ) {
     renderObject
       ..alignment = alignment
       ..minWidth = minWidth
@@ -171,11 +168,11 @@ class RenderOverflowBox extends RenderObject
     double? maxWidth,
     double? minHeight,
     double? maxHeight,
-  })  : _alignment = alignment,
-        _minWidth = minWidth,
-        _maxWidth = maxWidth,
-        _minHeight = minHeight,
-        _maxHeight = maxHeight;
+  }) : _alignment = alignment,
+       _minWidth = minWidth,
+       _maxWidth = maxWidth,
+       _minHeight = minHeight,
+       _maxHeight = maxHeight;
 
   AlignmentGeometry _alignment;
 
@@ -320,15 +317,14 @@ class SizedOverflowBox extends SingleChildRenderObjectComponent {
 
   @override
   RenderSizedOverflowBox createRenderObject(BuildContext context) {
-    return RenderSizedOverflowBox(
-      alignment: alignment,
-      requestedSize: size,
-    );
+    return RenderSizedOverflowBox(alignment: alignment, requestedSize: size);
   }
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderSizedOverflowBox renderObject) {
+    BuildContext context,
+    RenderSizedOverflowBox renderObject,
+  ) {
     renderObject
       ..alignment = alignment
       ..requestedSize = size;
@@ -343,8 +339,8 @@ class RenderSizedOverflowBox extends RenderObject
   RenderSizedOverflowBox({
     AlignmentGeometry alignment = Alignment.center,
     required Size requestedSize,
-  })  : _alignment = alignment,
-        _requestedSize = requestedSize;
+  }) : _alignment = alignment,
+       _requestedSize = requestedSize;
 
   AlignmentGeometry _alignment;
 

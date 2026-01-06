@@ -29,8 +29,10 @@ class LogicalKey {
   static const LogicalKey ampersand = LogicalKey(0x26, 'ampersand');
   static const LogicalKey quoteSingle = LogicalKey(0x27, 'quoteSingle');
   static const LogicalKey parenthesisLeft = LogicalKey(0x28, 'parenthesisLeft');
-  static const LogicalKey parenthesisRight =
-      LogicalKey(0x29, 'parenthesisRight');
+  static const LogicalKey parenthesisRight = LogicalKey(
+    0x29,
+    'parenthesisRight',
+  );
   static const LogicalKey asterisk = LogicalKey(0x2A, 'asterisk');
   static const LogicalKey add = LogicalKey(0x2B, 'add');
   static const LogicalKey comma = LogicalKey(0x2C, 'comma');
@@ -106,8 +108,10 @@ class LogicalKey {
 
   // Modifier keys (for tracking state)
   static const LogicalKey controlLeft = LogicalKey(0x100000100, 'controlLeft');
-  static const LogicalKey controlRight =
-      LogicalKey(0x100000101, 'controlRight');
+  static const LogicalKey controlRight = LogicalKey(
+    0x100000101,
+    'controlRight',
+  );
   static const LogicalKey shiftLeft = LogicalKey(0x100000102, 'shiftLeft');
   static const LogicalKey shiftRight = LogicalKey(0x100000103, 'shiftRight');
   static const LogicalKey altLeft = LogicalKey(0x100000104, 'altLeft');

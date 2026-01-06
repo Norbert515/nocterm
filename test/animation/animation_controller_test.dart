@@ -622,8 +622,9 @@ void main() {
           duration: const Duration(milliseconds: 100),
           vsync: vsync,
         );
-        final animation =
-            controller.drive(Tween<double>(begin: 0.0, end: 100.0));
+        final animation = controller.drive(
+          Tween<double>(begin: 0.0, end: 100.0),
+        );
 
         expect(animation.value, 0.0);
 
@@ -662,7 +663,9 @@ void main() {
       expect(AnimationStatus.forward, isNot(equals(AnimationStatus.reverse)));
       expect(AnimationStatus.reverse, isNot(equals(AnimationStatus.completed)));
       expect(
-          AnimationStatus.completed, isNot(equals(AnimationStatus.dismissed)));
+        AnimationStatus.completed,
+        isNot(equals(AnimationStatus.dismissed)),
+      );
     });
   });
 }

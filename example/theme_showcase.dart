@@ -101,10 +101,7 @@ class _ThemeShowcaseState extends State<ThemeShowcase> {
 }
 
 class _ThemeShowcaseContent extends StatelessComponent {
-  _ThemeShowcaseContent({
-    required this.themeName,
-    required this.themeIndex,
-  });
+  _ThemeShowcaseContent({required this.themeName, required this.themeIndex});
 
   final String themeName;
   final int themeIndex;
@@ -187,10 +184,7 @@ class _ThemeShowcaseContent extends StatelessComponent {
       child: Center(
         child: Text(
           'Theme: $themeName',
-          style: TextStyle(
-            color: theme.primary,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: theme.primary, fontWeight: FontWeight.bold),
         ),
       ),
     );
@@ -203,18 +197,10 @@ class _ThemeShowcaseContent extends StatelessComponent {
         Row(
           children: [
             Expanded(
-              child: SizedBox(
-                height: 1,
-                child: ProgressBar(
-                  value: 0.6,
-                ),
-              ),
+              child: SizedBox(height: 1, child: ProgressBar(value: 0.6)),
             ),
             SizedBox(width: 2),
-            Text(
-              '60%',
-              style: TextStyle(color: theme.secondary),
-            ),
+            Text('60%', style: TextStyle(color: theme.secondary)),
           ],
         ),
       ],
@@ -227,38 +213,20 @@ class _ThemeShowcaseContent extends StatelessComponent {
       children: [
         Row(
           children: [
-            Text(
-              '● ',
-              style: TextStyle(color: theme.success),
-            ),
-            Text(
-              'Success message',
-              style: TextStyle(color: theme.onSurface),
-            ),
+            Text('● ', style: TextStyle(color: theme.success)),
+            Text('Success message', style: TextStyle(color: theme.onSurface)),
           ],
         ),
         Row(
           children: [
-            Text(
-              '● ',
-              style: TextStyle(color: theme.warning),
-            ),
-            Text(
-              'Warning message',
-              style: TextStyle(color: theme.onSurface),
-            ),
+            Text('● ', style: TextStyle(color: theme.warning)),
+            Text('Warning message', style: TextStyle(color: theme.onSurface)),
           ],
         ),
         Row(
           children: [
-            Text(
-              '● ',
-              style: TextStyle(color: theme.error),
-            ),
-            Text(
-              'Error message',
-              style: TextStyle(color: theme.onSurface),
-            ),
+            Text('● ', style: TextStyle(color: theme.error)),
+            Text('Error message', style: TextStyle(color: theme.onSurface)),
           ],
         ),
       ],

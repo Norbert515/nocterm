@@ -5,8 +5,8 @@ class Rect {
   const Rect.fromLTWH(this.left, this.top, this.width, this.height);
 
   const Rect.fromLTRB(this.left, this.top, double right, double bottom)
-      : width = right - left,
-        height = bottom - top;
+    : width = right - left,
+      height = bottom - top;
 
   final double left;
   final double top;

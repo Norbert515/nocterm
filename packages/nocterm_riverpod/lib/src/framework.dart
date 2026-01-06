@@ -53,8 +53,8 @@ class ProviderScope extends StatefulComponent {
       scope = context
           .dependOnInheritedComponentOfExactType<UncontrolledProviderScope>();
     } else {
-      scope =
-          context.findAncestorComponentOfExactType<UncontrolledProviderScope>();
+      scope = context
+          .findAncestorComponentOfExactType<UncontrolledProviderScope>();
     }
 
     if (scope == null) {
@@ -69,7 +69,8 @@ class ProviderScope extends StatefulComponent {
   /// Returns the [_UncontrolledProviderScopeElement] of the closest [ProviderScope] ancestor.
   @internal
   static _UncontrolledProviderScopeElement scopeElementOf(
-      BuildContext context) {
+    BuildContext context,
+  ) {
     // Find the InheritedElement for UncontrolledProviderScope
     final InheritedElement? element = context
         .getElementForInheritedWidgetOfExactType<UncontrolledProviderScope>();
@@ -205,7 +206,7 @@ extension on BuildContext {
   /// Gets the InheritedElement for a given InheritedWidget type
   @internal
   InheritedElement?
-      getElementForInheritedWidgetOfExactType<T extends InheritedComponent>() {
+  getElementForInheritedWidgetOfExactType<T extends InheritedComponent>() {
     // This is a workaround since nocterm doesn't expose this directly
     // We need to walk up the tree to find the InheritedElement
     Element? element = this as Element;

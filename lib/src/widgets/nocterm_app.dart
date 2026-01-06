@@ -98,22 +98,22 @@ class NoctermApp extends StatefulComponent {
     this.navigatorKey,
     this.theme,
     super.key,
-  })  : assert(
-          child != null ||
-              home != null ||
-              routes != null ||
-              onGenerateRoute != null,
-          'Either child, home, routes, or onGenerateRoute must be provided',
-        ),
-        assert(
-          child == null ||
-              (home == null &&
-                  routes == null &&
-                  initialRoute == null &&
-                  onGenerateRoute == null &&
-                  onUnknownRoute == null),
-          'If child is provided, navigation parameters (home, routes, initialRoute, onGenerateRoute, onUnknownRoute) cannot be used',
-        );
+  }) : assert(
+         child != null ||
+             home != null ||
+             routes != null ||
+             onGenerateRoute != null,
+         'Either child, home, routes, or onGenerateRoute must be provided',
+       ),
+       assert(
+         child == null ||
+             (home == null &&
+                 routes == null &&
+                 initialRoute == null &&
+                 onGenerateRoute == null &&
+                 onUnknownRoute == null),
+         'If child is provided, navigation parameters (home, routes, initialRoute, onGenerateRoute, onUnknownRoute) cannot be used',
+       );
 
   /// A one-line description of this app for use in the terminal window title.
   ///
@@ -259,24 +259,26 @@ class _NoctermAppState extends State<NoctermApp> {
     }
 
     // Detect brightness asynchronously
-    detectTerminalBrightness(terminal).then((brightness) {
-      if (mounted) {
-        setState(() {
-          _detectedTheme = brightness == Brightness.light
-              ? TuiThemeData.light
-              : TuiThemeData.dark;
-          _detectingTheme = false;
+    detectTerminalBrightness(terminal)
+        .then((brightness) {
+          if (mounted) {
+            setState(() {
+              _detectedTheme = brightness == Brightness.light
+                  ? TuiThemeData.light
+                  : TuiThemeData.dark;
+              _detectingTheme = false;
+            });
+          }
+        })
+        .catchError((_) {
+          // On error, default to dark theme
+          if (mounted) {
+            setState(() {
+              _detectedTheme = TuiThemeData.dark;
+              _detectingTheme = false;
+            });
+          }
         });
-      }
-    }).catchError((_) {
-      // On error, default to dark theme
-      if (mounted) {
-        setState(() {
-          _detectedTheme = TuiThemeData.dark;
-          _detectingTheme = false;
-        });
-      }
-    });
   }
 
   void _updateTitle() {
@@ -346,10 +348,7 @@ class _NoctermAppState extends State<NoctermApp> {
     // Wrap in TuiTheme if a theme is provided or auto-detected
     final effectiveTheme = component.theme ?? _detectedTheme;
     if (effectiveTheme != null) {
-      content = TuiTheme(
-        data: effectiveTheme,
-        child: content,
-      );
+      content = TuiTheme(data: effectiveTheme, child: content);
     }
 
     return content;

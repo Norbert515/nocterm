@@ -4,7 +4,8 @@ void main() async {
   // Run with: dart run --enable-vm-service example/hot_reload_simple.dart
   print('Starting Hot Reload Simple Demo...');
   print(
-      'Run with: dart run --enable-vm-service example/hot_reload_simple.dart');
+    'Run with: dart run --enable-vm-service example/hot_reload_simple.dart',
+  );
   await runApp(const SimpleHotReloadApp());
 }
 
@@ -37,19 +38,14 @@ class _SimpleHotReloadAppState extends State<SimpleHotReloadApp> {
     final message = 'Hello, TUI!'; // <- Change this message!
 
     return Container(
-      decoration: BoxDecoration(
-        border: BoxBorder.all(color: borderColor),
-      ),
+      decoration: BoxDecoration(border: BoxBorder.all(color: borderColor)),
       padding: EdgeInsets.all(2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             title,
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 1),
           Text(
@@ -64,17 +60,12 @@ class _SimpleHotReloadAppState extends State<SimpleHotReloadApp> {
           SizedBox(height: 2),
           Text(
             'Edit this file and save to trigger hot reload!',
-            style: TextStyle(
-              color: Colors.gray,
-              fontWeight: FontWeight.dim,
-            ),
+            style: TextStyle(color: Colors.gray, fontWeight: FontWeight.dim),
           ),
           Expanded(child: Container()),
           Text(
             'Press Esc to exit',
-            style: TextStyle(
-              fontWeight: FontWeight.dim,
-            ),
+            style: TextStyle(fontWeight: FontWeight.dim),
           ),
         ],
       ),

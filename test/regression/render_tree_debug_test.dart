@@ -5,20 +5,12 @@ void main() {
   test('Column properly removes old children from render tree', () async {
     await testNocterm('render tree update', (tester) async {
       // Start with a column containing one Text widget
-      await tester.pumpComponent(
-        Column(children: [
-          Text('First'),
-        ]),
-      );
+      await tester.pumpComponent(Column(children: [Text('First')]));
 
       expect(tester.terminalState, containsText('First'));
 
       // Replace with a different Text widget
-      await tester.pumpComponent(
-        Column(children: [
-          Text('Second'),
-        ]),
-      );
+      await tester.pumpComponent(Column(children: [Text('Second')]));
 
       // Should only show Second
       expect(tester.terminalState, containsText('Second'));
@@ -26,11 +18,7 @@ void main() {
 
       // Try with multiple children
       await tester.pumpComponent(
-        Column(children: [
-          Text('A'),
-          Text('B'),
-          Text('C'),
-        ]),
+        Column(children: [Text('A'), Text('B'), Text('C')]),
       );
 
       expect(tester.terminalState, containsText('A'));
@@ -39,11 +27,7 @@ void main() {
       expect(tester.terminalState, isNot(containsText('Second')));
 
       // Replace with fewer children
-      await tester.pumpComponent(
-        Column(children: [
-          Text('X'),
-        ]),
-      );
+      await tester.pumpComponent(Column(children: [Text('X')]));
 
       expect(tester.terminalState, containsText('X'));
       expect(tester.terminalState, isNot(containsText('A')));

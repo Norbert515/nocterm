@@ -15,10 +15,7 @@ class NavigationDemo extends StatelessComponent {
         '/': (context) => const HomePage(),
         '/about': (context) => const AboutPage(),
       },
-      popBehavior: const PopBehavior(
-        escapeEnabled: true,
-        customPopKey: 'q',
-      ),
+      popBehavior: const PopBehavior(escapeEnabled: true, customPopKey: 'q'),
       observers: [LoggingNavigatorObserver()],
     );
   }
@@ -35,9 +32,7 @@ class HomePage extends StatelessComponent {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           MenuList(
-            items: const [
-              MenuItem('About', '/about'),
-            ],
+            items: const [MenuItem('About', '/about')],
             onSelect: (value) async {
               Navigator.of(context).pushNamed(value);
             },
@@ -102,11 +97,7 @@ class MenuList extends StatefulComponent {
   final List<MenuItem> items;
   final Function(dynamic) onSelect;
 
-  const MenuList({
-    super.key,
-    required this.items,
-    required this.onSelect,
-  });
+  const MenuList({super.key, required this.items, required this.onSelect});
 
   @override
   State<MenuList> createState() => _MenuListState();
@@ -123,7 +114,8 @@ class _MenuListState extends State<MenuList> {
       return true;
     } else if (key == LogicalKey.arrowUp) {
       setState(() {
-        _selectedIndex = (_selectedIndex - 1 + component.items.length) %
+        _selectedIndex =
+            (_selectedIndex - 1 + component.items.length) %
             component.items.length;
       });
       return true;
@@ -148,7 +140,8 @@ class _MenuListState extends State<MenuList> {
               style: i == _selectedIndex
                   ? const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Color.fromRGB(100, 200, 100))
+                      color: Color.fromRGB(100, 200, 100),
+                    )
                   : null,
             ),
         ],

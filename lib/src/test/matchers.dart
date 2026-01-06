@@ -68,8 +68,9 @@ class HasTextAt extends Matcher {
   ) {
     if (item is TerminalState) {
       final actualText = item.getTextAt(x, y, length: text.length);
-      return mismatchDescription
-          .add('actual text at ($x, $y): "${actualText ?? "(out of bounds)"}"');
+      return mismatchDescription.add(
+        'actual text at ($x, $y): "${actualText ?? "(out of bounds)"}"',
+      );
     }
     return mismatchDescription.add('is not a TerminalState');
   }

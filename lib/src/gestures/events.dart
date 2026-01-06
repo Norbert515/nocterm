@@ -62,7 +62,7 @@ typedef GestureTapUpCallback = void Function(TapUpDetails details);
 typedef GestureTapCallback = void Function();
 typedef GestureTapCancelCallback = void Function();
 typedef GestureLongPressCallback = void Function();
-typedef GestureLongPressStartCallback = void Function(
-    LongPressStartDetails details);
-typedef GestureLongPressEndCallback = void Function(
-    LongPressEndDetails details);
+typedef GestureLongPressStartCallback =
+    void Function(LongPressStartDetails details);
+typedef GestureLongPressEndCallback =
+    void Function(LongPressEndDetails details);

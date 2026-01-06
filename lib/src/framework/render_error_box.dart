@@ -15,13 +15,13 @@ class RenderTUIErrorBox extends RenderObject
     String message = '',
     Object? error,
     StackTrace? stackTrace,
-  })  : _message = message.isNotEmpty
-            ? message
-            : error != null
-                ? error.toString()
-                : 'Error',
-        _error = error,
-        _stackTrace = stackTrace;
+  }) : _message = message.isNotEmpty
+           ? message
+           : error != null
+           ? error.toString()
+           : 'Error',
+       _error = error,
+       _stackTrace = stackTrace;
 
   final String _message;
   final Object? _error;
@@ -66,8 +66,11 @@ class RenderTUIErrorBox extends RenderObject
     } catch (e) {
       // If painting fails, at least try to output something
       try {
-        canvas.drawText(offset, 'ERROR',
-            style: TextStyle(color: Color.fromRGB(255, 0, 0)));
+        canvas.drawText(
+          offset,
+          'ERROR',
+          style: TextStyle(color: Color.fromRGB(255, 0, 0)),
+        );
       } catch (_) {
         // Give up silently
       }
@@ -83,32 +86,56 @@ class RenderTUIErrorBox extends RenderObject
     final borderStyle = TextStyle(color: Color.fromRGB(255, 0, 0));
 
     // Top border
-    canvas.drawText(Offset(left.toDouble(), top.toDouble()), '┌',
-        style: borderStyle);
+    canvas.drawText(
+      Offset(left.toDouble(), top.toDouble()),
+      '┌',
+      style: borderStyle,
+    );
     for (int x = left + 1; x < right; x++) {
-      canvas.drawText(Offset(x.toDouble(), top.toDouble()), '─',
-          style: borderStyle);
+      canvas.drawText(
+        Offset(x.toDouble(), top.toDouble()),
+        '─',
+        style: borderStyle,
+      );
     }
-    canvas.drawText(Offset(right.toDouble(), top.toDouble()), '┐',
-        style: borderStyle);
+    canvas.drawText(
+      Offset(right.toDouble(), top.toDouble()),
+      '┐',
+      style: borderStyle,
+    );
 
     // Side borders
     for (int y = top + 1; y < bottom; y++) {
-      canvas.drawText(Offset(left.toDouble(), y.toDouble()), '│',
-          style: borderStyle);
-      canvas.drawText(Offset(right.toDouble(), y.toDouble()), '│',
-          style: borderStyle);
+      canvas.drawText(
+        Offset(left.toDouble(), y.toDouble()),
+        '│',
+        style: borderStyle,
+      );
+      canvas.drawText(
+        Offset(right.toDouble(), y.toDouble()),
+        '│',
+        style: borderStyle,
+      );
     }
 
     // Bottom border
-    canvas.drawText(Offset(left.toDouble(), bottom.toDouble()), '└',
-        style: borderStyle);
+    canvas.drawText(
+      Offset(left.toDouble(), bottom.toDouble()),
+      '└',
+      style: borderStyle,
+    );
     for (int x = left + 1; x < right; x++) {
-      canvas.drawText(Offset(x.toDouble(), bottom.toDouble()), '─',
-          style: borderStyle);
+      canvas.drawText(
+        Offset(x.toDouble(), bottom.toDouble()),
+        '─',
+        style: borderStyle,
+      );
     }
-    canvas.drawText(Offset(right.toDouble(), bottom.toDouble()), '┘',
-        style: borderStyle);
+    canvas.drawText(
+      Offset(right.toDouble(), bottom.toDouble()),
+      '┘',
+      style: borderStyle,
+    );
   }
 
   void _drawErrorText(TerminalCanvas canvas, Rect rect) {

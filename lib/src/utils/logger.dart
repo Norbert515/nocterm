@@ -27,9 +27,7 @@ import 'log_server.dart';
 /// The logger is used automatically by [runApp] to capture print statements
 /// and errors without blocking the TUI.
 class Logger {
-  Logger({
-    LogServer? logServer,
-  }) : _logServer = logServer;
+  Logger({LogServer? logServer}) : _logServer = logServer;
 
   /// The log server to stream messages to (nullable for testing)
   final LogServer? _logServer;

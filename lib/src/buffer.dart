@@ -21,10 +21,7 @@ class Cell {
   }
 
   Cell copyWith({String? char, TextStyle? style}) {
-    return Cell(
-      char: char ?? this.char,
-      style: style ?? this.style,
-    );
+    return Cell(char: char ?? this.char, style: style ?? this.style);
   }
 
   @override
@@ -44,10 +41,7 @@ class Buffer {
   final List<List<Cell>> cells;
 
   Buffer(this.width, this.height)
-      : cells = List.generate(
-          height,
-          (_) => List.generate(width, (_) => Cell()),
-        );
+    : cells = List.generate(height, (_) => List.generate(width, (_) => Cell()));
 
   Cell getCell(int x, int y) {
     if (x < 0 || x >= width || y < 0 || y >= height) {
@@ -84,8 +78,10 @@ class Buffer {
 
         // For wide characters, mark the next cell as occupied
         if (charWidth == 2 && currentX + 1 < width) {
-          cells[y][currentX + 1] =
-              Cell(char: '\u200B', style: style); // Zero-width space marker
+          cells[y][currentX + 1] = Cell(
+            char: '\u200B',
+            style: style,
+          ); // Zero-width space marker
         }
       }
 

@@ -74,18 +74,18 @@ class HomeScreen extends StatelessComponent {
                 Center(
                   child: Text(
                     '🏠 Home Screen',
-                    style: TextStyle(
-                      color: Color.fromRGB(100, 200, 255),
-                    ),
+                    style: TextStyle(color: Color.fromRGB(100, 200, 255)),
                   ),
                 ),
                 Text(''),
                 const Divider(),
                 Text(''),
                 Text(
-                    'This demo shows NoctermApp with built-in Navigator support.'),
+                  'This demo shows NoctermApp with built-in Navigator support.',
+                ),
                 Text(
-                    'You can navigate between different screens using routes.'),
+                  'You can navigate between different screens using routes.',
+                ),
                 Text(''),
                 const Divider(),
                 Text(''),
@@ -174,9 +174,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Center(
                   child: Text(
                     '⚙️  Settings Screen',
-                    style: TextStyle(
-                      color: Color.fromRGB(150, 255, 150),
-                    ),
+                    style: TextStyle(color: Color.fromRGB(150, 255, 150)),
                   ),
                 ),
                 Text(''),
@@ -185,9 +183,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Text('Configure your application settings:'),
                 Text(''),
                 Text(
-                    '[1] Dark Mode: ${_darkMode ? "✓ Enabled" : "✗ Disabled"}'),
+                  '[1] Dark Mode: ${_darkMode ? "✓ Enabled" : "✗ Disabled"}',
+                ),
                 Text(
-                    '[2] Notifications: ${_notifications ? "✓ Enabled" : "✗ Disabled"}'),
+                  '[2] Notifications: ${_notifications ? "✓ Enabled" : "✗ Disabled"}',
+                ),
                 Text(''),
                 const Divider(),
                 Text(''),
@@ -256,9 +256,7 @@ class AboutScreen extends StatelessComponent {
                 Center(
                   child: Text(
                     'ℹ️  About Screen',
-                    style: TextStyle(
-                      color: Color.fromRGB(255, 150, 255),
-                    ),
+                    style: TextStyle(color: Color.fromRGB(255, 150, 255)),
                   ),
                 ),
                 Text(''),

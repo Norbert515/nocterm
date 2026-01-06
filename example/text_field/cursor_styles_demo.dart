@@ -132,9 +132,13 @@ class _CursorStylesDemoState extends State<CursorStylesDemo> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Controls:',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.yellow)),
+                  Text(
+                    'Controls:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.yellow,
+                    ),
+                  ),
                   Text('• Tab/Shift+Tab: Navigate fields'),
                   Text('• Ctrl+S: Change cursor style'),
                   Text('• Ctrl+C: Change cursor color'),
@@ -165,8 +169,10 @@ class _CursorStylesDemoState extends State<CursorStylesDemo> {
             const SizedBox(height: 2),
 
             // Interactive test field
-            Text('Interactive Field (focused: ${_focusedFieldIndex == 0}):',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              'Interactive Field (focused: ${_focusedFieldIndex == 0}):',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             TextField(
               controller: _textController,
               focused: _focusedFieldIndex == 0,
@@ -184,9 +190,13 @@ class _CursorStylesDemoState extends State<CursorStylesDemo> {
             const SizedBox(height: 2),
 
             // Demo fields showing all styles
-            Text('All Cursor Styles:',
-                style: TextStyle(
-                    fontWeight: FontWeight.bold, color: Colors.yellow)),
+            Text(
+              'All Cursor Styles:',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.yellow,
+              ),
+            ),
             const SizedBox(height: 1),
 
             // Block cursor
@@ -217,8 +227,10 @@ class _CursorStylesDemoState extends State<CursorStylesDemo> {
               children: [
                 SizedBox(
                   width: 15,
-                  child:
-                      Text('Underline:', style: TextStyle(color: Colors.gray)),
+                  child: Text(
+                    'Underline:',
+                    style: TextStyle(color: Colors.gray),
+                  ),
                 ),
                 TextField(
                   controller: TextEditingController(text: 'Underline cursor'),

@@ -31,16 +31,26 @@ void main() {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('Opacity Gradient (white on blue):'),
-                Text('100%',
-                    style: TextStyle(color: Colors.white.withOpacity(1.0))),
-                Text(' 80%',
-                    style: TextStyle(color: Colors.white.withOpacity(0.8))),
-                Text(' 60%',
-                    style: TextStyle(color: Colors.white.withOpacity(0.6))),
-                Text(' 40%',
-                    style: TextStyle(color: Colors.white.withOpacity(0.4))),
-                Text(' 20%',
-                    style: TextStyle(color: Colors.white.withOpacity(0.2))),
+                Text(
+                  '100%',
+                  style: TextStyle(color: Colors.white.withOpacity(1.0)),
+                ),
+                Text(
+                  ' 80%',
+                  style: TextStyle(color: Colors.white.withOpacity(0.8)),
+                ),
+                Text(
+                  ' 60%',
+                  style: TextStyle(color: Colors.white.withOpacity(0.6)),
+                ),
+                Text(
+                  ' 40%',
+                  style: TextStyle(color: Colors.white.withOpacity(0.4)),
+                ),
+                Text(
+                  ' 20%',
+                  style: TextStyle(color: Colors.white.withOpacity(0.2)),
+                ),
               ],
             ),
           ),

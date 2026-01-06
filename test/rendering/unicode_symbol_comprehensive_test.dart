@@ -43,8 +43,9 @@ void main() {
         final width = UnicodeWidth.stringWidth(symbol);
         final code = symbol.runes.first;
         print(
-            '$symbol U+${code.toRadixString(16).toUpperCase().padLeft(4, '0')} '
-            'width=$width $name');
+          '$symbol U+${code.toRadixString(16).toUpperCase().padLeft(4, '0')} '
+          'width=$width $name',
+        );
         expect(width, equals(1), reason: '$name should be width 1');
       });
 
@@ -53,8 +54,9 @@ void main() {
         final width = UnicodeWidth.stringWidth(symbol);
         final code = symbol.runes.first;
         print(
-            '$symbol U+${code.toRadixString(16).toUpperCase().padLeft(4, '0')} '
-            'width=$width $name');
+          '$symbol U+${code.toRadixString(16).toUpperCase().padLeft(4, '0')} '
+          'width=$width $name',
+        );
         expect(width, equals(2), reason: '$name should be width 2');
       });
     });
@@ -99,10 +101,16 @@ void main() {
 
       // With the fix, this should fit (21 <= 30)
       // Before the fix, it was 22 which also fit, but was incorrect
-      expect(textWidth, equals(21),
-          reason: 'Text with ✓ symbol should be calculated correctly');
-      expect(textWidth <= containerWidth, isTrue,
-          reason: 'Text should fit in container');
+      expect(
+        textWidth,
+        equals(21),
+        reason: 'Text with ✓ symbol should be calculated correctly',
+      );
+      expect(
+        textWidth <= containerWidth,
+        isTrue,
+        reason: 'Text should fit in container',
+      );
     });
   });
 }

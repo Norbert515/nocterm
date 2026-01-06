@@ -5,10 +5,7 @@ void main() {
   group('TextLayoutEngine', () {
     group('Basic word wrapping', () {
       test('wraps text at word boundaries', () {
-        final config = TextLayoutConfig(
-          maxWidth: 10,
-          softWrap: true,
-        );
+        final config = TextLayoutConfig(maxWidth: 10, softWrap: true);
 
         final result = TextLayoutEngine.layout('Hello world test', config);
 
@@ -18,10 +15,7 @@ void main() {
       });
 
       test('preserves explicit newlines', () {
-        final config = TextLayoutConfig(
-          maxWidth: 20,
-          softWrap: true,
-        );
+        final config = TextLayoutConfig(maxWidth: 20, softWrap: true);
 
         final result = TextLayoutEngine.layout('Hello\nworld', config);
 
@@ -30,10 +24,7 @@ void main() {
       });
 
       test('handles empty lines', () {
-        final config = TextLayoutConfig(
-          maxWidth: 20,
-          softWrap: true,
-        );
+        final config = TextLayoutConfig(maxWidth: 20, softWrap: true);
 
         final result = TextLayoutEngine.layout('Hello\n\nworld', config);
 
@@ -42,10 +33,7 @@ void main() {
       });
 
       test('wraps long sentences', () {
-        final config = TextLayoutConfig(
-          maxWidth: 15,
-          softWrap: true,
-        );
+        final config = TextLayoutConfig(maxWidth: 15, softWrap: true);
 
         final result = TextLayoutEngine.layout(
           'This is a very long sentence that needs wrapping',
@@ -63,10 +51,7 @@ void main() {
 
     group('Long word breaking', () {
       test('breaks words longer than max width', () {
-        final config = TextLayoutConfig(
-          maxWidth: 5,
-          softWrap: true,
-        );
+        final config = TextLayoutConfig(maxWidth: 5, softWrap: true);
 
         final result = TextLayoutEngine.layout('Supercalifragilistic', config);
 
@@ -77,29 +62,20 @@ void main() {
       });
 
       test('handles mixed content with long words', () {
-        final config = TextLayoutConfig(
-          maxWidth: 8,
-          softWrap: true,
+        final config = TextLayoutConfig(maxWidth: 8, softWrap: true);
+
+        final result = TextLayoutEngine.layout(
+          'Hello verylongword test',
+          config,
         );
 
-        final result =
-            TextLayoutEngine.layout('Hello verylongword test', config);
-
-        expect(result.lines, [
-          'Hello ',
-          'verylong',
-          'word ',
-          'test',
-        ]);
+        expect(result.lines, ['Hello ', 'verylong', 'word ', 'test']);
       });
     });
 
     group('No wrap mode', () {
       test('does not wrap when softWrap is false', () {
-        final config = TextLayoutConfig(
-          maxWidth: 5,
-          softWrap: false,
-        );
+        final config = TextLayoutConfig(maxWidth: 5, softWrap: false);
 
         final result = TextLayoutEngine.layout('Hello world', config);
 
@@ -109,10 +85,7 @@ void main() {
       });
 
       test('respects newlines even without soft wrap', () {
-        final config = TextLayoutConfig(
-          maxWidth: 5,
-          softWrap: false,
-        );
+        final config = TextLayoutConfig(maxWidth: 5, softWrap: false);
 
         final result = TextLayoutEngine.layout('Hello\nworld', config);
 
@@ -256,10 +229,7 @@ void main() {
 
     group('Unicode support', () {
       test('handles emoji correctly', () {
-        final config = TextLayoutConfig(
-          maxWidth: 10,
-          softWrap: true,
-        );
+        final config = TextLayoutConfig(maxWidth: 10, softWrap: true);
 
         // Emoji typically take 2 columns
         final result = TextLayoutEngine.layout('Hello 😀 world', config);
@@ -270,10 +240,7 @@ void main() {
       });
 
       test('handles CJK characters', () {
-        final config = TextLayoutConfig(
-          maxWidth: 10,
-          softWrap: true,
-        );
+        final config = TextLayoutConfig(maxWidth: 10, softWrap: true);
 
         // CJK characters typically take 2 columns each
         final result = TextLayoutEngine.layout('你好世界 test', config);
@@ -285,10 +252,7 @@ void main() {
 
     group('Edge cases', () {
       test('handles empty string', () {
-        final config = TextLayoutConfig(
-          maxWidth: 10,
-          softWrap: true,
-        );
+        final config = TextLayoutConfig(maxWidth: 10, softWrap: true);
 
         final result = TextLayoutEngine.layout('', config);
 
@@ -298,10 +262,7 @@ void main() {
       });
 
       test('handles single character', () {
-        final config = TextLayoutConfig(
-          maxWidth: 10,
-          softWrap: true,
-        );
+        final config = TextLayoutConfig(maxWidth: 10, softWrap: true);
 
         final result = TextLayoutEngine.layout('a', config);
 
@@ -310,10 +271,7 @@ void main() {
       });
 
       test('handles only spaces', () {
-        final config = TextLayoutConfig(
-          maxWidth: 5,
-          softWrap: true,
-        );
+        final config = TextLayoutConfig(maxWidth: 5, softWrap: true);
 
         final result = TextLayoutEngine.layout('     ', config);
 
@@ -321,10 +279,7 @@ void main() {
       });
 
       test('handles maxWidth of 1', () {
-        final config = TextLayoutConfig(
-          maxWidth: 1,
-          softWrap: true,
-        );
+        final config = TextLayoutConfig(maxWidth: 1, softWrap: true);
 
         final result = TextLayoutEngine.layout('abc', config);
 

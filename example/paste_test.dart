@@ -89,12 +89,16 @@ class _PasteTestAppState extends State<PasteTestApp> {
             const SizedBox(height: 1),
             const Divider(),
             const SizedBox(height: 1),
-            const Text('Recent events:',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            ..._events.map((e) => Text(
-                  '  $e',
-                  style: const TextStyle(color: Color.fromRGB(150, 150, 150)),
-                )),
+            const Text(
+              'Recent events:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            ..._events.map(
+              (e) => Text(
+                '  $e',
+                style: const TextStyle(color: Color.fromRGB(150, 150, 150)),
+              ),
+            ),
           ],
         ),
       ),

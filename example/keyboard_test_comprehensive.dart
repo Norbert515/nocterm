@@ -131,79 +131,103 @@ class _KeyboardTestAppState extends State<KeyboardTestApp> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Current Key State',
-                              style: TextStyle(
-                                  color: Colors.yellow,
-                                  fontWeight: FontWeight.bold)),
+                          Text(
+                            'Current Key State',
+                            style: TextStyle(
+                              color: Colors.yellow,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           const SizedBox(height: 1),
                           Text('Last Key: $_lastKey'),
                           Text('Character: $_lastCharacter'),
                           const SizedBox(height: 1),
-                          Text('Modifiers:',
-                              style: TextStyle(color: Colors.cyan)),
-                          Text('  Ctrl:  ${_ctrlState ? "✓" : "✗"}',
-                              style: TextStyle(
-                                  color:
-                                      _ctrlState ? Colors.green : Colors.red)),
-                          Text('  Shift: ${_shiftState ? "✓" : "✗"}',
-                              style: TextStyle(
-                                  color:
-                                      _shiftState ? Colors.green : Colors.red)),
-                          Text('  Alt:   ${_altState ? "✓" : "✗"}',
-                              style: TextStyle(
-                                  color:
-                                      _altState ? Colors.green : Colors.red)),
-                          Text('  Meta:  ${_metaState ? "✓" : "✗"}',
-                              style: TextStyle(
-                                  color:
-                                      _metaState ? Colors.green : Colors.red)),
+                          Text(
+                            'Modifiers:',
+                            style: TextStyle(color: Colors.cyan),
+                          ),
+                          Text(
+                            '  Ctrl:  ${_ctrlState ? "✓" : "✗"}',
+                            style: TextStyle(
+                              color: _ctrlState ? Colors.green : Colors.red,
+                            ),
+                          ),
+                          Text(
+                            '  Shift: ${_shiftState ? "✓" : "✗"}',
+                            style: TextStyle(
+                              color: _shiftState ? Colors.green : Colors.red,
+                            ),
+                          ),
+                          Text(
+                            '  Alt:   ${_altState ? "✓" : "✗"}',
+                            style: TextStyle(
+                              color: _altState ? Colors.green : Colors.red,
+                            ),
+                          ),
+                          Text(
+                            '  Meta:  ${_metaState ? "✓" : "✗"}',
+                            style: TextStyle(
+                              color: _metaState ? Colors.green : Colors.red,
+                            ),
+                          ),
                           const SizedBox(height: 1),
-                          Text('Test Results:',
-                              style: TextStyle(
-                                  color: Colors.yellow,
-                                  fontWeight: FontWeight.bold)),
                           Text(
-                              'Ctrl+A:      ${_ctrlAPressed ? "✓ PASS" : "⋯ waiting"}',
-                              style: TextStyle(
-                                  color: _ctrlAPressed
-                                      ? Colors.green
-                                      : Colors.gray)),
+                            'Test Results:',
+                            style: TextStyle(
+                              color: Colors.yellow,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           Text(
-                              'Ctrl+C:      ${_ctrlCPressed ? "✓ PASS" : "⋯ waiting"}',
-                              style: TextStyle(
-                                  color: _ctrlCPressed
-                                      ? Colors.green
-                                      : Colors.gray)),
+                            'Ctrl+A:      ${_ctrlAPressed ? "✓ PASS" : "⋯ waiting"}',
+                            style: TextStyle(
+                              color: _ctrlAPressed ? Colors.green : Colors.gray,
+                            ),
+                          ),
                           Text(
-                              'Shift+Tab:   ${_shiftTabPressed ? "✓ PASS" : "⋯ waiting"}',
-                              style: TextStyle(
-                                  color: _shiftTabPressed
-                                      ? Colors.green
-                                      : Colors.gray)),
+                            'Ctrl+C:      ${_ctrlCPressed ? "✓ PASS" : "⋯ waiting"}',
+                            style: TextStyle(
+                              color: _ctrlCPressed ? Colors.green : Colors.gray,
+                            ),
+                          ),
                           Text(
-                              'Alt+X:       ${_altXPressed ? "✓ PASS" : "⋯ waiting"}',
-                              style: TextStyle(
-                                  color: _altXPressed
-                                      ? Colors.green
-                                      : Colors.gray)),
+                            'Shift+Tab:   ${_shiftTabPressed ? "✓ PASS" : "⋯ waiting"}',
+                            style: TextStyle(
+                              color: _shiftTabPressed
+                                  ? Colors.green
+                                  : Colors.gray,
+                            ),
+                          ),
                           Text(
-                              'Shift+Arrow: ${_shiftArrowPressed ? "✓ PASS" : "⋯ waiting"}',
-                              style: TextStyle(
-                                  color: _shiftArrowPressed
-                                      ? Colors.green
-                                      : Colors.gray)),
+                            'Alt+X:       ${_altXPressed ? "✓ PASS" : "⋯ waiting"}',
+                            style: TextStyle(
+                              color: _altXPressed ? Colors.green : Colors.gray,
+                            ),
+                          ),
                           Text(
-                              'Ctrl+Arrow:  ${_ctrlArrowPressed ? "✓ PASS" : "⋯ waiting"}',
-                              style: TextStyle(
-                                  color: _ctrlArrowPressed
-                                      ? Colors.green
-                                      : Colors.gray)),
+                            'Shift+Arrow: ${_shiftArrowPressed ? "✓ PASS" : "⋯ waiting"}',
+                            style: TextStyle(
+                              color: _shiftArrowPressed
+                                  ? Colors.green
+                                  : Colors.gray,
+                            ),
+                          ),
                           Text(
-                              'Alt+Arrow:   ${_altArrowPressed ? "✓ PASS" : "⋯ waiting"}',
-                              style: TextStyle(
-                                  color: _altArrowPressed
-                                      ? Colors.green
-                                      : Colors.gray)),
+                            'Ctrl+Arrow:  ${_ctrlArrowPressed ? "✓ PASS" : "⋯ waiting"}',
+                            style: TextStyle(
+                              color: _ctrlArrowPressed
+                                  ? Colors.green
+                                  : Colors.gray,
+                            ),
+                          ),
+                          Text(
+                            'Alt+Arrow:   ${_altArrowPressed ? "✓ PASS" : "⋯ waiting"}',
+                            style: TextStyle(
+                              color: _altArrowPressed
+                                  ? Colors.green
+                                  : Colors.gray,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -225,10 +249,13 @@ class _KeyboardTestAppState extends State<KeyboardTestApp> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Event Log:',
-                                    style: TextStyle(
-                                        color: Colors.yellow,
-                                        fontWeight: FontWeight.bold)),
+                                Text(
+                                  'Event Log:',
+                                  style: TextStyle(
+                                    color: Colors.yellow,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                                 const SizedBox(height: 1),
                                 Expanded(
                                   child: Column(
@@ -236,10 +263,13 @@ class _KeyboardTestAppState extends State<KeyboardTestApp> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       for (final event in _eventLog)
-                                        Text(event,
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.dim)),
+                                        Text(
+                                          event,
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.dim,
+                                          ),
+                                        ),
                                     ],
                                   ),
                                 ),
@@ -259,14 +289,20 @@ class _KeyboardTestAppState extends State<KeyboardTestApp> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('TextField Test:',
-                                  style: TextStyle(
-                                      color: Colors.yellow,
-                                      fontWeight: FontWeight.bold)),
-                              Text('(Tab to focus, test Ctrl+A/C/X/V)',
-                                  style: TextStyle(
-                                      color: Colors.gray,
-                                      fontWeight: FontWeight.dim)),
+                              Text(
+                                'TextField Test:',
+                                style: TextStyle(
+                                  color: Colors.yellow,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                '(Tab to focus, test Ctrl+A/C/X/V)',
+                                style: TextStyle(
+                                  color: Colors.gray,
+                                  fontWeight: FontWeight.dim,
+                                ),
+                              ),
                               const SizedBox(height: 1),
                               TextField(
                                 controller: _textController,

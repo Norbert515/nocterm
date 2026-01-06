@@ -6,9 +6,7 @@ void main() {
   // return;
 
   // Super slow
-  runApp(const Navigator(
-    home: MyAppWithNavigation(depth: 0),
-  ));
+  runApp(const Navigator(home: MyAppWithNavigation(depth: 0)));
 }
 
 class NoNavigation extends StatefulComponent {
@@ -49,10 +47,13 @@ class _MyAppWithNavigationState extends State<MyAppWithNavigation> {
       focused: true,
       onKeyEvent: (event) {
         if (event.logicalKey == LogicalKey.tab) {
-          Navigator.of(context).push(PageRoute(
+          Navigator.of(context).push(
+            PageRoute(
               builder: (context) =>
                   MyAppWithNavigation(depth: component.depth + 1),
-              settings: RouteSettings(name: 'depth_${component.depth}')));
+              settings: RouteSettings(name: 'depth_${component.depth}'),
+            ),
+          );
           return true;
         }
         return false;

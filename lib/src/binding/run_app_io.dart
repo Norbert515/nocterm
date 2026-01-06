@@ -8,7 +8,7 @@ import 'package:nocterm/src/backend/stdio_backend.dart';
 import 'package:nocterm/src/backend/terminal.dart' as term;
 
 (File?, bool) _useShellMode() {
-// Check for shell mode
+  // Check for shell mode
   final shellHandleFile = File(getShellHandlePath());
   if (shellHandleFile.existsSync() case false) {
     return (null, false);
@@ -50,29 +50,37 @@ Future<void> _runAppNormalMode(Component app, bool enableHotReload) async {
       stderr.writeln('Failed to start log server: $e');
     }
 
-    await runZoned(() async {
-      final backend = StdioBackend();
-      final terminal = term.Terminal(backend);
-      binding = TerminalBinding(terminal);
+    await runZoned(
+      () async {
+        final backend = StdioBackend();
+        final terminal = term.Terminal(backend);
+        binding = TerminalBinding(terminal);
 
-      binding!.initialize();
-      binding!.attachRootComponent(app);
+        binding!.initialize();
+        binding!.attachRootComponent(app);
 
-      if (enableHotReload && !bool.fromEnvironment('dart.vm.product')) {
-        await binding!.initializeHotReload();
-      }
+        if (enableHotReload && !bool.fromEnvironment('dart.vm.product')) {
+          await binding!.initializeHotReload();
+        }
 
-      await binding!.runEventLoop();
-    },
-        zoneSpecification: ZoneSpecification(
-          print: (Zone self, ZoneDelegate parent, Zone zone, String message) {
-            logger?.log(message);
-          },
-          handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone,
-              Object error, StackTrace stackTrace) {
-            logger?.log('ERROR: $error\n$stackTrace');
-          },
-        ));
+        await binding!.runEventLoop();
+      },
+      zoneSpecification: ZoneSpecification(
+        print: (Zone self, ZoneDelegate parent, Zone zone, String message) {
+          logger?.log(message);
+        },
+        handleUncaughtError:
+            (
+              Zone self,
+              ZoneDelegate parent,
+              Zone zone,
+              Object error,
+              StackTrace stackTrace,
+            ) {
+              logger?.log('ERROR: $error\n$stackTrace');
+            },
+      ),
+    );
   } catch (e) {
     // Handle signal-based exit
   } finally {
@@ -110,32 +118,40 @@ Future<void> _runAppInShellMode(
       0,
     );
 
-    await runZoned(() async {
-      final backend = SocketBackend(socket);
-      final terminal = term.Terminal(backend);
-      binding = TerminalBinding(terminal);
+    await runZoned(
+      () async {
+        final backend = SocketBackend(socket);
+        final terminal = term.Terminal(backend);
+        binding = TerminalBinding(terminal);
 
-      binding!.initialize();
-      binding!.attachRootComponent(app);
+        binding!.initialize();
+        binding!.attachRootComponent(app);
 
-      if (enableHotReload && !bool.fromEnvironment('dart.vm.product')) {
-        await binding!.initializeHotReload();
-      }
+        if (enableHotReload && !bool.fromEnvironment('dart.vm.product')) {
+          await binding!.initializeHotReload();
+        }
 
-      await binding!.runEventLoop();
-    },
-        zoneSpecification: ZoneSpecification(
-          print: (Zone self, ZoneDelegate parent, Zone zone, String message) {
-            logger?.log(message);
-            parent.print(zone, message);
-          },
-          handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone,
-              Object error, StackTrace stackTrace) {
-            final errorMessage = 'ERROR: $error\n$stackTrace';
-            logger?.log(errorMessage);
-            stderr.writeln(errorMessage);
-          },
-        ));
+        await binding!.runEventLoop();
+      },
+      zoneSpecification: ZoneSpecification(
+        print: (Zone self, ZoneDelegate parent, Zone zone, String message) {
+          logger?.log(message);
+          parent.print(zone, message);
+        },
+        handleUncaughtError:
+            (
+              Zone self,
+              ZoneDelegate parent,
+              Zone zone,
+              Object error,
+              StackTrace stackTrace,
+            ) {
+              final errorMessage = 'ERROR: $error\n$stackTrace';
+              logger?.log(errorMessage);
+              stderr.writeln(errorMessage);
+            },
+      ),
+    );
   } catch (e) {
     stderr.writeln('Shell mode error: $e');
   } finally {

@@ -77,7 +77,8 @@ class _NoctermAppDemoAppState extends State<NoctermAppDemoApp> {
                   const SizedBox(height: 1),
                   Text(''),
                   Text(
-                      'This demo showcases the NoctermApp widget, which provides'),
+                    'This demo showcases the NoctermApp widget, which provides',
+                  ),
                   Text('a declarative way to set terminal window titles.'),
                   Text(''),
                   const Divider(),

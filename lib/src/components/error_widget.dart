@@ -28,7 +28,9 @@ class TUIErrorWidget extends SingleChildRenderObjectComponent {
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderTUIErrorBox renderObject) {
+    BuildContext context,
+    RenderTUIErrorBox renderObject,
+  ) {
     // RenderTUIErrorBox is immutable after creation
   }
 }
@@ -58,7 +60,9 @@ class ErrorThrowingWidget extends SingleChildRenderObjectComponent {
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderErrorThrowing renderObject) {
+    BuildContext context,
+    RenderErrorThrowing renderObject,
+  ) {
     renderObject
       ..throwInLayout = throwInLayout
       ..throwInPaint = throwInPaint
@@ -72,9 +76,9 @@ class RenderErrorThrowing extends RenderObject {
     required bool throwInLayout,
     required bool throwInPaint,
     required String errorMessage,
-  })  : _throwInLayout = throwInLayout,
-        _throwInPaint = throwInPaint,
-        _errorMessage = errorMessage;
+  }) : _throwInLayout = throwInLayout,
+       _throwInPaint = throwInPaint,
+       _errorMessage = errorMessage;
 
   bool _throwInLayout;
   bool get throwInLayout => _throwInLayout;
@@ -127,10 +131,7 @@ class RenderErrorThrowing extends RenderObject {
     }
 
     // Normal paint (if not throwing)
-    canvas.drawText(
-      offset,
-      'No Error',
-    );
+    canvas.drawText(offset, 'No Error');
   }
 
   @override

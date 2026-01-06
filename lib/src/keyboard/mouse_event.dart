@@ -1,11 +1,5 @@
 /// Mouse button types
-enum MouseButton {
-  left,
-  middle,
-  right,
-  wheelUp,
-  wheelDown,
-}
+enum MouseButton { left, middle, right, wheelUp, wheelDown }
 
 /// Mouse event for terminal interactions
 class MouseEvent {

@@ -21,8 +21,10 @@ void main() {
         currentOffset: 10,
         direction: 1,
       );
-      expect(offset,
-          11); // Space before emoji -> emoji (emoji is 1 grapheme cluster)
+      expect(
+        offset,
+        11,
+      ); // Space before emoji -> emoji (emoji is 1 grapheme cluster)
     });
 
     test('handles wrapped lines in vertical movement', () {
@@ -52,10 +54,7 @@ void main() {
       final text = 'Line one\nA much longer second line\nShort';
       final layoutResult = TextLayoutEngine.layout(
         text,
-        TextLayoutConfig(
-          softWrap: false,
-          maxWidth: 100,
-        ),
+        TextLayoutConfig(softWrap: false, maxWidth: 100),
       );
 
       // Start at position 20 (somewhere in second line)
@@ -96,10 +95,7 @@ void main() {
       final text = 'First line\nSecond line\nThird';
       final layoutResult = TextLayoutEngine.layout(
         text,
-        TextLayoutConfig(
-          softWrap: false,
-          maxWidth: 100,
-        ),
+        TextLayoutConfig(softWrap: false, maxWidth: 100),
       );
 
       // Position at start of second line
@@ -119,10 +115,7 @@ void main() {
       final text = '你好世界'; // Chinese characters (double-width)
       final layoutResult = TextLayoutEngine.layout(
         text,
-        TextLayoutConfig(
-          softWrap: false,
-          maxWidth: 100,
-        ),
+        TextLayoutConfig(softWrap: false, maxWidth: 100),
       );
 
       // Position after first character
@@ -140,10 +133,7 @@ void main() {
       final text = 'First line\nSecond longer line\nThird';
       final layoutResult = TextLayoutEngine.layout(
         text,
-        TextLayoutConfig(
-          softWrap: false,
-          maxWidth: 100,
-        ),
+        TextLayoutConfig(softWrap: false, maxWidth: 100),
       );
 
       // Move to line start from middle of second line

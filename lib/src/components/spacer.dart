@@ -8,9 +8,6 @@ class Spacer extends StatelessComponent {
 
   @override
   Component build(BuildContext context) {
-    return Expanded(
-      flex: flex,
-      child: const SizedBox(),
-    );
+    return Expanded(flex: flex, child: const SizedBox());
   }
 }

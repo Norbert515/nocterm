@@ -21,10 +21,10 @@ class RenderStack extends RenderObject
     TextDirection? textDirection,
     stack_lib.StackFit fit = stack_lib.StackFit.loose,
     stack_lib.Clip clipBehavior = stack_lib.Clip.hardEdge,
-  })  : _alignment = alignment,
-        _textDirection = textDirection,
-        _fit = fit,
-        _clipBehavior = clipBehavior {
+  }) : _alignment = alignment,
+       _textDirection = textDirection,
+       _fit = fit,
+       _clipBehavior = clipBehavior {
     if (children != null) {
       for (final child in children) {
         addChild(child);
@@ -99,13 +99,15 @@ class RenderStack extends RenderObject
 
   /// Compute constraints for non-positioned children.
   BoxConstraints _computeNonPositionedChildConstraints(
-      BoxConstraints constraints) {
+    BoxConstraints constraints,
+  ) {
     switch (fit) {
       case stack_lib.StackFit.loose:
         return constraints.loosen();
       case stack_lib.StackFit.expand:
         return BoxConstraints.tight(
-            Size(constraints.maxWidth, constraints.maxHeight));
+          Size(constraints.maxWidth, constraints.maxHeight),
+        );
       case stack_lib.StackFit.passthrough:
         return constraints;
     }

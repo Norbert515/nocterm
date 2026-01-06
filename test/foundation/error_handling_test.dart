@@ -36,37 +36,33 @@ void main() {
     });
 
     test('paint error is caught and displayed', () async {
-      await testNocterm(
-        'paint error handling',
-        (tester) async {
-          // Create a widget that will throw during paint
-          await tester.pumpComponent(
-            const ErrorThrowingWidget(
-              throwInLayout: false,
-              throwInPaint: true,
-              errorMessage: 'Test paint error',
-            ),
-          );
+      await testNocterm('paint error handling', (tester) async {
+        // Create a widget that will throw during paint
+        await tester.pumpComponent(
+          const ErrorThrowingWidget(
+            throwInLayout: false,
+            throwInPaint: true,
+            errorMessage: 'Test paint error',
+          ),
+        );
 
-          // The app should not crash and should display an error
-          final output = tester.terminalState.getText();
+        // The app should not crash and should display an error
+        final output = tester.terminalState.getText();
 
-          // Should contain error border
-          expect(output, contains('┌'));
-          expect(output, contains('│'));
+        // Should contain error border
+        expect(output, contains('┌'));
+        expect(output, contains('│'));
 
-          // The error should be related to paint
-          expect(output, contains('Paint Error'));
-        },
-        debugPrintAfterPump: true,
-      );
+        // The error should be related to paint
+        expect(output, contains('Paint Error'));
+      }, debugPrintAfterPump: true);
     });
 
-    test('nested errors are isolated',
-        skip: 'Known issue: Error isolation not working as expected', () async {
-      await testNocterm(
-        'nested error isolation',
-        (tester) async {
+    test(
+      'nested errors are isolated',
+      skip: 'Known issue: Error isolation not working as expected',
+      () async {
+        await testNocterm('nested error isolation', (tester) async {
           // Create a column with one failing and one working widget
           await tester.pumpComponent(
             Column(
@@ -91,36 +87,31 @@ void main() {
           // because the error was in layout but the paint still runs
           // This demonstrates that errors don't crash the whole app
           expect(output, contains('No Error'));
-        },
-        debugPrintAfterPump: true,
-      );
-    });
+        }, debugPrintAfterPump: true);
+      },
+    );
 
     test('TUIErrorWidget displays custom error message', () async {
-      await testNocterm(
-        'custom error widget',
-        (tester) async {
-          await tester.pumpComponent(
-            const TUIErrorWidget(
-              message: 'Custom Error: Something went wrong',
-              error: 'TestError',
-            ),
-          );
+      await testNocterm('custom error widget', (tester) async {
+        await tester.pumpComponent(
+          const TUIErrorWidget(
+            message: 'Custom Error: Something went wrong',
+            error: 'TestError',
+          ),
+        );
 
-          final output = tester.terminalState.getText();
+        final output = tester.terminalState.getText();
 
-          // Should show the custom message
-          expect(output, contains('Custom'));
-          expect(output, contains('Error'));
+        // Should show the custom message
+        expect(output, contains('Custom'));
+        expect(output, contains('Error'));
 
-          // Should have error box border
-          expect(output, contains('┌'));
-          expect(output, contains('┐'));
-          expect(output, contains('└'));
-          expect(output, contains('┘'));
-        },
-        debugPrintAfterPump: true,
-      );
+        // Should have error box border
+        expect(output, contains('┌'));
+        expect(output, contains('┐'));
+        expect(output, contains('└'));
+        expect(output, contains('┘'));
+      }, debugPrintAfterPump: true);
     });
 
     test('error box respects size constraints', () async {

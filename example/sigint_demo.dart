@@ -106,9 +106,7 @@ class _SigintDemoState extends State<SigintDemo> {
         child: Container(
           width: 60,
           height: 25,
-          decoration: BoxDecoration(
-            border: BoxBorder.all(color: Colors.cyan),
-          ),
+          decoration: BoxDecoration(border: BoxBorder.all(color: Colors.cyan)),
           padding: const EdgeInsets.all(2),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,10 +141,7 @@ class _SigintDemoState extends State<SigintDemo> {
                 padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
                 child: Row(
                   children: [
-                    Text(
-                      'Status: ',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    Text('Status: ', style: TextStyle(color: Colors.white)),
                     Text(
                       _getStatusIcon(),
                       style: TextStyle(color: _getStatusColor()),
@@ -211,14 +206,8 @@ class _SigintDemoState extends State<SigintDemo> {
                   ),
                   Row(
                     children: [
-                      Text(
-                        'Last Key: ',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      Text(
-                        _lastKey,
-                        style: TextStyle(color: Colors.cyan),
-                      ),
+                      Text('Last Key: ', style: TextStyle(color: Colors.white)),
+                      Text(_lastKey, style: TextStyle(color: Colors.cyan)),
                     ],
                   ),
                 ],

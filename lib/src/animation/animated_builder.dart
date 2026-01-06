@@ -2,10 +2,8 @@ import 'package:nocterm/src/framework/framework.dart';
 import 'package:nocterm/src/framework/listenable.dart';
 
 /// Signature for the builder callback used by [AnimatedBuilder].
-typedef AnimatedComponentBuilder = Component Function(
-  BuildContext context,
-  Component? child,
-);
+typedef AnimatedComponentBuilder =
+    Component Function(BuildContext context, Component? child);
 
 /// A general-purpose component for building animations.
 ///

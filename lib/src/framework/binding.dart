@@ -36,18 +36,17 @@ abstract class NoctermBinding {
   void registerServiceExtension({
     required String name,
     required Future<Map<String, dynamic>> Function(
-            Map<String, String> parameters)
-        callback,
+      Map<String, String> parameters,
+    )
+    callback,
   }) {
-    developer.registerExtension(
-      'ext.nocterm.$name',
-      (String method, Map<String, String> parameters) async {
-        final result = await callback(parameters);
-        return developer.ServiceExtensionResponse.result(
-          json.encode(result),
-        );
-      },
-    );
+    developer.registerExtension('ext.nocterm.$name', (
+      String method,
+      Map<String, String> parameters,
+    ) async {
+      final result = await callback(parameters);
+      return developer.ServiceExtensionResponse.result(json.encode(result));
+    });
   }
 
   /// Registers a service extension for a boolean value.
@@ -176,8 +175,10 @@ class InheritedElement extends BuildableElement {
   @override
   void _updateInheritance() {
     _inheritedElements =
-        (_parent?._inheritedElements ?? const PersistentHashMap.empty())
-            .put(component.runtimeType, this);
+        (_parent?._inheritedElements ?? const PersistentHashMap.empty()).put(
+          component.runtimeType,
+          this,
+        );
   }
 
   @protected
@@ -202,7 +203,9 @@ class InheritedElement extends BuildableElement {
 
   @protected
   void notifyDependent(
-      covariant InheritedComponent oldComponent, covariant Element dependent) {
+    covariant InheritedComponent oldComponent,
+    covariant Element dependent,
+  ) {
     dependent.didChangeDependencies();
   }
 

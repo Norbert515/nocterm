@@ -38,7 +38,8 @@ void main() async {
     print('');
     print('// In production, you would call:');
     print(
-        '// Sentry.captureException(details.exception, stackTrace: details.stack);');
+      '// Sentry.captureException(details.exception, stackTrace: details.stack);',
+    );
     print('');
 
     // Still dump to console for visibility
@@ -69,9 +70,7 @@ class _ErrorHandlingDemoState extends State<ErrorHandlingDemo> {
         // Header
         Container(
           height: 3,
-          decoration: BoxDecoration(
-            border: BoxBorder.all(color: Colors.cyan),
-          ),
+          decoration: BoxDecoration(border: BoxBorder.all(color: Colors.cyan)),
           child: Center(
             child: Text(
               'NoctermError Demo - Press keys to trigger errors',
@@ -184,11 +183,7 @@ class _ErrorHandlingDemoState extends State<ErrorHandlingDemo> {
                           ),
                         ),
                         const Divider(),
-                        Expanded(
-                          child: Center(
-                            child: _buildErrorWidget(),
-                          ),
-                        ),
+                        Expanded(child: Center(child: _buildErrorWidget())),
                       ],
                     ),
                   ),
@@ -201,9 +196,7 @@ class _ErrorHandlingDemoState extends State<ErrorHandlingDemo> {
         // Footer
         Container(
           height: 3,
-          decoration: BoxDecoration(
-            border: BoxBorder.all(color: Colors.gray),
-          ),
+          decoration: BoxDecoration(border: BoxBorder.all(color: Colors.gray)),
           child: Center(
             child: Text(
               'Check your terminal output for custom error handler messages',
@@ -221,10 +214,7 @@ class _ErrorHandlingDemoState extends State<ErrorHandlingDemo> {
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'No errors yet',
-              style: TextStyle(color: Colors.gray),
-            ),
+            Text('No errors yet', style: TextStyle(color: Colors.gray)),
             const SizedBox(height: 1),
             Text(
               'Press 1-4 to trigger an error',
@@ -344,10 +334,4 @@ class _ErrorHandlingDemoState extends State<ErrorHandlingDemo> {
   }
 }
 
-enum ErrorType {
-  none,
-  layout,
-  paint,
-  build,
-  manual,
-}
+enum ErrorType { none, layout, paint, build, manual }

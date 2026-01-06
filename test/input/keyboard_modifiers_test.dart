@@ -34,8 +34,10 @@ void main() {
       );
 
       expect(event1.matches(LogicalKey.keyA, ctrl: true), isTrue);
-      expect(event1.matches(LogicalKey.keyA),
-          isTrue); // Not specifying modifiers means any state is OK
+      expect(
+        event1.matches(LogicalKey.keyA),
+        isTrue,
+      ); // Not specifying modifiers means any state is OK
       expect(event1.matches(LogicalKey.keyB, ctrl: true), isFalse);
       expect(event1.matches(LogicalKey.keyA, ctrl: false), isFalse);
       expect(event1.matches(LogicalKey.keyA, ctrl: true, shift: false), isTrue);
@@ -45,8 +47,10 @@ void main() {
       // Lowercase 'a'
       final eventA = parser.parseBytes([0x61]);
       expect(eventA, isNotNull);
-      expect(eventA!.logicalKey,
-          equals(LogicalKey.keyA)); // Same key for both cases
+      expect(
+        eventA!.logicalKey,
+        equals(LogicalKey.keyA),
+      ); // Same key for both cases
       expect(eventA.character, equals('a'));
       expect(eventA.modifiers.shift, isFalse);
 
@@ -54,8 +58,10 @@ void main() {
       parser.clear();
       final eventShiftA = parser.parseBytes([0x41]);
       expect(eventShiftA, isNotNull);
-      expect(eventShiftA!.logicalKey,
-          equals(LogicalKey.keyA)); // Same key for both cases
+      expect(
+        eventShiftA!.logicalKey,
+        equals(LogicalKey.keyA),
+      ); // Same key for both cases
       expect(eventShiftA.character, equals('A'));
       expect(eventShiftA.modifiers.shift, isTrue);
     });
@@ -101,8 +107,14 @@ void main() {
 
       // Shift+Arrow Up (ESC [ 1 ; 2 A)
       parser.clear();
-      final shiftArrowUp =
-          parser.parseBytes([0x1B, 0x5B, 0x31, 0x3B, 0x32, 0x41]);
+      final shiftArrowUp = parser.parseBytes([
+        0x1B,
+        0x5B,
+        0x31,
+        0x3B,
+        0x32,
+        0x41,
+      ]);
       expect(shiftArrowUp, isNotNull);
       expect(shiftArrowUp!.logicalKey, equals(LogicalKey.arrowUp));
       expect(shiftArrowUp.modifiers.shift, isTrue);
@@ -110,8 +122,14 @@ void main() {
 
       // Alt+Arrow Up (ESC [ 1 ; 3 A)
       parser.clear();
-      final altArrowUp =
-          parser.parseBytes([0x1B, 0x5B, 0x31, 0x3B, 0x33, 0x41]);
+      final altArrowUp = parser.parseBytes([
+        0x1B,
+        0x5B,
+        0x31,
+        0x3B,
+        0x33,
+        0x41,
+      ]);
       expect(altArrowUp, isNotNull);
       expect(altArrowUp!.logicalKey, equals(LogicalKey.arrowUp));
       expect(altArrowUp.modifiers.alt, isTrue);
@@ -119,8 +137,14 @@ void main() {
 
       // Ctrl+Arrow Up (ESC [ 1 ; 5 A)
       parser.clear();
-      final ctrlArrowUp =
-          parser.parseBytes([0x1B, 0x5B, 0x31, 0x3B, 0x35, 0x41]);
+      final ctrlArrowUp = parser.parseBytes([
+        0x1B,
+        0x5B,
+        0x31,
+        0x3B,
+        0x35,
+        0x41,
+      ]);
       expect(ctrlArrowUp, isNotNull);
       expect(ctrlArrowUp!.logicalKey, equals(LogicalKey.arrowUp));
       expect(ctrlArrowUp.modifiers.ctrl, isTrue);

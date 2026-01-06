@@ -23,13 +23,17 @@ class _BorderTitleDemoState extends State<BorderTitleDemo> {
               Text(
                 'Border Title Demo',
                 style: TextStyle(
-                    color: Colors.cyan, decoration: TextDecoration.underline),
+                  color: Colors.cyan,
+                  decoration: TextDecoration.underline,
+                ),
               ),
               SizedBox(height: 2),
 
               // Left-aligned title (default)
-              Text('Left-aligned title:',
-                  style: TextStyle(color: Colors.yellow)),
+              Text(
+                'Left-aligned title:',
+                style: TextStyle(color: Colors.yellow),
+              ),
               SizedBox(height: 1),
               Container(
                 width: 40,
@@ -43,8 +47,10 @@ class _BorderTitleDemoState extends State<BorderTitleDemo> {
               SizedBox(height: 2),
 
               // Center-aligned title
-              Text('Center-aligned title:',
-                  style: TextStyle(color: Colors.yellow)),
+              Text(
+                'Center-aligned title:',
+                style: TextStyle(color: Colors.yellow),
+              ),
               SizedBox(height: 1),
               Container(
                 width: 40,
@@ -61,8 +67,10 @@ class _BorderTitleDemoState extends State<BorderTitleDemo> {
               SizedBox(height: 2),
 
               // Right-aligned title
-              Text('Right-aligned title:',
-                  style: TextStyle(color: Colors.yellow)),
+              Text(
+                'Right-aligned title:',
+                style: TextStyle(color: Colors.yellow),
+              ),
               SizedBox(height: 1),
               Container(
                 width: 40,
@@ -79,15 +87,19 @@ class _BorderTitleDemoState extends State<BorderTitleDemo> {
               SizedBox(height: 2),
 
               // Styled title
-              Text('Styled title with color:',
-                  style: TextStyle(color: Colors.yellow)),
+              Text(
+                'Styled title with color:',
+                style: TextStyle(color: Colors.yellow),
+              ),
               SizedBox(height: 1),
               Container(
                 width: 40,
                 height: 5,
                 decoration: BoxDecoration(
                   border: BoxBorder.all(
-                      color: Colors.cyan, style: BoxBorderStyle.rounded),
+                    color: Colors.cyan,
+                    style: BoxBorderStyle.rounded,
+                  ),
                   title: BorderTitle(
                     text: 'Important',
                     style: TextStyle(color: Colors.red),
@@ -107,7 +119,9 @@ class _BorderTitleDemoState extends State<BorderTitleDemo> {
                       height: 6,
                       decoration: BoxDecoration(
                         border: BoxBorder.all(
-                            color: Colors.green, style: BoxBorderStyle.rounded),
+                          color: Colors.green,
+                          style: BoxBorderStyle.rounded,
+                        ),
                         title: BorderTitle(text: 'Input'),
                       ),
                       padding: EdgeInsets.all(1),
@@ -120,7 +134,9 @@ class _BorderTitleDemoState extends State<BorderTitleDemo> {
                       height: 6,
                       decoration: BoxDecoration(
                         border: BoxBorder.all(
-                            color: Colors.blue, style: BoxBorderStyle.rounded),
+                          color: Colors.blue,
+                          style: BoxBorderStyle.rounded,
+                        ),
                         title: BorderTitle(text: 'Output'),
                       ),
                       padding: EdgeInsets.all(1),
@@ -132,8 +148,10 @@ class _BorderTitleDemoState extends State<BorderTitleDemo> {
               SizedBox(height: 2),
 
               // Partial borders (no corners when sides don't connect)
-              Text('Partial borders (top only):',
-                  style: TextStyle(color: Colors.yellow)),
+              Text(
+                'Partial borders (top only):',
+                style: TextStyle(color: Colors.yellow),
+              ),
               SizedBox(height: 1),
               Container(
                 width: 40,
@@ -141,7 +159,9 @@ class _BorderTitleDemoState extends State<BorderTitleDemo> {
                 decoration: BoxDecoration(
                   border: BoxBorder(
                     top: BorderSide(
-                        color: Colors.magenta, style: BoxBorderStyle.rounded),
+                      color: Colors.magenta,
+                      style: BoxBorderStyle.rounded,
+                    ),
                   ),
                   title: BorderTitle(text: 'Section Header'),
                 ),
@@ -150,8 +170,10 @@ class _BorderTitleDemoState extends State<BorderTitleDemo> {
               SizedBox(height: 2),
 
               // Top and bottom only
-              Text('Top + Bottom borders:',
-                  style: TextStyle(color: Colors.yellow)),
+              Text(
+                'Top + Bottom borders:',
+                style: TextStyle(color: Colors.yellow),
+              ),
               SizedBox(height: 1),
               Container(
                 width: 40,
@@ -159,9 +181,13 @@ class _BorderTitleDemoState extends State<BorderTitleDemo> {
                 decoration: BoxDecoration(
                   border: BoxBorder(
                     top: BorderSide(
-                        color: Colors.cyan, style: BoxBorderStyle.solid),
+                      color: Colors.cyan,
+                      style: BoxBorderStyle.solid,
+                    ),
                     bottom: BorderSide(
-                        color: Colors.cyan, style: BoxBorderStyle.solid),
+                      color: Colors.cyan,
+                      style: BoxBorderStyle.solid,
+                    ),
                   ),
                   title: BorderTitle(text: 'Divider Style'),
                 ),

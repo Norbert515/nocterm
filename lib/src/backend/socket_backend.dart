@@ -15,7 +15,7 @@ class SocketBackend implements TerminalBackend {
   bool _disposed = false;
 
   SocketBackend(this._socket, {Size? initialSize})
-      : _size = initialSize ?? const Size(80, 24);
+    : _size = initialSize ?? const Size(80, 24);
 
   @override
   void writeRaw(String data) {
@@ -45,8 +45,7 @@ class SocketBackend implements TerminalBackend {
   Stream<Size>? get resizeStream => _resizeController.stream;
 
   @override
-  Stream<void>? get shutdownStream =>
-      null; // Socket closure handled differently
+  Stream<void>? get shutdownStream => null; // Socket closure handled differently
 
   @override
   void enableRawMode() {

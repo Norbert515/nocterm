@@ -23,11 +23,7 @@ class TuiTheme extends InheritedComponent {
   final TuiThemeData data;
 
   /// Creates a theme provider.
-  const TuiTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const TuiTheme({super.key, required this.data, required super.child});
 
   /// Returns the [TuiThemeData] from the closest [TuiTheme] ancestor.
   ///
@@ -61,8 +57,8 @@ class TuiTheme extends InheritedComponent {
   ///
   /// Returns `null` if no [TuiTheme] ancestor exists.
   static TuiThemeData? maybeOf(BuildContext context) {
-    final element =
-        context.getElementForInheritedComponentOfExactType<TuiTheme>();
+    final element = context
+        .getElementForInheritedComponentOfExactType<TuiTheme>();
     return (element?.component as TuiTheme?)?.data;
   }
 

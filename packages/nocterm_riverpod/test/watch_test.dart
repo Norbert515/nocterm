@@ -8,57 +8,54 @@ void main() {
       final counterProvider = StateProvider<int>((ref) => 0);
       int buildCount = 0;
 
-      await testNocterm(
-        'watch rebuilds',
-        (tester) async {
-          await tester.pumpComponent(
-            ProviderScope(
-              child: _WatchTestComponent(
-                builder: (context) {
-                  buildCount++;
-                  final count = context.watch(counterProvider);
-                  return Column(
-                    children: [
-                      Text('Count: $count'),
-                      Text('Builds: $buildCount'),
-                      KeyboardListener(
-                        onKeyEvent: (key) {
-                          if (key == LogicalKey.arrowUp) {
-                            context.read(counterProvider.notifier).state++;
-                          }
-                          return false;
-                        },
-                        child: const Text('Press up to increment'),
-                      ),
-                    ],
-                  );
-                },
-              ),
+      await testNocterm('watch rebuilds', (tester) async {
+        await tester.pumpComponent(
+          ProviderScope(
+            child: _WatchTestComponent(
+              builder: (context) {
+                buildCount++;
+                final count = context.watch(counterProvider);
+                return Column(
+                  children: [
+                    Text('Count: $count'),
+                    Text('Builds: $buildCount'),
+                    KeyboardListener(
+                      onKeyEvent: (key) {
+                        if (key == LogicalKey.arrowUp) {
+                          context.read(counterProvider.notifier).state++;
+                        }
+                        return false;
+                      },
+                      child: const Text('Press up to increment'),
+                    ),
+                  ],
+                );
+              },
             ),
-          );
+          ),
+        );
 
-          // Initial build
-          expect(buildCount, 1);
-          expect(tester.terminalState, containsText('Count: 0'));
-          expect(tester.terminalState, containsText('Builds: 1'));
+        // Initial build
+        expect(buildCount, 1);
+        expect(tester.terminalState, containsText('Count: 0'));
+        expect(tester.terminalState, containsText('Builds: 1'));
 
-          // Increment counter - should trigger rebuild
-          await tester.sendKey(LogicalKey.arrowUp);
-          await tester.pump();
+        // Increment counter - should trigger rebuild
+        await tester.sendKey(LogicalKey.arrowUp);
+        await tester.pump();
 
-          expect(buildCount, 2);
-          expect(tester.terminalState, containsText('Count: 1'));
-          expect(tester.terminalState, containsText('Builds: 2'));
+        expect(buildCount, 2);
+        expect(tester.terminalState, containsText('Count: 1'));
+        expect(tester.terminalState, containsText('Builds: 2'));
 
-          // Increment again
-          await tester.sendKey(LogicalKey.arrowUp);
-          await tester.pump();
+        // Increment again
+        await tester.sendKey(LogicalKey.arrowUp);
+        await tester.pump();
 
-          expect(buildCount, 3);
-          expect(tester.terminalState, containsText('Count: 2'));
-          expect(tester.terminalState, containsText('Builds: 3'));
-        },
-      );
+        expect(buildCount, 3);
+        expect(tester.terminalState, containsText('Count: 2'));
+        expect(tester.terminalState, containsText('Builds: 3'));
+      });
     });
 
     test('watch with multiple providers', () async {
@@ -66,58 +63,55 @@ void main() {
       final ageProvider = StateProvider<int>((ref) => 30);
       int buildCount = 0;
 
-      await testNocterm(
-        'multiple watches',
-        (tester) async {
-          await tester.pumpComponent(
-            ProviderScope(
-              child: _WatchTestComponent(
-                builder: (context) {
-                  buildCount++;
-                  final name = context.watch(nameProvider);
-                  final age = context.watch(ageProvider);
+      await testNocterm('multiple watches', (tester) async {
+        await tester.pumpComponent(
+          ProviderScope(
+            child: _WatchTestComponent(
+              builder: (context) {
+                buildCount++;
+                final name = context.watch(nameProvider);
+                final age = context.watch(ageProvider);
 
-                  return Column(
-                    children: [
-                      Text('$name is $age years old'),
-                      Text('Builds: $buildCount'),
-                      KeyboardListener(
-                        onKeyEvent: (key) {
-                          if (key == LogicalKey.arrowUp) {
-                            context.read(ageProvider.notifier).state++;
-                          } else if (key == LogicalKey.arrowRight) {
-                            context.read(nameProvider.notifier).state = 'Bob';
-                          }
-                          return false;
-                        },
-                        child: const Text('Up: age, Right: name'),
-                      ),
-                    ],
-                  );
-                },
-              ),
+                return Column(
+                  children: [
+                    Text('$name is $age years old'),
+                    Text('Builds: $buildCount'),
+                    KeyboardListener(
+                      onKeyEvent: (key) {
+                        if (key == LogicalKey.arrowUp) {
+                          context.read(ageProvider.notifier).state++;
+                        } else if (key == LogicalKey.arrowRight) {
+                          context.read(nameProvider.notifier).state = 'Bob';
+                        }
+                        return false;
+                      },
+                      child: const Text('Up: age, Right: name'),
+                    ),
+                  ],
+                );
+              },
             ),
-          );
+          ),
+        );
 
-          // Initial build
-          expect(buildCount, 1);
-          expect(tester.terminalState, containsText('Alice is 30 years old'));
+        // Initial build
+        expect(buildCount, 1);
+        expect(tester.terminalState, containsText('Alice is 30 years old'));
 
-          // Change age
-          await tester.sendKey(LogicalKey.arrowUp);
-          await tester.pump();
+        // Change age
+        await tester.sendKey(LogicalKey.arrowUp);
+        await tester.pump();
 
-          expect(buildCount, 2);
-          expect(tester.terminalState, containsText('Alice is 31 years old'));
+        expect(buildCount, 2);
+        expect(tester.terminalState, containsText('Alice is 31 years old'));
 
-          // Change name
-          await tester.sendKey(LogicalKey.arrowRight);
-          await tester.pump();
+        // Change name
+        await tester.sendKey(LogicalKey.arrowRight);
+        await tester.pump();
 
-          expect(buildCount, 3);
-          expect(tester.terminalState, containsText('Bob is 31 years old'));
-        },
-      );
+        expect(buildCount, 3);
+        expect(tester.terminalState, containsText('Bob is 31 years old'));
+      });
     });
 
     test('watch with computed provider', () async {
@@ -129,96 +123,88 @@ void main() {
 
       int buildCount = 0;
 
-      await testNocterm(
-        'computed provider',
-        (tester) async {
-          await tester.pumpComponent(
-            ProviderScope(
-              child: _WatchTestComponent(
-                builder: (context) {
-                  buildCount++;
-                  final doubled = context.watch(doubledProvider);
+      await testNocterm('computed provider', (tester) async {
+        await tester.pumpComponent(
+          ProviderScope(
+            child: _WatchTestComponent(
+              builder: (context) {
+                buildCount++;
+                final doubled = context.watch(doubledProvider);
 
-                  return Column(
-                    children: [
-                      Text('Doubled: $doubled'),
-                      Text('Builds: $buildCount'),
-                      KeyboardListener(
-                        onKeyEvent: (key) {
-                          if (key == LogicalKey.arrowUp) {
-                            context.read(counterProvider.notifier).state++;
-                          }
-                          return false;
-                        },
-                        child: const Text('Press up to increment'),
-                      ),
-                    ],
-                  );
-                },
-              ),
+                return Column(
+                  children: [
+                    Text('Doubled: $doubled'),
+                    Text('Builds: $buildCount'),
+                    KeyboardListener(
+                      onKeyEvent: (key) {
+                        if (key == LogicalKey.arrowUp) {
+                          context.read(counterProvider.notifier).state++;
+                        }
+                        return false;
+                      },
+                      child: const Text('Press up to increment'),
+                    ),
+                  ],
+                );
+              },
             ),
-          );
+          ),
+        );
 
-          // Initial build
-          expect(buildCount, 1);
-          expect(tester.terminalState, containsText('Doubled: 20'));
+        // Initial build
+        expect(buildCount, 1);
+        expect(tester.terminalState, containsText('Doubled: 20'));
 
-          // Increment base counter
-          await tester.sendKey(LogicalKey.arrowUp);
-          await tester.pump();
+        // Increment base counter
+        await tester.sendKey(LogicalKey.arrowUp);
+        await tester.pump();
 
-          expect(buildCount, 2);
-          expect(tester.terminalState, containsText('Doubled: 22'));
-        },
-      );
+        expect(buildCount, 2);
+        expect(tester.terminalState, containsText('Doubled: 22'));
+      });
     });
 
     test('nested ProviderScopes with watch', () async {
       final colorProvider = StateProvider<String>((ref) => 'blue');
 
-      await testNocterm(
-        'nested scopes',
-        (tester) async {
-          await tester.pumpComponent(
-            ProviderScope(
-              child: Column(
-                children: [
-                  _WatchTestComponent(
+      await testNocterm('nested scopes', (tester) async {
+        await tester.pumpComponent(
+          ProviderScope(
+            child: Column(
+              children: [
+                _WatchTestComponent(
+                  builder: (context) {
+                    final color = context.watch(colorProvider);
+                    return Text('Outer: $color');
+                  },
+                ),
+                ProviderScope(
+                  overrides: [colorProvider.overrideWith((ref) => 'red')],
+                  child: _WatchTestComponent(
                     builder: (context) {
                       final color = context.watch(colorProvider);
-                      return Text('Outer: $color');
+                      return Text('Inner: $color');
                     },
                   ),
-                  ProviderScope(
-                    overrides: [
-                      colorProvider.overrideWith((ref) => 'red'),
-                    ],
-                    child: _WatchTestComponent(
-                      builder: (context) {
-                        final color = context.watch(colorProvider);
-                        return Text('Inner: $color');
-                      },
-                    ),
-                  ),
-                  KeyboardListener(
-                    onKeyEvent: (key) {
-                      if (key == LogicalKey.arrowUp) {
-                        // This won't work as expected since we're outside the scope
-                        // but it's here for testing
-                      }
-                      return false;
-                    },
-                    child: const Text('Controls'),
-                  ),
-                ],
-              ),
+                ),
+                KeyboardListener(
+                  onKeyEvent: (key) {
+                    if (key == LogicalKey.arrowUp) {
+                      // This won't work as expected since we're outside the scope
+                      // but it's here for testing
+                    }
+                    return false;
+                  },
+                  child: const Text('Controls'),
+                ),
+              ],
             ),
-          );
+          ),
+        );
 
-          expect(tester.terminalState, containsText('Outer: blue'));
-          expect(tester.terminalState, containsText('Inner: red'));
-        },
-      );
+        expect(tester.terminalState, containsText('Outer: blue'));
+        expect(tester.terminalState, containsText('Inner: red'));
+      });
     });
 
     test('watch does not create duplicate subscriptions', () async {
@@ -226,62 +212,59 @@ void main() {
       final rebuildTrigger = StateProvider<int>((ref) => 0);
       int watchCallCount = 0;
 
-      await testNocterm(
-        'no duplicate subscriptions',
-        (tester) async {
-          await tester.pumpComponent(
-            ProviderScope(
-              child: _WatchTestComponent(
-                builder: (context) {
-                  // Watch counter (track how many times watch is called)
-                  watchCallCount++;
-                  final count = context.watch(counterProvider);
+      await testNocterm('no duplicate subscriptions', (tester) async {
+        await tester.pumpComponent(
+          ProviderScope(
+            child: _WatchTestComponent(
+              builder: (context) {
+                // Watch counter (track how many times watch is called)
+                watchCallCount++;
+                final count = context.watch(counterProvider);
 
-                  // Also watch another provider to trigger rebuilds
-                  context.watch(rebuildTrigger);
+                // Also watch another provider to trigger rebuilds
+                context.watch(rebuildTrigger);
 
-                  return Column(
-                    children: [
-                      Text('Count: $count'),
-                      Text('Watch calls: $watchCallCount'),
-                      KeyboardListener(
-                        onKeyEvent: (key) {
-                          if (key == LogicalKey.arrowUp) {
-                            context.read(counterProvider.notifier).state++;
-                          } else if (key == LogicalKey.arrowRight) {
-                            // Trigger rebuild without changing counter
-                            context.read(rebuildTrigger.notifier).state++;
-                          }
-                          return false;
-                        },
-                        child: const Text('Up: counter, Right: rebuild'),
-                      ),
-                    ],
-                  );
-                },
-              ),
+                return Column(
+                  children: [
+                    Text('Count: $count'),
+                    Text('Watch calls: $watchCallCount'),
+                    KeyboardListener(
+                      onKeyEvent: (key) {
+                        if (key == LogicalKey.arrowUp) {
+                          context.read(counterProvider.notifier).state++;
+                        } else if (key == LogicalKey.arrowRight) {
+                          // Trigger rebuild without changing counter
+                          context.read(rebuildTrigger.notifier).state++;
+                        }
+                        return false;
+                      },
+                      child: const Text('Up: counter, Right: rebuild'),
+                    ),
+                  ],
+                );
+              },
             ),
-          );
+          ),
+        );
 
-          // Initial build
-          expect(watchCallCount, 1);
+        // Initial build
+        expect(watchCallCount, 1);
 
-          // Trigger rebuild without changing counter
-          await tester.sendKey(LogicalKey.arrowRight);
-          await tester.pump();
+        // Trigger rebuild without changing counter
+        await tester.sendKey(LogicalKey.arrowRight);
+        await tester.pump();
 
-          // Watch was called again but shouldn't create duplicate subscription
-          expect(watchCallCount, 2);
+        // Watch was called again but shouldn't create duplicate subscription
+        expect(watchCallCount, 2);
 
-          // Now change the counter
-          await tester.sendKey(LogicalKey.arrowUp);
-          await tester.pump();
+        // Now change the counter
+        await tester.sendKey(LogicalKey.arrowUp);
+        await tester.pump();
 
-          // Should only rebuild once despite multiple watch calls
-          expect(watchCallCount, 3);
-          expect(tester.terminalState, containsText('Count: 1'));
-        },
-      );
+        // Should only rebuild once despite multiple watch calls
+        expect(watchCallCount, 3);
+        expect(tester.terminalState, containsText('Count: 1'));
+      });
     });
   });
 
@@ -289,35 +272,32 @@ void main() {
     test('listen receives updates without rebuilding', () async {
       final counterProvider = StateProvider<int>((ref) => 0);
 
-      await testNocterm(
-        'listen without rebuild',
-        (tester) async {
-          await tester.pumpComponent(
-            ProviderScope(
-              child: _ListenTestComponent(counterProvider: counterProvider),
-            ),
-          );
+      await testNocterm('listen without rebuild', (tester) async {
+        await tester.pumpComponent(
+          ProviderScope(
+            child: _ListenTestComponent(counterProvider: counterProvider),
+          ),
+        );
 
-          // Initial state
-          expect(tester.terminalState, containsText('Last value: 0'));
-          expect(tester.terminalState, containsText('Build count: 1'));
+        // Initial state
+        expect(tester.terminalState, containsText('Last value: 0'));
+        expect(tester.terminalState, containsText('Build count: 1'));
 
-          // Increment counter
-          await tester.sendKey(LogicalKey.arrowUp);
-          await tester.pump();
+        // Increment counter
+        await tester.sendKey(LogicalKey.arrowUp);
+        await tester.pump();
 
-          // Value updated but build count stays the same
-          expect(tester.terminalState, containsText('Last value: 1'));
-          expect(tester.terminalState, containsText('Build count: 1'));
+        // Value updated but build count stays the same
+        expect(tester.terminalState, containsText('Last value: 1'));
+        expect(tester.terminalState, containsText('Build count: 1'));
 
-          // Increment again
-          await tester.sendKey(LogicalKey.arrowUp);
-          await tester.pump();
+        // Increment again
+        await tester.sendKey(LogicalKey.arrowUp);
+        await tester.pump();
 
-          expect(tester.terminalState, containsText('Last value: 2'));
-          expect(tester.terminalState, containsText('Build count: 1'));
-        },
-      );
+        expect(tester.terminalState, containsText('Last value: 2'));
+        expect(tester.terminalState, containsText('Build count: 1'));
+      });
     });
   });
 }

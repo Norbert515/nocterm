@@ -3,15 +3,16 @@ import 'package:test/test.dart';
 
 void main() {
   group('Flex error cases', () {
-    test('Column with Expanded child in unbounded height should error',
-        () async {
+    test('Column with Expanded child in unbounded height should error', () async {
       await testNocterm(
         'expanded in unbounded column',
         (tester) async {
           print(
-              '\n=== Testing Expanded in unbounded Column (should error) ===');
+            '\n=== Testing Expanded in unbounded Column (should error) ===',
+          );
           print(
-              'Note: Error is caught by RenderObject and displayed as layout error');
+            'Note: Error is caught by RenderObject and displayed as layout error',
+          );
 
           await tester.pumpComponent(
             Column(
@@ -36,8 +37,10 @@ void main() {
                       child: Container(
                         width: 20,
                         color: Colors.yellow,
-                        child: Text('Expanded',
-                            style: TextStyle(color: Colors.black)),
+                        child: Text(
+                          'Expanded',
+                          style: TextStyle(color: Colors.black),
+                        ),
                       ),
                     ),
                   ],
@@ -67,7 +70,8 @@ void main() {
         (tester) async {
           print('\n=== Testing Expanded in unbounded Row (should error) ===');
           print(
-              'Note: Error is caught by RenderObject and displayed as layout error');
+            'Note: Error is caught by RenderObject and displayed as layout error',
+          );
 
           await tester.pumpComponent(
             Row(
@@ -92,8 +96,10 @@ void main() {
                       child: Container(
                         height: 10,
                         color: Colors.yellow,
-                        child:
-                            Text('Exp', style: TextStyle(color: Colors.black)),
+                        child: Text(
+                          'Exp',
+                          style: TextStyle(color: Colors.black),
+                        ),
                       ),
                     ),
                   ],
@@ -117,13 +123,13 @@ void main() {
       );
     });
 
-    test('Column with MainAxisSize.max in unbounded height should error',
-        () async {
-      await testNocterm(
-        'mainAxisSize.max in unbounded',
-        (tester) async {
+    test(
+      'Column with MainAxisSize.max in unbounded height should error',
+      () async {
+        await testNocterm('mainAxisSize.max in unbounded', (tester) async {
           print(
-              '\n=== Testing MainAxisSize.max in unbounded Column (should error) ===');
+            '\n=== Testing MainAxisSize.max in unbounded Column (should error) ===',
+          );
 
           bool errorThrown = false;
           String? errorMessage;
@@ -141,8 +147,10 @@ void main() {
                         width: 20,
                         height: 3,
                         color: Colors.red,
-                        child: Text('Child',
-                            style: TextStyle(color: Colors.white)),
+                        child: Text(
+                          'Child',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ],
                   ),
@@ -157,20 +165,22 @@ void main() {
 
           // In Flutter, this would NOT error because there are no flex children
           // Our implementation currently allows this too
-          expect(errorThrown, isFalse,
-              reason: 'Should NOT error when no flex children');
-        },
-        debugPrintAfterPump: true,
-      );
-    });
+          expect(
+            errorThrown,
+            isFalse,
+            reason: 'Should NOT error when no flex children',
+          );
+        }, debugPrintAfterPump: true);
+      },
+    );
 
-    test('Column with MainAxisSize.min in unbounded height should work',
-        () async {
-      await testNocterm(
-        'mainAxisSize.min in unbounded',
-        (tester) async {
+    test(
+      'Column with MainAxisSize.min in unbounded height should work',
+      () async {
+        await testNocterm('mainAxisSize.min in unbounded', (tester) async {
           print(
-              '\n=== Testing MainAxisSize.min in unbounded Column (should work) ===');
+            '\n=== Testing MainAxisSize.min in unbounded Column (should work) ===',
+          );
 
           await tester.pumpComponent(
             Column(
@@ -214,9 +224,8 @@ void main() {
           expect(tester.terminalState, containsText('A'));
           expect(tester.terminalState, containsText('B'));
           expect(tester.terminalState, containsText('Bot'));
-        },
-        debugPrintAfterPump: true,
-      );
-    });
+        }, debugPrintAfterPump: true);
+      },
+    );
   });
 }

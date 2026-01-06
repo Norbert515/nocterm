@@ -65,8 +65,9 @@ class AsciiLayoutEngine {
     for (final word in words) {
       final layout = _layoutWord(word, font);
       wordLayouts.add(layout);
-      wordWidths
-          .add(layout.isEmpty ? 0 : UnicodeWidth.stringWidth(layout.first));
+      wordWidths.add(
+        layout.isEmpty ? 0 : UnicodeWidth.stringWidth(layout.first),
+      );
     }
 
     // Calculate space width
@@ -95,8 +96,9 @@ class AsciiLayoutEngine {
     } else {
       // No wrapping - single line
       final singleLine = _joinWords(wordLayouts, spaceWidth, fontHeight);
-      maxLineWidth =
-          singleLine.isEmpty ? 0 : UnicodeWidth.stringWidth(singleLine.first);
+      maxLineWidth = singleLine.isEmpty
+          ? 0
+          : UnicodeWidth.stringWidth(singleLine.first);
       resultLines.addAll(singleLine);
     }
 
@@ -247,10 +249,10 @@ class RenderAsciiText extends RenderObject {
     TextStyle? style,
     AsciiFont font = const _StandardFontRef(),
     TextAlign textAlign = TextAlign.left,
-  })  : _text = text,
-        _style = style,
-        _font = font,
-        _textAlign = textAlign;
+  }) : _text = text,
+       _style = style,
+       _font = font,
+       _textAlign = textAlign;
 
   String _text;
   String get text => _text;
@@ -291,8 +293,9 @@ class RenderAsciiText extends RenderObject {
 
   @override
   void performLayout() {
-    final maxWidth =
-        constraints.maxWidth.isFinite ? constraints.maxWidth.toInt() : null;
+    final maxWidth = constraints.maxWidth.isFinite
+        ? constraints.maxWidth.toInt()
+        : null;
 
     final config = AsciiLayoutConfig(
       font: _font,
@@ -302,10 +305,9 @@ class RenderAsciiText extends RenderObject {
 
     _layoutResult = AsciiLayoutEngine.layout(_text, config);
 
-    size = constraints.constrain(Size(
-      _layoutResult!.width.toDouble(),
-      _layoutResult!.height.toDouble(),
-    ));
+    size = constraints.constrain(
+      Size(_layoutResult!.width.toDouble(), _layoutResult!.height.toDouble()),
+    );
   }
 
   @override
@@ -321,18 +323,15 @@ class RenderAsciiText extends RenderObject {
       final line = lines[i];
 
       // Calculate horizontal offset based on text alignment
-      final xOffset = offset.dx +
+      final xOffset =
+          offset.dx +
           AsciiLayoutEngine.calculateAlignmentOffset(
             line,
             alignmentWidth,
             _textAlign,
           );
 
-      canvas.drawText(
-        Offset(xOffset, offset.dy + i),
-        line,
-        style: _style,
-      );
+      canvas.drawText(Offset(xOffset, offset.dy + i), line, style: _style);
     }
   }
 }

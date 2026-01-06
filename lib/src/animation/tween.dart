@@ -19,10 +19,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
   ///
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but can be null when the tween is created.
-  Tween({
-    this.begin,
-    this.end,
-  });
+  Tween({this.begin, this.end});
 
   /// The value this tween has at the beginning of the animation.
   T? begin;
@@ -80,10 +77,7 @@ String objectRuntimeType(Object? object, String optimizedValue) {
 /// This tween rounds the interpolated value to the nearest integer.
 class IntTween extends Tween<int> {
   /// Creates an [IntTween].
-  IntTween({
-    super.begin,
-    super.end,
-  });
+  IntTween({super.begin, super.end});
 
   @override
   int lerp(double t) {
@@ -94,10 +88,7 @@ class IntTween extends Tween<int> {
 /// A tween that interpolates between two doubles.
 class DoubleTween extends Tween<double> {
   /// Creates a [DoubleTween].
-  DoubleTween({
-    super.begin,
-    super.end,
-  });
+  DoubleTween({super.begin, super.end});
 
   @override
   double lerp(double t) {
@@ -111,10 +102,7 @@ class DoubleTween extends Tween<double> {
 /// which produces smooth color transitions.
 class ColorTween extends Tween<Color?> {
   /// Creates a [ColorTween].
-  ColorTween({
-    super.begin,
-    super.end,
-  });
+  ColorTween({super.begin, super.end});
 
   @override
   Color? lerp(double t) {
@@ -180,10 +168,7 @@ class ReverseTween<T> extends Tween<T> {
 /// If [begin] equals [end], this tween returns [begin] for all values of [t].
 class StepTween extends Tween<int> {
   /// Creates a step tween.
-  StepTween({
-    super.begin,
-    super.end,
-  });
+  StepTween({super.begin, super.end});
 
   @override
   int lerp(double t) => (begin! + (end! - begin!) * t).floor();
@@ -207,10 +192,9 @@ class TweenSequence<T> extends Animatable<T> {
     _intervals = <_Interval>[];
     for (final item in items) {
       final double normalizedWeight = item.weight / totalWeight;
-      _intervals.add(_Interval(
-        previousWeight,
-        previousWeight + normalizedWeight,
-      ));
+      _intervals.add(
+        _Interval(previousWeight, previousWeight + normalizedWeight),
+      );
       previousWeight += normalizedWeight;
     }
   }
@@ -227,7 +211,8 @@ class TweenSequence<T> extends Animatable<T> {
 
     for (int i = 0; i < _items.length; i++) {
       if (t >= _intervals[i].start && t < _intervals[i].end) {
-        final double localT = (t - _intervals[i].start) /
+        final double localT =
+            (t - _intervals[i].start) /
             (_intervals[i].end - _intervals[i].start);
         return _items[i].tween.transform(localT);
       }
@@ -241,10 +226,8 @@ class TweenSequence<T> extends Animatable<T> {
 /// An item in a [TweenSequence].
 class TweenSequenceItem<T> {
   /// Creates a tween sequence item.
-  const TweenSequenceItem({
-    required this.tween,
-    required this.weight,
-  }) : assert(weight > 0.0);
+  const TweenSequenceItem({required this.tween, required this.weight})
+    : assert(weight > 0.0);
 
   /// The tween to use for this item.
   final Animatable<T> tween;
@@ -268,11 +251,11 @@ class Interval extends Curve {
   /// The [begin] and [end] values must be between 0.0 and 1.0, and
   /// [begin] must be less than or equal to [end].
   const Interval(this.begin, this.end, {this.curve = Curves.linear})
-      : assert(begin >= 0.0),
-        assert(begin <= 1.0),
-        assert(end >= 0.0),
-        assert(end <= 1.0),
-        assert(end >= begin);
+    : assert(begin >= 0.0),
+      assert(begin <= 1.0),
+      assert(end >= 0.0),
+      assert(end <= 1.0),
+      assert(end >= begin);
 
   /// The start of the interval.
   final double begin;
@@ -313,7 +296,7 @@ class Interval extends Curve {
 class Threshold extends Curve {
   /// Creates a threshold curve.
   const Threshold(this.threshold)
-      : assert(threshold >= 0.0 && threshold <= 1.0);
+    : assert(threshold >= 0.0 && threshold <= 1.0);
 
   /// The threshold value.
   final double threshold;

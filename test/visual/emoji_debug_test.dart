@@ -68,34 +68,36 @@ void main() {
       }
     });
 
-    test('symbols that are already emoji (no FE0F needed) should have width 2',
-        () {
-      // These symbols are emoji by default and don't need FE0F
-      final defaultEmoji = {
-        "⭐": "Star",
-        "✨": "Sparkles",
-        "⚡": "High voltage",
-        "⛔": "No entry",
-        "⬛": "Black square",
-        "⬜": "White square",
-        "🔶": "Orange diamond",
-        "🔷": "Blue diamond",
-        "✅": "Check mark button",
-        "❌": "Cross mark",
-      };
+    test(
+      'symbols that are already emoji (no FE0F needed) should have width 2',
+      () {
+        // These symbols are emoji by default and don't need FE0F
+        final defaultEmoji = {
+          "⭐": "Star",
+          "✨": "Sparkles",
+          "⚡": "High voltage",
+          "⛔": "No entry",
+          "⬛": "Black square",
+          "⬜": "White square",
+          "🔶": "Orange diamond",
+          "🔷": "Blue diamond",
+          "✅": "Check mark button",
+          "❌": "Cross mark",
+        };
 
-      for (final entry in defaultEmoji.entries) {
-        final symbol = entry.key;
-        final name = entry.value;
-        final width = UnicodeWidth.stringWidth(symbol);
+        for (final entry in defaultEmoji.entries) {
+          final symbol = entry.key;
+          final name = entry.value;
+          final width = UnicodeWidth.stringWidth(symbol);
 
-        expect(
-          width,
-          equals(2),
-          reason: '$name ($symbol) should have width 2, got $width',
-        );
-      }
-    });
+          expect(
+            width,
+            equals(2),
+            reason: '$name ($symbol) should have width 2, got $width',
+          );
+        }
+      },
+    );
 
     test('FE0F detection in grapheme', () {
       // Verify FE0F is correctly identified

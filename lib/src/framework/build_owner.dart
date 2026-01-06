@@ -85,8 +85,10 @@ class BuildOwner {
 
     assert(() {
       for (final element in _dirtyElements) {
-        assert(!element.dirty,
-            'Element ${element.runtimeType} is still dirty after building');
+        assert(
+          !element.dirty,
+          'Element ${element.runtimeType} is still dirty after building',
+        );
       }
       return true;
     }());

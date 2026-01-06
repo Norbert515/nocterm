@@ -74,10 +74,7 @@ class _SingleChildScrollViewState extends State<SingleChildScrollView> {
     Component? child = component.child;
 
     if (component.padding != null && child != null) {
-      child = Padding(
-        padding: component.padding!,
-        child: child,
-      );
+      child = Padding(padding: component.padding!, child: child);
     }
 
     return _SingleChildViewport(
@@ -109,7 +106,9 @@ class _SingleChildViewport extends SingleChildRenderObjectComponent {
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderSingleChildViewport renderObject) {
+    BuildContext context,
+    RenderSingleChildViewport renderObject,
+  ) {
     renderObject
       ..scrollDirection = scrollDirection
       ..controller = controller;
@@ -122,8 +121,8 @@ class RenderSingleChildViewport extends RenderObject
   RenderSingleChildViewport({
     required Axis scrollDirection,
     required ScrollController controller,
-  })  : _scrollDirection = scrollDirection,
-        _controller = controller {
+  }) : _scrollDirection = scrollDirection,
+       _controller = controller {
     _controller.addListener(_handleScrollUpdate);
   }
 
@@ -209,14 +208,14 @@ class RenderSingleChildViewport extends RenderObject
     child!.layout(childConstraints, parentUsesSize: true);
 
     // Our size is constrained by our parent
-    size = constraints.constrain(Size(
-      constraints.maxWidth,
-      constraints.maxHeight,
-    ));
+    size = constraints.constrain(
+      Size(constraints.maxWidth, constraints.maxHeight),
+    );
 
     // Update scroll controller metrics
-    final double viewportExtent =
-        scrollDirection == Axis.vertical ? size.height : size.width;
+    final double viewportExtent = scrollDirection == Axis.vertical
+        ? size.height
+        : size.width;
     final double scrollExtent = scrollDirection == Axis.vertical
         ? child!.size.height
         : child!.size.width;

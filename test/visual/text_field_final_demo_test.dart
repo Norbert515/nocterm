@@ -7,11 +7,13 @@ void main() {
       'final demo',
       (tester) async {
         final multiLineController = TextEditingController(
-            text:
-                'Hello this is a cool thing to do is typing a cool long string that can be enough to show wrapping');
+          text:
+              'Hello this is a cool thing to do is typing a cool long string that can be enough to show wrapping',
+        );
 
         final singleLineController = TextEditingController(
-            text: 'This text will scroll horizontally when it gets too long');
+          text: 'This text will scroll horizontally when it gets too long',
+        );
 
         await tester.pumpComponent(
           Column(
@@ -56,10 +58,12 @@ void main() {
         );
 
         // Position cursors at the end
-        multiLineController.selection =
-            TextSelection.collapsed(offset: multiLineController.text.length);
-        singleLineController.selection =
-            TextSelection.collapsed(offset: singleLineController.text.length);
+        multiLineController.selection = TextSelection.collapsed(
+          offset: multiLineController.text.length,
+        );
+        singleLineController.selection = TextSelection.collapsed(
+          offset: singleLineController.text.length,
+        );
         await tester.pump();
       },
       debugPrintAfterPump: true,

@@ -6,32 +6,27 @@ void main() {
   test('Watch triggers rebuild on provider change', () async {
     final counterProvider = StateProvider<int>((ref) => 0);
 
-    await testNocterm(
-      'watch rebuild test',
-      (tester) async {
-        await tester.pumpComponent(
-          ProviderScope(
-            child: _TestWidget(counterProvider: counterProvider),
-          ),
-        );
+    await testNocterm('watch rebuild test', (tester) async {
+      await tester.pumpComponent(
+        ProviderScope(child: _TestWidget(counterProvider: counterProvider)),
+      );
 
-        // Initial state
-        expect(tester.terminalState, containsText('Count: 0'));
-        print('[TEST] Initial render complete');
+      // Initial state
+      expect(tester.terminalState, containsText('Count: 0'));
+      print('[TEST] Initial render complete');
 
-        // Trigger provider change
-        print('[TEST] Incrementing counter...');
-        await tester.sendKey(LogicalKey.arrowUp);
+      // Trigger provider change
+      print('[TEST] Incrementing counter...');
+      await tester.sendKey(LogicalKey.arrowUp);
 
-        // Give time for async operations
-        await Future.delayed(Duration(milliseconds: 100));
-        await tester.pump();
+      // Give time for async operations
+      await Future.delayed(Duration(milliseconds: 100));
+      await tester.pump();
 
-        print('[TEST] After pump, checking state...');
-        // Check if rebuild happened
-        expect(tester.terminalState, containsText('Count: 1'));
-      },
-    );
+      print('[TEST] After pump, checking state...');
+      // Check if rebuild happened
+      expect(tester.terminalState, containsText('Count: 1'));
+    });
   });
 }
 

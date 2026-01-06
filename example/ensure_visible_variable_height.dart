@@ -65,17 +65,13 @@ class _VariableHeightListDemoState extends State<VariableHeightListDemo> {
         return false;
       },
       child: Container(
-        decoration: BoxDecoration(
-          border: BoxBorder.all(color: Colors.blue),
-        ),
+        decoration: BoxDecoration(border: BoxBorder.all(color: Colors.blue)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
               padding: const EdgeInsets.all(1),
-              decoration: BoxDecoration(
-                color: Colors.blue,
-              ),
+              decoration: BoxDecoration(color: Colors.blue),
               child: Text(
                 'Variable Height Items - Use ↑/↓ arrows',
                 style: const TextStyle(color: Colors.white),
@@ -111,9 +107,7 @@ class _VariableHeightListDemoState extends State<VariableHeightListDemo> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 1),
               decoration: BoxDecoration(
-                border: const BoxBorder(
-                  top: BorderSide(color: Colors.blue),
-                ),
+                border: const BoxBorder(top: BorderSide(color: Colors.blue)),
               ),
               child: Text(
                 'Item $selectedIndex (height: ${items[selectedIndex].$2}) | '

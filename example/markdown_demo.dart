@@ -16,7 +16,7 @@ class _MarkdownDemoState extends State<MarkdownDemo> {
     'Overview',
     'Formatting',
     'Lists & Code',
-    'Advanced'
+    'Advanced',
   ];
 
   final List<String> _markdownContent = [
@@ -147,7 +147,7 @@ You can combine all these features to create rich documentation:
 echo "Hello, Terminal!"
 ```
 
-> Pro tip: Markdown in terminals brings documentation to life!'''
+> Pro tip: Markdown in terminals brings documentation to life!''',
   ];
 
   @override
@@ -171,10 +171,7 @@ echo "Hello, Terminal!"
             // Title
             const Text(
               'Markdown Text Demo',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.cyan,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyan),
             ),
             const SizedBox(height: 1),
 
@@ -186,9 +183,7 @@ echo "Hello, Terminal!"
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 1),
                     decoration: _selectedTab == i
-                        ? BoxDecoration(
-                            color: Colors.blue,
-                          )
+                        ? BoxDecoration(color: Colors.blue)
                         : null,
                     child: Text(
                       _tabs[i],
@@ -213,9 +208,7 @@ echo "Hello, Terminal!"
                   border: BoxBorder.all(style: BoxBorderStyle.solid),
                 ),
                 child: SingleChildScrollView(
-                  child: MarkdownText(
-                    _markdownContent[_selectedTab],
-                  ),
+                  child: MarkdownText(_markdownContent[_selectedTab]),
                 ),
               ),
             ),
@@ -223,10 +216,7 @@ echo "Hello, Terminal!"
             const SizedBox(height: 1),
             Text(
               'Use Tab or click to switch between examples',
-              style: TextStyle(
-                color: Colors.grey,
-                fontStyle: FontStyle.italic,
-              ),
+              style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
             ),
           ],
         ),

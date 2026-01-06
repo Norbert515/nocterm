@@ -131,9 +131,7 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
         return false;
       },
       child: Container(
-        decoration: BoxDecoration(
-          color: Color(0xFF0A0E27),
-        ),
+        decoration: BoxDecoration(color: Color(0xFF0A0E27)),
         child: Column(
           children: [
             _buildHeader(),
@@ -194,10 +192,7 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
                 style: TextStyle(color: Color(0xFF00FF88)),
               ),
               SizedBox(width: 3),
-              Text(
-                _currentTime,
-                style: TextStyle(color: Color(0xFF888888)),
-              ),
+              Text(_currentTime, style: TextStyle(color: Color(0xFF888888))),
             ],
           ),
         ],
@@ -216,10 +211,7 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '── Rooms ──',
-            style: TextStyle(color: Color(0xFF00D9FF)),
-          ),
+          Text('── Rooms ──', style: TextStyle(color: Color(0xFF00D9FF))),
           SizedBox(height: 1),
           ...List.generate(_rooms.length, (index) {
             final isSelected = index == _selectedRoom;
@@ -250,10 +242,7 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '── Climate ──',
-            style: TextStyle(color: Color(0xFF00D9FF)),
-          ),
+          Text('── Climate ──', style: TextStyle(color: Color(0xFF00D9FF))),
           SizedBox(height: 1),
           Row(
             children: [
@@ -262,7 +251,9 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
               Text(
                 '${_currentTemp.toStringAsFixed(1)}°C',
                 style: TextStyle(
-                    color: Color(0xFF00FF88), fontWeight: FontWeight.bold),
+                  color: Color(0xFF00FF88),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -273,7 +264,9 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
               Text(
                 '$_humidity%',
                 style: TextStyle(
-                    color: Color(0xFF00FF88), fontWeight: FontWeight.bold),
+                  color: Color(0xFF00FF88),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -285,7 +278,9 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
               Text(
                 'AUTO',
                 style: TextStyle(
-                    color: Color(0xFF00D9FF), fontWeight: FontWeight.bold),
+                  color: Color(0xFF00D9FF),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -304,10 +299,7 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '── Devices ──',
-            style: TextStyle(color: Color(0xFF00D9FF)),
-          ),
+          Text('── Devices ──', style: TextStyle(color: Color(0xFF00D9FF))),
           SizedBox(height: 1),
           Row(
             children: [
@@ -326,22 +318,28 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
               Text(
                 '${(_lightsOn * 100 / _totalLights).round()}%',
                 style: TextStyle(
-                    color: _devices['lights']!
-                        ? Color(0xFF00FF88)
-                        : Color(0xFF888888)),
+                  color: _devices['lights']!
+                      ? Color(0xFF00FF88)
+                      : Color(0xFF888888),
+                ),
               ),
             ],
           ),
           _buildDeviceRow(
-              'Smart Lock',
-              _devices['lock']! ? '🔒 LOCKED' : '🔓 UNLOCKED',
-              _devices['lock']!),
+            'Smart Lock',
+            _devices['lock']! ? '🔒 LOCKED' : '🔓 UNLOCKED',
+            _devices['lock']!,
+          ),
           _buildDeviceRow(
-              'Security System',
-              _devices['security']! ? '✓ ARMED' : '✗ DISARMED',
-              _devices['security']!),
-          _buildDeviceRow('Garage Door',
-              _devices['garage']! ? '⬆ OPEN' : '⬇ CLOSED', _devices['garage']!),
+            'Security System',
+            _devices['security']! ? '✓ ARMED' : '✗ DISARMED',
+            _devices['security']!,
+          ),
+          _buildDeviceRow(
+            'Garage Door',
+            _devices['garage']! ? '⬆ OPEN' : '⬇ CLOSED',
+            _devices['garage']!,
+          ),
         ],
       ),
     );
@@ -428,9 +426,7 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
       height: 2,
       decoration: BoxDecoration(
         color: Color(0xFF1A1F3A),
-        border: BoxBorder(
-          top: BorderSide(color: Color(0xFF2A3F5F), width: 1),
-        ),
+        border: BoxBorder(top: BorderSide(color: Color(0xFF2A3F5F), width: 1)),
       ),
       padding: EdgeInsets.symmetric(horizontal: 2),
       child: Center(

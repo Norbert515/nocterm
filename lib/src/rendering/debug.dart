@@ -5,8 +5,12 @@ import '../style.dart';
 
 // Default repaint color: less saturated (0.5), semi-transparent (0.3 alpha)
 // Starting hue at 60 (yellow) like Flutter
-const HSVColor _kDebugDefaultRepaintColor =
-    HSVColor.fromAHSV(0.3, 60.0, 0.5, 1.0);
+const HSVColor _kDebugDefaultRepaintColor = HSVColor.fromAHSV(
+  0.3,
+  60.0,
+  0.5,
+  1.0,
+);
 
 /// Overlay a rotating set of colors when repainting render objects in debug mode.
 ///

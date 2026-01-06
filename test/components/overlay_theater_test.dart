@@ -4,32 +4,28 @@ import 'package:nocterm/nocterm.dart';
 void main() {
   group('Overlay with Theater implementation', () {
     test('basic overlay rendering', () async {
-      await testNocterm(
-        'overlay with single entry',
-        (tester) async {
-          await tester.pumpComponent(
-            Overlay(
-              key: GlobalKey(),
-              initialEntries: [
-                OverlayEntry(
-                  builder: (context) {
-                    return Container(
-                      width: 20,
-                      height: 3,
-                      color: Colors.blue,
-                      child: Text('Entry 1'),
-                    );
-                  },
-                ),
-              ],
-            ),
-          );
+      await testNocterm('overlay with single entry', (tester) async {
+        await tester.pumpComponent(
+          Overlay(
+            key: GlobalKey(),
+            initialEntries: [
+              OverlayEntry(
+                builder: (context) {
+                  return Container(
+                    width: 20,
+                    height: 3,
+                    color: Colors.blue,
+                    child: Text('Entry 1'),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
 
-          // Check that the overlay rendered
-          expect(tester.terminalState, containsText('Entry 1'));
-        },
-        debugPrintAfterPump: true,
-      );
+        // Check that the overlay rendered
+        expect(tester.terminalState, containsText('Entry 1'));
+      }, debugPrintAfterPump: true);
     });
 
     test('overlay with multiple entries', () async {
@@ -77,83 +73,71 @@ void main() {
     });
 
     test('opaque entry blocks entries below', () async {
-      await testNocterm(
-        'opaque overlay entry',
-        (tester) async {
-          final bottomEntry = OverlayEntry(
-            builder: (context) => Container(
-              width: 30,
-              height: 5,
-              color: Colors.blue,
-              child: Text('Hidden'),
-            ),
-          );
+      await testNocterm('opaque overlay entry', (tester) async {
+        final bottomEntry = OverlayEntry(
+          builder: (context) => Container(
+            width: 30,
+            height: 5,
+            color: Colors.blue,
+            child: Text('Hidden'),
+          ),
+        );
 
-          final opaqueEntry = OverlayEntry(
-            opaque: true,
-            builder: (context) => Container(
-              width: 30,
-              height: 5,
-              color: Colors.green,
-              child: Text('Opaque'),
-            ),
-          );
+        final opaqueEntry = OverlayEntry(
+          opaque: true,
+          builder: (context) => Container(
+            width: 30,
+            height: 5,
+            color: Colors.green,
+            child: Text('Opaque'),
+          ),
+        );
 
-          await tester.pumpComponent(
-            Overlay(
-              initialEntries: [bottomEntry, opaqueEntry],
-            ),
-          );
+        await tester.pumpComponent(
+          Overlay(initialEntries: [bottomEntry, opaqueEntry]),
+        );
 
-          // Only the opaque entry should be visible
-          expect(tester.terminalState, containsText('Opaque'));
-          // The bottom entry should not be rendered (unless maintainState is true)
-          // This depends on the theater implementation correctly skipping offstage children
-        },
-        debugPrintAfterPump: true,
-      );
+        // Only the opaque entry should be visible
+        expect(tester.terminalState, containsText('Opaque'));
+        // The bottom entry should not be rendered (unless maintainState is true)
+        // This depends on the theater implementation correctly skipping offstage children
+      }, debugPrintAfterPump: true);
     });
 
     test('maintainState keeps offstage entries alive', () async {
-      await testNocterm(
-        'maintain state for hidden entries',
-        (tester) async {
-          int buildCount = 0;
+      await testNocterm('maintain state for hidden entries', (tester) async {
+        int buildCount = 0;
 
-          final bottomEntry = OverlayEntry(
-            maintainState: true,
-            builder: (context) {
-              buildCount++;
-              return Container(
-                width: 30,
-                height: 5,
-                child: Text('Maintained: $buildCount'),
-              );
-            },
-          );
-
-          final opaqueEntry = OverlayEntry(
-            opaque: true,
-            builder: (context) => Container(
+        final bottomEntry = OverlayEntry(
+          maintainState: true,
+          builder: (context) {
+            buildCount++;
+            return Container(
               width: 30,
               height: 5,
-              color: Colors.green,
-              child: Text('Opaque Top'),
-            ),
-          );
+              child: Text('Maintained: $buildCount'),
+            );
+          },
+        );
 
-          await tester.pumpComponent(
-            Overlay(
-              initialEntries: [bottomEntry, opaqueEntry],
-            ),
-          );
+        final opaqueEntry = OverlayEntry(
+          opaque: true,
+          builder: (context) => Container(
+            width: 30,
+            height: 5,
+            color: Colors.green,
+            child: Text('Opaque Top'),
+          ),
+        );
 
-          // The bottom entry should have been built even though it's hidden
-          expect(buildCount, greaterThan(0));
-          expect(tester.terminalState, containsText('Opaque Top'));
-        },
-        debugPrintAfterPump: true,
-      );
+        await tester.pumpComponent(
+          Overlay(initialEntries: [bottomEntry, opaqueEntry]),
+        );
+
+        // The bottom entry should have been built even though it's hidden
+        expect(buildCount, greaterThan(0));
+        expect(tester.terminalState, containsText('Opaque Top'));
+      }, debugPrintAfterPump: true);
     });
 
     test('dynamic overlay entry insertion', () async {
@@ -217,43 +201,34 @@ void main() {
     });
 
     test('overlay entry markNeedsBuild', () async {
-      await testNocterm(
-        'rebuild overlay entry on demand',
-        (tester) async {
-          int buildCount = 0;
-          late OverlayEntry entry;
+      await testNocterm('rebuild overlay entry on demand', (tester) async {
+        int buildCount = 0;
+        late OverlayEntry entry;
 
-          entry = OverlayEntry(
-            builder: (context) {
-              buildCount++;
-              return Container(
-                width: 30,
-                height: 5,
-                child: Text('Build: $buildCount'),
-              );
-            },
-          );
+        entry = OverlayEntry(
+          builder: (context) {
+            buildCount++;
+            return Container(
+              width: 30,
+              height: 5,
+              child: Text('Build: $buildCount'),
+            );
+          },
+        );
 
-          await tester.pumpComponent(
-            Overlay(
-              initialEntries: [entry],
-            ),
-          );
+        await tester.pumpComponent(Overlay(initialEntries: [entry]));
 
-          final initialBuildCount = buildCount;
-          expect(
-              tester.terminalState, containsText('Build: $initialBuildCount'));
+        final initialBuildCount = buildCount;
+        expect(tester.terminalState, containsText('Build: $initialBuildCount'));
 
-          // Mark entry as needing rebuild
-          entry.markNeedsBuild();
-          await tester.pump();
+        // Mark entry as needing rebuild
+        entry.markNeedsBuild();
+        await tester.pump();
 
-          // Build count should have increased
-          expect(buildCount, greaterThan(initialBuildCount));
-          expect(tester.terminalState, containsText('Build: $buildCount'));
-        },
-        debugPrintAfterPump: true,
-      );
+        // Build count should have increased
+        expect(buildCount, greaterThan(initialBuildCount));
+        expect(tester.terminalState, containsText('Build: $buildCount'));
+      }, debugPrintAfterPump: true);
     });
   });
 }

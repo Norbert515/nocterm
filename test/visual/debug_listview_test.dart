@@ -30,8 +30,11 @@ void main() {
         print('Expected maxScrollExtent: ~7 (10 items - 3 visible)');
         print('Actual maxScrollExtent: ${scrollController.maxScrollExtent}');
 
-        expect(scrollController.maxScrollExtent, greaterThan(0),
-            reason: 'With 10 items and small viewport, should need scrolling');
+        expect(
+          scrollController.maxScrollExtent,
+          greaterThan(0),
+          reason: 'With 10 items and small viewport, should need scrolling',
+        );
       },
       debugPrintAfterPump: true,
       size: Size(30, 10),

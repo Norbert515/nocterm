@@ -7,125 +7,113 @@ void main() {
       int buildCount = 0;
       late TestBatchingComponentState state;
 
-      await testNocterm(
-        'batching test',
-        (tester) async {
-          await tester.pumpComponent(
-            TestBatchingComponent(
-              onBuild: () => buildCount++,
-              onStateCreated: (s) => state = s,
-            ),
-          );
+      await testNocterm('batching test', (tester) async {
+        await tester.pumpComponent(
+          TestBatchingComponent(
+            onBuild: () => buildCount++,
+            onStateCreated: (s) => state = s,
+          ),
+        );
 
-          // Initial build
-          expect(buildCount, 1);
-          buildCount = 0;
+        // Initial build
+        expect(buildCount, 1);
+        buildCount = 0;
 
-          // Call setState 10 times rapidly
-          for (int i = 0; i < 10; i++) {
-            state.triggerSetState();
-          }
+        // Call setState 10 times rapidly
+        for (int i = 0; i < 10; i++) {
+          state.triggerSetState();
+        }
 
-          // Should only schedule ONE frame (not 10)
-          expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
+        // Should only schedule ONE frame (not 10)
+        expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
 
-          // Pump the frame
-          await tester.pump();
+        // Pump the frame
+        await tester.pump();
 
-          // Should have only rebuilt ONCE (not 10 times)
-          expect(buildCount, 1);
-        },
-      );
+        // Should have only rebuilt ONCE (not 10 times)
+        expect(buildCount, 1);
+      });
     });
 
     test('rapid events batch into single frame', () async {
       int renderCount = 0;
       late TestEventComponentState state;
 
-      await testNocterm(
-        'rapid events test',
-        (tester) async {
-          await tester.pumpComponent(
-            TestEventComponent(
-              onRender: () => renderCount++,
-              onStateCreated: (s) => state = s,
-            ),
-          );
+      await testNocterm('rapid events test', (tester) async {
+        await tester.pumpComponent(
+          TestEventComponent(
+            onRender: () => renderCount++,
+            onStateCreated: (s) => state = s,
+          ),
+        );
 
-          // Initial render
-          expect(renderCount, 1);
-          renderCount = 0;
+        // Initial render
+        expect(renderCount, 1);
+        renderCount = 0;
 
-          // Simulate 100 rapid scroll events
-          for (int i = 0; i < 100; i++) {
-            state.handleEvent(i);
-          }
+        // Simulate 100 rapid scroll events
+        for (int i = 0; i < 100; i++) {
+          state.handleEvent(i);
+        }
 
-          // All events processed, state updated 100 times
-          expect(state.value, 99);
+        // All events processed, state updated 100 times
+        expect(state.value, 99);
 
-          // But only ONE frame scheduled
-          expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
+        // But only ONE frame scheduled
+        expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
 
-          // Pump once
-          await tester.pump();
+        // Pump once
+        await tester.pump();
 
-          // Should have rendered only ONCE (not 100 times)
-          expect(renderCount, 1);
-        },
-      );
+        // Should have rendered only ONCE (not 100 times)
+        expect(renderCount, 1);
+      });
     });
 
     test('post-frame callbacks execute after frame', () async {
       final executionOrder = <String>[];
 
-      await testNocterm(
-        'post-frame callback test',
-        (tester) async {
-          await tester.pumpComponent(
-            TestCallbackComponent(
-              onBuild: () => executionOrder.add('build'),
-              onPostFrame: () => executionOrder.add('post-frame'),
-            ),
-          );
+      await testNocterm('post-frame callback test', (tester) async {
+        await tester.pumpComponent(
+          TestCallbackComponent(
+            onBuild: () => executionOrder.add('build'),
+            onPostFrame: () => executionOrder.add('post-frame'),
+          ),
+        );
 
-          // Check execution order
-          expect(executionOrder, ['build', 'post-frame']);
-        },
-      );
+        // Check execution order
+        expect(executionOrder, ['build', 'post-frame']);
+      });
     });
 
     test('frame phases execute in correct order', () async {
       final phases = <SchedulerPhase>[];
 
-      await testNocterm(
-        'frame phase test',
-        (tester) async {
-          // Register callbacks in different phases
-          SchedulerBinding.instance.scheduleFrameCallback((timeStamp) {
-            phases.add(SchedulerPhase.transientCallbacks);
-          });
+      await testNocterm('frame phase test', (tester) async {
+        // Register callbacks in different phases
+        SchedulerBinding.instance.scheduleFrameCallback((timeStamp) {
+          phases.add(SchedulerPhase.transientCallbacks);
+        });
 
-          SchedulerBinding.instance.addPersistentFrameCallback((timeStamp) {
-            phases.add(SchedulerPhase.persistentCallbacks);
-          });
+        SchedulerBinding.instance.addPersistentFrameCallback((timeStamp) {
+          phases.add(SchedulerPhase.persistentCallbacks);
+        });
 
-          SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-            phases.add(SchedulerPhase.postFrameCallbacks);
-          });
+        SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+          phases.add(SchedulerPhase.postFrameCallbacks);
+        });
 
-          // Trigger a frame
-          SchedulerBinding.instance.scheduleFrame();
-          await tester.pump();
+        // Trigger a frame
+        SchedulerBinding.instance.scheduleFrame();
+        await tester.pump();
 
-          // Check phases executed in order
-          expect(phases, [
-            SchedulerPhase.transientCallbacks,
-            SchedulerPhase.persistentCallbacks,
-            SchedulerPhase.postFrameCallbacks,
-          ]);
-        },
-      );
+        // Check phases executed in order
+        expect(phases, [
+          SchedulerPhase.transientCallbacks,
+          SchedulerPhase.persistentCallbacks,
+          SchedulerPhase.postFrameCallbacks,
+        ]);
+      });
     });
   });
 }

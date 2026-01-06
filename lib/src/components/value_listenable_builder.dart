@@ -1,8 +1,8 @@
 import 'package:nocterm/src/framework/framework.dart';
 import 'package:nocterm/src/framework/value_listenable.dart';
 
-typedef ValueComponentBuilder<T> = Component Function(
-    BuildContext context, T value, Component? child);
+typedef ValueComponentBuilder<T> =
+    Component Function(BuildContext context, T value, Component? child);
 
 class ValueListenableBuilder<T> extends StatefulComponent {
   const ValueListenableBuilder({

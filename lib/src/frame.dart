@@ -13,8 +13,8 @@ class Frame {
   bool _fullRedraw = true;
 
   Frame({required this.size, Buffer? previousBuffer})
-      : buffer = Buffer(size.width.toInt(), size.height.toInt()),
-        _previousBuffer = previousBuffer;
+    : buffer = Buffer(size.width.toInt(), size.height.toInt()),
+      _previousBuffer = previousBuffer;
 
   Rect get area =>
       Rect.fromLTWH(0, 0, size.width.toDouble(), size.height.toDouble());

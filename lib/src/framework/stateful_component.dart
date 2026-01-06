@@ -85,8 +85,10 @@ abstract class State<T extends StatefulComponent> {
   @protected
   void setState(VoidCallback fn) {
     assert(_element != null);
-    assert(_element!._lifecycleState == _ElementLifecycle.active,
-        'Element is not active but ${_element!._lifecycleState} instead');
+    assert(
+      _element!._lifecycleState == _ElementLifecycle.active,
+      'Element is not active but ${_element!._lifecycleState} instead',
+    );
 
     fn();
     _element!.markNeedsBuild();
@@ -117,12 +119,14 @@ class StatefulElement extends BuildableElement {
     final Object? debugCheckForReturnedFuture = state.initState() as dynamic;
     assert(() {
       if (debugCheckForReturnedFuture is Future) {
-        throw FlutterError([
-          '${state.runtimeType}.initState() returned a Future.',
-          'State.initState() must be a void method without an `async` keyword.',
-          'Rather than awaiting on asynchronous work directly inside of initState, '
-              'call a separate method to do this work without awaiting it.',
-        ].join('\n'));
+        throw FlutterError(
+          [
+            '${state.runtimeType}.initState() returned a Future.',
+            'State.initState() must be a void method without an `async` keyword.',
+            'Rather than awaiting on asynchronous work directly inside of initState, '
+                'call a separate method to do this work without awaiting it.',
+          ].join('\n'),
+        );
       }
       return true;
     }());
@@ -142,7 +146,8 @@ class StatefulElement extends BuildableElement {
     assert(() {
       if (debugCheckForReturnedFuture is Future) {
         throw FlutterError(
-            '${_state.runtimeType}.didUpdateComponent() returned a Future.');
+          '${_state.runtimeType}.didUpdateComponent() returned a Future.',
+        );
       }
       return true;
     }());

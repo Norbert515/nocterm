@@ -66,7 +66,9 @@ void main() {
 
       expect(opaque.toString(), equals('Color(r: 255, g: 0, b: 0)'));
       expect(
-          transparent.toString(), equals('Color(a: 128, r: 255, g: 0, b: 0)'));
+        transparent.toString(),
+        equals('Color(a: 128, r: 255, g: 0, b: 0)'),
+      );
     });
   });
 
@@ -141,32 +143,31 @@ void main() {
   });
 
   group('Alpha blending rendering', () {
-    test('text with semi-transparent foreground blends with background',
-        () async {
-      await testNocterm(
-        'semi-transparent text',
-        (tester) async {
-          await tester.pumpComponent(
-            Container(
-              color: Colors.blue,
-              child: Text(
-                'Hello',
-                style: TextStyle(
-                  color: Colors.red.withOpacity(0.5),
+    test(
+      'text with semi-transparent foreground blends with background',
+      () async {
+        await testNocterm(
+          'semi-transparent text',
+          (tester) async {
+            await tester.pumpComponent(
+              Container(
+                color: Colors.blue,
+                child: Text(
+                  'Hello',
+                  style: TextStyle(color: Colors.red.withOpacity(0.5)),
                 ),
               ),
-            ),
-          );
+            );
 
-          // Text should be rendered (can't easily verify exact blended color in test)
-          expect(tester.terminalState, containsText('Hello'));
-        },
-        // debugPrintAfterPump: true, // Uncomment to see visual output
-      );
-    });
+            // Text should be rendered (can't easily verify exact blended color in test)
+            expect(tester.terminalState, containsText('Hello'));
+          },
+          // debugPrintAfterPump: true, // Uncomment to see visual output
+        );
+      },
+    );
 
-    test('semi-transparent background blends with existing background',
-        () async {
+    test('semi-transparent background blends with existing background', () async {
       await testNocterm(
         'semi-transparent background',
         (tester) async {
@@ -253,9 +254,7 @@ void main() {
               padding: const EdgeInsets.all(2),
               child: Text(
                 'Faded Text',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.3),
-                ),
+                style: TextStyle(color: Colors.white.withOpacity(0.3)),
               ),
             ),
           );
@@ -267,46 +266,36 @@ void main() {
     });
 
     test('zero opacity makes color fully transparent', () async {
-      await testNocterm(
-        'fully transparent text',
-        (tester) async {
-          await tester.pumpComponent(
-            Container(
-              color: Colors.blue,
-              child: Text(
-                'Invisible',
-                style: TextStyle(
-                  color: Colors.red.withOpacity(0.0),
-                ),
-              ),
+      await testNocterm('fully transparent text', (tester) async {
+        await tester.pumpComponent(
+          Container(
+            color: Colors.blue,
+            child: Text(
+              'Invisible',
+              style: TextStyle(color: Colors.red.withOpacity(0.0)),
             ),
-          );
+          ),
+        );
 
-          // Text should still be there (just same color as background)
-          expect(tester.terminalState, containsText('Invisible'));
-        },
-      );
+        // Text should still be there (just same color as background)
+        expect(tester.terminalState, containsText('Invisible'));
+      });
     });
 
     test('full opacity works same as before', () async {
-      await testNocterm(
-        'fully opaque colors',
-        (tester) async {
-          await tester.pumpComponent(
-            Container(
-              color: Colors.blue.withOpacity(1.0),
-              child: Text(
-                'Solid',
-                style: TextStyle(
-                  color: Colors.red.withOpacity(1.0),
-                ),
-              ),
+      await testNocterm('fully opaque colors', (tester) async {
+        await tester.pumpComponent(
+          Container(
+            color: Colors.blue.withOpacity(1.0),
+            child: Text(
+              'Solid',
+              style: TextStyle(color: Colors.red.withOpacity(1.0)),
             ),
-          );
+          ),
+        );
 
-          expect(tester.terminalState, containsText('Solid'));
-        },
-      );
+        expect(tester.terminalState, containsText('Solid'));
+      });
     });
   });
 
@@ -353,18 +342,30 @@ void main() {
               color: Colors.blue,
               child: Column(
                 children: [
-                  Text('100%',
-                      style: TextStyle(color: Colors.white.withOpacity(1.0))),
-                  Text(' 80%',
-                      style: TextStyle(color: Colors.white.withOpacity(0.8))),
-                  Text(' 60%',
-                      style: TextStyle(color: Colors.white.withOpacity(0.6))),
-                  Text(' 40%',
-                      style: TextStyle(color: Colors.white.withOpacity(0.4))),
-                  Text(' 20%',
-                      style: TextStyle(color: Colors.white.withOpacity(0.2))),
-                  Text('  0%',
-                      style: TextStyle(color: Colors.white.withOpacity(0.0))),
+                  Text(
+                    '100%',
+                    style: TextStyle(color: Colors.white.withOpacity(1.0)),
+                  ),
+                  Text(
+                    ' 80%',
+                    style: TextStyle(color: Colors.white.withOpacity(0.8)),
+                  ),
+                  Text(
+                    ' 60%',
+                    style: TextStyle(color: Colors.white.withOpacity(0.6)),
+                  ),
+                  Text(
+                    ' 40%',
+                    style: TextStyle(color: Colors.white.withOpacity(0.4)),
+                  ),
+                  Text(
+                    ' 20%',
+                    style: TextStyle(color: Colors.white.withOpacity(0.2)),
+                  ),
+                  Text(
+                    '  0%',
+                    style: TextStyle(color: Colors.white.withOpacity(0.0)),
+                  ),
                 ],
               ),
             ),
@@ -403,9 +404,7 @@ void main() {
                     width: 20,
                     height: 3,
                     color: Colors.black.withOpacity(0.5),
-                    child: const Center(
-                      child: Text('OVERLAY'),
-                    ),
+                    child: const Center(child: Text('OVERLAY')),
                   ),
                 ),
               ],

@@ -17,19 +17,12 @@ class FocusScope extends StatelessComponent {
   /// but not passed to children.
   final bool absorb;
 
-  const FocusScope({
-    super.key,
-    this.absorb = true,
-    required this.child,
-  });
+  const FocusScope({super.key, this.absorb = true, required this.child});
 
   @override
   Component build(BuildContext context) {
     // When disabled, wrap the child in a widget that blocks focus
-    return _FocusBlocker(
-      absorb: absorb,
-      child: child,
-    );
+    return _FocusBlocker(absorb: absorb, child: child);
   }
 }
 
@@ -38,10 +31,7 @@ class _FocusBlocker extends StatelessComponent {
   final bool absorb;
   final Component child;
 
-  const _FocusBlocker({
-    required this.absorb,
-    required this.child,
-  });
+  const _FocusBlocker({required this.absorb, required this.child});
 
   @override
   Component build(BuildContext context) {

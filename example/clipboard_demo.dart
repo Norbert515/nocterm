@@ -89,8 +89,9 @@ class _ClipboardDemoAppState extends State<ClipboardDemoApp> {
                 color: _focusedField == 0
                     ? const Color.fromRGB(100, 255, 100)
                     : const Color.fromRGB(150, 150, 150),
-                fontWeight:
-                    _focusedField == 0 ? FontWeight.bold : FontWeight.normal,
+                fontWeight: _focusedField == 0
+                    ? FontWeight.bold
+                    : FontWeight.normal,
               ),
             ),
             const SizedBox(height: 0.5),
@@ -115,8 +116,9 @@ class _ClipboardDemoAppState extends State<ClipboardDemoApp> {
                 color: _focusedField == 1
                     ? const Color.fromRGB(100, 255, 100)
                     : const Color.fromRGB(150, 150, 150),
-                fontWeight:
-                    _focusedField == 1 ? FontWeight.bold : FontWeight.normal,
+                fontWeight: _focusedField == 1
+                    ? FontWeight.bold
+                    : FontWeight.normal,
               ),
             ),
             const SizedBox(height: 0.5),

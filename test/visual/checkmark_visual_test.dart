@@ -45,32 +45,28 @@ void main() {
     });
 
     test('clipboard status text with checkmark', () async {
-      await testNocterm(
-        'clipboard status',
-        (tester) async {
-          await tester.pumpComponent(
-            Container(
-              width: 50,
-              padding: const EdgeInsets.all(1),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Clipboard Status:'),
-                  Text('✓ Has content: "test"'),
-                  Text('✗ Empty'),
-                ],
-              ),
+      await testNocterm('clipboard status', (tester) async {
+        await tester.pumpComponent(
+          Container(
+            width: 50,
+            padding: const EdgeInsets.all(1),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Clipboard Status:'),
+                Text('✓ Has content: "test"'),
+                Text('✗ Empty'),
+              ],
             ),
-          );
+          ),
+        );
 
-          final state = tester.terminalState;
+        final state = tester.terminalState;
 
-          expect(state, containsText('Clipboard Status'));
-          expect(state, containsText('Has content'));
-          expect(state, containsText('Empty'));
-        },
-        debugPrintAfterPump: true,
-      );
+        expect(state, containsText('Clipboard Status'));
+        expect(state, containsText('Has content'));
+        expect(state, containsText('Empty'));
+      }, debugPrintAfterPump: true);
     });
   });
 }

@@ -18,7 +18,7 @@ class App {
   bool _forceFullRedraw = false;
 
   App({required this.onRender, this.onKeyPress})
-      : terminal = Terminal(StdioBackend());
+    : terminal = Terminal(StdioBackend());
 
   Future<void> run() async {
     _running = true;
@@ -83,8 +83,10 @@ class App {
       if (key != null && onKeyPress != null) {
         onKeyPress!(key);
         // Re-render after key press with previous buffer for optimization
-        final frame =
-            Frame(size: terminal.size, previousBuffer: _previousBuffer);
+        final frame = Frame(
+          size: terminal.size,
+          previousBuffer: _previousBuffer,
+        );
         if (_forceFullRedraw) {
           frame.forceFullRedraw();
           _forceFullRedraw = false;

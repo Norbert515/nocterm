@@ -61,8 +61,10 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///
   /// This method is only valid when [T] is [double].
   Animation<U> drive<U>(Animatable<U> child) {
-    assert(this is Animation<double>,
-        'drive() may only be called on Animation<double>.');
+    assert(
+      this is Animation<double>,
+      'drive() may only be called on Animation<double>.',
+    );
     return child.animate(this as Animation<double>);
   }
 
@@ -228,8 +230,8 @@ class AnimationController extends Animation<double> {
     this.lowerBound = 0.0,
     this.upperBound = 1.0,
     required TickerProvider vsync,
-  })  : assert(lowerBound <= upperBound),
-        _direction = _AnimationDirection.forward {
+  }) : assert(lowerBound <= upperBound),
+       _direction = _AnimationDirection.forward {
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value ?? lowerBound);
   }
@@ -243,9 +245,9 @@ class AnimationController extends Animation<double> {
     this.duration,
     this.reverseDuration,
     required TickerProvider vsync,
-  })  : lowerBound = double.negativeInfinity,
-        upperBound = double.infinity,
-        _direction = _AnimationDirection.forward {
+  }) : lowerBound = double.negativeInfinity,
+       upperBound = double.infinity,
+       _direction = _AnimationDirection.forward {
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value);
   }
@@ -383,8 +385,9 @@ class AnimationController extends Animation<double> {
     Curve curve = Curves.linear,
   }) {
     final double range = upperBound - lowerBound;
-    final double remainingFraction =
-        range.isFinite ? (target - _value).abs() / range : 1.0;
+    final double remainingFraction = range.isFinite
+        ? (target - _value).abs() / range
+        : 1.0;
 
     Duration? simulationDuration;
     if (_direction == _AnimationDirection.reverse && reverseDuration != null) {
@@ -407,12 +410,9 @@ class AnimationController extends Animation<double> {
       return TickerFuture.complete();
     }
 
-    return _startSimulation(_InterpolationSimulation(
-      _value,
-      target,
-      simulationDuration,
-      curve,
-    ));
+    return _startSimulation(
+      _InterpolationSimulation(_value, target, simulationDuration, curve),
+    );
   }
 
   /// Repeats the animation indefinitely (or until stopped).
@@ -437,12 +437,7 @@ class AnimationController extends Animation<double> {
     assert(min <= max);
     assert(period != null);
 
-    return _startSimulation(_RepeatingSimulation(
-      min,
-      max,
-      reverse,
-      period!,
-    ));
+    return _startSimulation(_RepeatingSimulation(min, max, reverse, period!));
   }
 
   /// Sets the controller's value to [lowerBound], stopping the animation if
@@ -581,12 +576,7 @@ abstract class _AnimationSimulation {
 
 /// A simulation that interpolates linearly from one value to another.
 class _InterpolationSimulation extends _AnimationSimulation {
-  _InterpolationSimulation(
-    this._begin,
-    this._end,
-    this._duration,
-    this._curve,
-  );
+  _InterpolationSimulation(this._begin, this._end, this._duration, this._curve);
 
   final double _begin;
   final double _end;
@@ -595,8 +585,10 @@ class _InterpolationSimulation extends _AnimationSimulation {
 
   @override
   double x(Duration time) {
-    final double t =
-        (time.inMicroseconds / _duration.inMicroseconds).clamp(0.0, 1.0);
+    final double t = (time.inMicroseconds / _duration.inMicroseconds).clamp(
+      0.0,
+      1.0,
+    );
     if (t == 0.0) {
       return _begin;
     } else if (t == 1.0) {
@@ -608,8 +600,10 @@ class _InterpolationSimulation extends _AnimationSimulation {
 
   @override
   double velocity(Duration time) {
-    final double t =
-        (time.inMicroseconds / _duration.inMicroseconds).clamp(0.0, 1.0);
+    final double t = (time.inMicroseconds / _duration.inMicroseconds).clamp(
+      0.0,
+      1.0,
+    );
     final double epsilon = 0.01;
     final double t1 = (t - epsilon).clamp(0.0, 1.0);
     final double t2 = (t + epsilon).clamp(0.0, 1.0);
@@ -626,12 +620,7 @@ class _InterpolationSimulation extends _AnimationSimulation {
 
 /// A simulation that repeats a linear interpolation indefinitely.
 class _RepeatingSimulation extends _AnimationSimulation {
-  _RepeatingSimulation(
-    this._min,
-    this._max,
-    this._reverse,
-    this._period,
-  );
+  _RepeatingSimulation(this._min, this._max, this._reverse, this._period);
 
   final double _min;
   final double _max;
@@ -661,11 +650,11 @@ class _RepeatingSimulation extends _AnimationSimulation {
     final bool goingForward = _reverse ? iteration.isEven : true;
     return goingForward
         ? (_max - _min) /
-            _period.inMicroseconds *
-            Duration.microsecondsPerSecond
+              _period.inMicroseconds *
+              Duration.microsecondsPerSecond
         : -(_max - _min) /
-            _period.inMicroseconds *
-            Duration.microsecondsPerSecond;
+              _period.inMicroseconds *
+              Duration.microsecondsPerSecond;
   }
 
   @override

@@ -154,9 +154,7 @@ class TapGestureRecognizer extends GestureRecognizer {
 
 /// Recognizes double tap gestures.
 class DoubleTapGestureRecognizer extends GestureRecognizer {
-  DoubleTapGestureRecognizer({
-    this.onDoubleTap,
-  });
+  DoubleTapGestureRecognizer({this.onDoubleTap});
 
   /// Called when a double tap has been detected.
   GestureTapCallback? onDoubleTap;

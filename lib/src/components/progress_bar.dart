@@ -65,7 +65,9 @@ class ProgressBar extends SingleChildRenderObjectComponent {
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderProgressBar renderObject) {
+    BuildContext context,
+    RenderProgressBar renderObject,
+  ) {
     final theme = TuiTheme.of(context);
     renderObject
       ..value = value
@@ -93,16 +95,16 @@ class RenderProgressBar extends RenderObject {
     bool showPercentage = false,
     String? label,
     bool indeterminate = false,
-  })  : _value = value,
-        _minHeight = minHeight,
-        _backgroundColor = backgroundColor,
-        _valueColor = valueColor,
-        _borderStyle = borderStyle,
-        _fillCharacter = fillCharacter,
-        _emptyCharacter = emptyCharacter,
-        _showPercentage = showPercentage,
-        _label = label,
-        _indeterminate = indeterminate;
+  }) : _value = value,
+       _minHeight = minHeight,
+       _backgroundColor = backgroundColor,
+       _valueColor = valueColor,
+       _borderStyle = borderStyle,
+       _fillCharacter = fillCharacter,
+       _emptyCharacter = emptyCharacter,
+       _showPercentage = showPercentage,
+       _label = label,
+       _indeterminate = indeterminate;
 
   double? _value;
   double _minHeight;
@@ -204,10 +206,7 @@ class RenderProgressBar extends RenderObject {
   @override
   void performLayout() {
     final desiredHeight = minHeight.clamp(1.0, constraints.maxHeight);
-    size = constraints.constrain(Size(
-      constraints.maxWidth,
-      desiredHeight,
-    ));
+    size = constraints.constrain(Size(constraints.maxWidth, desiredHeight));
   }
 
   @override
@@ -230,17 +229,24 @@ class RenderProgressBar extends RenderObject {
 
       // Top border
       if (barHeight > 1) {
-        canvas.drawText(offset, borderChars['topLeft']!,
-            style: TextStyle(color: valueColor));
+        canvas.drawText(
+          offset,
+          borderChars['topLeft']!,
+          style: TextStyle(color: valueColor),
+        );
         for (int x = 1; x < barWidth - 1; x++) {
           canvas.drawText(
-              offset + Offset(x.toDouble(), 0), borderChars['horizontal']!,
-              style: TextStyle(color: valueColor));
+            offset + Offset(x.toDouble(), 0),
+            borderChars['horizontal']!,
+            style: TextStyle(color: valueColor),
+          );
         }
         if (barWidth > 1) {
-          canvas.drawText(offset + Offset((barWidth - 1).toDouble(), 0),
-              borderChars['topRight']!,
-              style: TextStyle(color: valueColor));
+          canvas.drawText(
+            offset + Offset((barWidth - 1).toDouble(), 0),
+            borderChars['topRight']!,
+            style: TextStyle(color: valueColor),
+          );
         }
       }
 
@@ -248,46 +254,60 @@ class RenderProgressBar extends RenderObject {
       if (barHeight > 2) {
         for (int y = 1; y < barHeight - 1; y++) {
           canvas.drawText(
-              offset + Offset(0, y.toDouble()), borderChars['vertical']!,
-              style: TextStyle(color: valueColor));
+            offset + Offset(0, y.toDouble()),
+            borderChars['vertical']!,
+            style: TextStyle(color: valueColor),
+          );
           if (barWidth > 1) {
             canvas.drawText(
-                offset + Offset((barWidth - 1).toDouble(), y.toDouble()),
-                borderChars['vertical']!,
-                style: TextStyle(color: valueColor));
+              offset + Offset((barWidth - 1).toDouble(), y.toDouble()),
+              borderChars['vertical']!,
+              style: TextStyle(color: valueColor),
+            );
           }
         }
 
         // Bottom border
-        canvas.drawText(offset + Offset(0, (barHeight - 1).toDouble()),
-            borderChars['bottomLeft']!,
-            style: TextStyle(color: valueColor));
+        canvas.drawText(
+          offset + Offset(0, (barHeight - 1).toDouble()),
+          borderChars['bottomLeft']!,
+          style: TextStyle(color: valueColor),
+        );
         for (int x = 1; x < barWidth - 1; x++) {
           canvas.drawText(
-              offset + Offset(x.toDouble(), (barHeight - 1).toDouble()),
-              borderChars['horizontal']!,
-              style: TextStyle(color: valueColor));
+            offset + Offset(x.toDouble(), (barHeight - 1).toDouble()),
+            borderChars['horizontal']!,
+            style: TextStyle(color: valueColor),
+          );
         }
         if (barWidth > 1) {
           canvas.drawText(
-              offset +
-                  Offset((barWidth - 1).toDouble(), (barHeight - 1).toDouble()),
-              borderChars['bottomRight']!,
-              style: TextStyle(color: valueColor));
+            offset +
+                Offset((barWidth - 1).toDouble(), (barHeight - 1).toDouble()),
+            borderChars['bottomRight']!,
+            style: TextStyle(color: valueColor),
+          );
         }
       } else if (barHeight == 2) {
         // Simple two-line border
-        canvas.drawText(offset + Offset(0, 1), borderChars['bottomLeft']!,
-            style: TextStyle(color: valueColor));
+        canvas.drawText(
+          offset + Offset(0, 1),
+          borderChars['bottomLeft']!,
+          style: TextStyle(color: valueColor),
+        );
         for (int x = 1; x < barWidth - 1; x++) {
           canvas.drawText(
-              offset + Offset(x.toDouble(), 1), borderChars['horizontal']!,
-              style: TextStyle(color: valueColor));
+            offset + Offset(x.toDouble(), 1),
+            borderChars['horizontal']!,
+            style: TextStyle(color: valueColor),
+          );
         }
         if (barWidth > 1) {
-          canvas.drawText(offset + Offset((barWidth - 1).toDouble(), 1),
-              borderChars['bottomRight']!,
-              style: TextStyle(color: valueColor));
+          canvas.drawText(
+            offset + Offset((barWidth - 1).toDouble(), 1),
+            borderChars['bottomRight']!,
+            style: TextStyle(color: valueColor),
+          );
         }
       }
 
@@ -318,7 +338,8 @@ class RenderProgressBar extends RenderObject {
       for (int y = contentStartY; y < contentEndY; y++) {
         for (int x = contentStartX; x < contentEndX; x++) {
           final relativeX = x - contentStartX;
-          final isPulse = (relativeX >= pulsePosition - pulseWidth &&
+          final isPulse =
+              (relativeX >= pulsePosition - pulseWidth &&
                   relativeX <= pulsePosition) ||
               (pulsePosition > contentWidth &&
                   relativeX >= pulsePosition - contentWidth - pulseWidth &&

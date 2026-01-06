@@ -20,7 +20,7 @@ class _ShowcaseAppState extends State<ShowcaseApp> {
     'Forms',
     'Charts',
     'Colors',
-    'About'
+    'About',
   ];
   Timer? _clockTimer;
   String _currentTime = '';
@@ -80,16 +80,12 @@ class _ShowcaseAppState extends State<ShowcaseApp> {
         return false;
       },
       child: Container(
-        decoration: BoxDecoration(
-          color: Color(0xFF1A1B26),
-        ),
+        decoration: BoxDecoration(color: Color(0xFF1A1B26)),
         child: Column(
           children: [
             _buildHeader(),
             _buildTabBar(),
-            Expanded(
-              child: _buildContent(),
-            ),
+            Expanded(child: _buildContent()),
             _buildFooter(),
           ],
         ),
@@ -101,29 +97,18 @@ class _ShowcaseAppState extends State<ShowcaseApp> {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF2D2E40),
-        border: BoxBorder(
-          bottom: BorderSide(color: Color(0xFF565869)),
-        ),
+        border: BoxBorder(bottom: BorderSide(color: Color(0xFF565869))),
       ),
       padding: EdgeInsets.symmetric(horizontal: 2, vertical: 1),
       child: Row(
         children: [
-          Text(
-            '🚀 ',
-            style: TextStyle(color: Colors.cyan),
-          ),
+          Text('🚀 ', style: TextStyle(color: Colors.cyan)),
           Text(
             'Dart TUI Showcase',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           Spacer(),
-          Text(
-            _currentTime,
-            style: TextStyle(color: Color(0xFF7AA2F7)),
-          ),
+          Text(_currentTime, style: TextStyle(color: Color(0xFF7AA2F7))),
         ],
       ),
     );
@@ -131,9 +116,7 @@ class _ShowcaseAppState extends State<ShowcaseApp> {
 
   Component _buildTabBar() {
     return Container(
-      decoration: BoxDecoration(
-        color: Color(0xFF24253A),
-      ),
+      decoration: BoxDecoration(color: Color(0xFF24253A)),
       padding: EdgeInsets.symmetric(horizontal: 1),
       child: Row(
         children: [
@@ -191,42 +174,22 @@ class _ShowcaseAppState extends State<ShowcaseApp> {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF2D2E40),
-        border: BoxBorder(
-          top: BorderSide(color: Color(0xFF565869)),
-        ),
+        border: BoxBorder(top: BorderSide(color: Color(0xFF565869))),
       ),
       padding: EdgeInsets.symmetric(horizontal: 2, vertical: 1),
       child: Row(
         children: [
-          Text(
-            'Tab: Navigate',
-            style: TextStyle(color: Color(0xFF565869)),
-          ),
+          Text('Tab: Navigate', style: TextStyle(color: Color(0xFF565869))),
           Text(' | ', style: TextStyle(color: Color(0xFF565869))),
-          Text(
-            'Enter: Select',
-            style: TextStyle(color: Color(0xFF565869)),
-          ),
+          Text('Enter: Select', style: TextStyle(color: Color(0xFF565869))),
           Text(' | ', style: TextStyle(color: Color(0xFF565869))),
-          Text(
-            '←→: Switch Tabs',
-            style: TextStyle(color: Color(0xFF565869)),
-          ),
+          Text('←→: Switch Tabs', style: TextStyle(color: Color(0xFF565869))),
           Text(' | ', style: TextStyle(color: Color(0xFF565869))),
-          Text(
-            '1-5: Quick Jump',
-            style: TextStyle(color: Color(0xFF565869)),
-          ),
+          Text('1-5: Quick Jump', style: TextStyle(color: Color(0xFF565869))),
           Text(' | ', style: TextStyle(color: Color(0xFF565869))),
-          Text(
-            'q: Quit',
-            style: TextStyle(color: Color(0xFF565869)),
-          ),
+          Text('q: Quit', style: TextStyle(color: Color(0xFF565869))),
           Spacer(),
-          Text(
-            'v1.0.0',
-            style: TextStyle(color: Color(0xFF7AA2F7)),
-          ),
+          Text('v1.0.0', style: TextStyle(color: Color(0xFF7AA2F7))),
         ],
       ),
     );
@@ -273,29 +236,27 @@ class _DashboardTabState extends State<DashboardTab> {
           Row(
             children: [
               Expanded(
-                  child: _buildStatCard('Active Users', '1,234', Colors.green)),
+                child: _buildStatCard('Active Users', '1,234', Colors.green),
+              ),
               SizedBox(width: 2),
               Expanded(
-                  child: _buildStatCard('Revenue', '\$45.2K', Colors.cyan)),
+                child: _buildStatCard('Revenue', '\$45.2K', Colors.cyan),
+              ),
               SizedBox(width: 2),
               Expanded(child: _buildStatCard('Orders', '567', Colors.yellow)),
               SizedBox(width: 2),
               Expanded(
-                  child: _buildStatCard('Growth', '+12.5%', Colors.magenta)),
+                child: _buildStatCard('Growth', '+12.5%', Colors.magenta),
+              ),
             ],
           ),
           SizedBox(height: 2),
           Expanded(
             child: Row(
               children: [
-                Expanded(
-                  flex: 2,
-                  child: _buildSystemMonitor(),
-                ),
+                Expanded(flex: 2, child: _buildSystemMonitor()),
                 SizedBox(width: 2),
-                Expanded(
-                  child: _buildActivityFeed(),
-                ),
+                Expanded(child: _buildActivityFeed()),
               ],
             ),
           ),
@@ -314,17 +275,11 @@ class _DashboardTabState extends State<DashboardTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(color: Color(0xFF565869)),
-          ),
+          Text(title, style: TextStyle(color: Color(0xFF565869))),
           SizedBox(height: 1),
           Text(
             value,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: color, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -343,10 +298,7 @@ class _DashboardTabState extends State<DashboardTab> {
         children: [
           Text(
             '📊 System Monitor',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 2),
           _buildProgressBar('CPU', _cpu, Colors.cyan),
@@ -355,10 +307,7 @@ class _DashboardTabState extends State<DashboardTab> {
           SizedBox(height: 1),
           _buildProgressBar('Disk', _disk, Colors.yellow),
           SizedBox(height: 2),
-          Text(
-            'CPU History',
-            style: TextStyle(color: Color(0xFF565869)),
-          ),
+          Text('CPU History', style: TextStyle(color: Color(0xFF565869))),
           SizedBox(height: 1),
           _buildSparkline(),
         ],
@@ -374,16 +323,11 @@ class _DashboardTabState extends State<DashboardTab> {
           children: [
             SizedBox(
               width: 8,
-              child: Text(
-                label,
-                style: TextStyle(color: Color(0xFF565869)),
-              ),
+              child: Text(label, style: TextStyle(color: Color(0xFF565869))),
             ),
             Expanded(
               child: Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFF1A1B26),
-                ),
+                decoration: BoxDecoration(color: Color(0xFF1A1B26)),
                 child: Row(
                   children: [
                     Expanded(
@@ -396,10 +340,7 @@ class _DashboardTabState extends State<DashboardTab> {
                         ),
                       ),
                     ),
-                    Expanded(
-                      flex: (100 - value).toInt(),
-                      child: Container(),
-                    ),
+                    Expanded(flex: (100 - value).toInt(), child: Container()),
                   ],
                 ),
               ),
@@ -422,10 +363,7 @@ class _DashboardTabState extends State<DashboardTab> {
       int index = ((value / 100) * (chars.length - 1)).round();
       sparkline += chars[index];
     }
-    return Text(
-      sparkline,
-      style: TextStyle(color: Color(0xFF7AA2F7)),
-    );
+    return Text(sparkline, style: TextStyle(color: Color(0xFF7AA2F7)));
   }
 
   Component _buildActivityFeed() {
@@ -449,10 +387,7 @@ class _DashboardTabState extends State<DashboardTab> {
         children: [
           Text(
             '📝 Activity Feed',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 2),
           Expanded(
@@ -530,20 +465,14 @@ class _FormsTabState extends State<FormsTab> {
                 SizedBox(height: 1),
                 _buildFormField('Password', _password, isPassword: true),
                 SizedBox(height: 2),
-                Text(
-                  'Country',
-                  style: TextStyle(color: Color(0xFF565869)),
-                ),
+                Text('Country', style: TextStyle(color: Color(0xFF565869))),
                 Container(
                   decoration: BoxDecoration(
                     border: BoxBorder.all(color: Color(0xFF565869)),
                     color: Color(0xFF1A1B26),
                   ),
                   padding: EdgeInsets.symmetric(horizontal: 1),
-                  child: Text(
-                    _country,
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  child: Text(_country, style: TextStyle(color: Colors.white)),
                 ),
                 SizedBox(height: 2),
                 Row(
@@ -560,10 +489,7 @@ class _FormsTabState extends State<FormsTab> {
                   ],
                 ),
                 SizedBox(height: 2),
-                Text(
-                  'Preferences',
-                  style: TextStyle(color: Color(0xFF565869)),
-                ),
+                Text('Preferences', style: TextStyle(color: Color(0xFF565869))),
                 Column(
                   children: [
                     _buildRadioOption(0, 'Email notifications'),
@@ -573,9 +499,7 @@ class _FormsTabState extends State<FormsTab> {
                 ),
                 SizedBox(height: 2),
                 Container(
-                  decoration: BoxDecoration(
-                    color: Color(0xFF7AA2F7),
-                  ),
+                  decoration: BoxDecoration(color: Color(0xFF7AA2F7)),
                   padding: EdgeInsets.symmetric(horizontal: 2, vertical: 1),
                   child: Text(
                     'Submit',
@@ -593,15 +517,15 @@ class _FormsTabState extends State<FormsTab> {
     );
   }
 
-  Component _buildFormField(String label, String value,
-      {bool isPassword = false}) {
+  Component _buildFormField(
+    String label,
+    String value, {
+    bool isPassword = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(color: Color(0xFF565869)),
-        ),
+        Text(label, style: TextStyle(color: Color(0xFF565869))),
         Container(
           decoration: BoxDecoration(
             border: BoxBorder.all(color: Color(0xFF565869)),
@@ -625,10 +549,7 @@ class _FormsTabState extends State<FormsTab> {
           style: TextStyle(color: Color(0xFF7AA2F7)),
         ),
         SizedBox(width: 1),
-        Text(
-          label,
-          style: TextStyle(color: Colors.white),
-        ),
+        Text(label, style: TextStyle(color: Colors.white)),
       ],
     );
   }
@@ -646,13 +567,9 @@ class _ChartsTabState extends State<ChartsTab> {
       padding: EdgeInsets.all(2),
       child: Row(
         children: [
-          Expanded(
-            child: _buildBarChart(),
-          ),
+          Expanded(child: _buildBarChart()),
           SizedBox(width: 2),
-          Expanded(
-            child: _buildLineChart(),
-          ),
+          Expanded(child: _buildLineChart()),
         ],
       ),
     );
@@ -679,10 +596,7 @@ class _ChartsTabState extends State<ChartsTab> {
         children: [
           Text(
             '📊 Sales by Month',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 2),
           Expanded(
@@ -710,8 +624,9 @@ class _ChartsTabState extends State<ChartsTab> {
                                     (item.$2 / 10).round(),
                                     (index) => Text(
                                       '█',
-                                      style:
-                                          TextStyle(color: Color(0xFF7AA2F7)),
+                                      style: TextStyle(
+                                        color: Color(0xFF7AA2F7),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -747,40 +662,16 @@ class _ChartsTabState extends State<ChartsTab> {
         children: [
           Text(
             '📈 Growth Trend',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 2),
-          Text(
-            '100 ┤',
-            style: TextStyle(color: Color(0xFF565869)),
-          ),
-          Text(
-            ' 80 ┤    ╭─╮',
-            style: TextStyle(color: Color(0xFF565869)),
-          ),
-          Text(
-            ' 60 ┤  ╭─╯ ╰╮',
-            style: TextStyle(color: Color(0xFF565869)),
-          ),
-          Text(
-            ' 40 ┤ ╭╯    ╰─╮',
-            style: TextStyle(color: Color(0xFF565869)),
-          ),
-          Text(
-            ' 20 ┤╭╯       ╰╮',
-            style: TextStyle(color: Color(0xFF565869)),
-          ),
-          Text(
-            '  0 └──────────┘',
-            style: TextStyle(color: Color(0xFF565869)),
-          ),
-          Text(
-            '    Q1 Q2 Q3 Q4',
-            style: TextStyle(color: Color(0xFF565869)),
-          ),
+          Text('100 ┤', style: TextStyle(color: Color(0xFF565869))),
+          Text(' 80 ┤    ╭─╮', style: TextStyle(color: Color(0xFF565869))),
+          Text(' 60 ┤  ╭─╯ ╰╮', style: TextStyle(color: Color(0xFF565869))),
+          Text(' 40 ┤ ╭╯    ╰─╮', style: TextStyle(color: Color(0xFF565869))),
+          Text(' 20 ┤╭╯       ╰╮', style: TextStyle(color: Color(0xFF565869))),
+          Text('  0 └──────────┘', style: TextStyle(color: Color(0xFF565869))),
+          Text('    Q1 Q2 Q3 Q4', style: TextStyle(color: Color(0xFF565869))),
         ],
       ),
     );
@@ -812,10 +703,7 @@ class ColorsTab extends StatelessComponent {
         children: [
           Text(
             '🎨 Color Palette',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 2),
           Expanded(
@@ -850,10 +738,7 @@ class ColorsTab extends StatelessComponent {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Gradient Demo',
-                  style: TextStyle(color: Colors.white),
-                ),
+                Text('Gradient Demo', style: TextStyle(color: Colors.white)),
                 SizedBox(height: 1),
                 Row(
                   children: [
@@ -888,10 +773,7 @@ class ColorsTab extends StatelessComponent {
             child: Text('    ', style: TextStyle(color: color)),
           ),
           SizedBox(width: 2),
-          Text(
-            name,
-            style: TextStyle(color: Colors.white),
-          ),
+          Text(name, style: TextStyle(color: Colors.white)),
           Spacer(),
           Text(
             '#${color.red.toRadixString(16).padLeft(2, '0')}${color.green.toRadixString(16).padLeft(2, '0')}${color.blue.toRadixString(16).padLeft(2, '0')}'
@@ -987,9 +869,7 @@ class AboutTab extends StatelessComponent {
               ),
               SizedBox(height: 2),
               Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFF7AA2F7),
-                ),
+                decoration: BoxDecoration(color: Color(0xFF7AA2F7)),
                 padding: EdgeInsets.symmetric(horizontal: 2, vertical: 1),
                 child: Text(
                   'github.com/your-repo/dart-tui',

@@ -228,8 +228,10 @@ class TerminalBinding extends NoctermBinding
 
         if (foundTerminator && end < bytes.length) {
           // Extract OSC content
-          final oscContent =
-              utf8.decode(bytes.sublist(i + 2, end), allowMalformed: true);
+          final oscContent = utf8.decode(
+            bytes.sublist(i + 2, end),
+            allowMalformed: true,
+          );
 
           // Handle OSC sequence based on command number
           _handleOscSequence(oscContent);
@@ -337,7 +339,8 @@ class TerminalBinding extends NoctermBinding
       if (event is KeyboardInputEvent) {
         final keyEvent = event.event;
         // Check if this is a simple printable character (no modifiers except shift)
-        final isPrintable = keyEvent.character != null &&
+        final isPrintable =
+            keyEvent.character != null &&
             keyEvent.character!.isNotEmpty &&
             !keyEvent.isControlPressed &&
             !keyEvent.isAltPressed &&
@@ -486,8 +489,12 @@ class TerminalBinding extends NoctermBinding
       // Find the render object at the mouse position
       final renderObject = _findRenderObjectInTree(rootElement!);
       if (renderObject != null) {
-        _dispatchMouseWheelAtPosition(rootElement!, event,
-            Offset(event.x.toDouble(), event.y.toDouble()), Offset.zero);
+        _dispatchMouseWheelAtPosition(
+          rootElement!,
+          event,
+          Offset(event.x.toDouble(), event.y.toDouble()),
+          Offset.zero,
+        );
       }
     }
 
@@ -553,8 +560,12 @@ class TerminalBinding extends NoctermBinding
   }
 
   /// Dispatch a mouse wheel event to scrollable RenderObjects at a specific position
-  bool _dispatchMouseWheelAtPosition(Element element, MouseEvent event,
-      Offset mousePos, Offset currentOffset) {
+  bool _dispatchMouseWheelAtPosition(
+    Element element,
+    MouseEvent event,
+    Offset mousePos,
+    Offset currentOffset,
+  ) {
     // TODO: This is a hack to handle RenderTheater specially for Navigator
     // Should be properly integrated into the render object hierarchy
     if (element.renderObject is RenderTheater) {
@@ -562,7 +573,11 @@ class TerminalBinding extends NoctermBinding
       if (multiChildRenderObject.children.isNotEmpty) {
         final child = multiChildRenderObject.children.last;
         return _dispatchMouseWheelAtPosition(
-            child, event, mousePos, currentOffset);
+          child,
+          event,
+          mousePos,
+          currentOffset,
+        );
       }
     }
 
@@ -609,7 +624,11 @@ class TerminalBinding extends NoctermBinding
     element.visitChildren((child) {
       if (!handled) {
         handled = _dispatchMouseWheelAtPosition(
-            child, event, mousePos, childrenOffset);
+          child,
+          event,
+          mousePos,
+          childrenOffset,
+        );
       }
     });
 
@@ -795,7 +814,8 @@ class TerminalBinding extends NoctermBinding
         terminal.moveCursor(x, y);
 
         // Handle style
-        final hasStyle = cell.style.color != null ||
+        final hasStyle =
+            cell.style.color != null ||
             cell.style.backgroundColor != null ||
             cell.style.fontWeight == FontWeight.bold ||
             cell.style.fontWeight == FontWeight.dim ||
@@ -840,7 +860,8 @@ class TerminalBinding extends NoctermBinding
         final cell = buffer.getCell(x, y);
 
         // Handle style
-        final hasStyle = cell.style.color != null ||
+        final hasStyle =
+            cell.style.color != null ||
             cell.style.backgroundColor != null ||
             cell.style.fontWeight == FontWeight.bold ||
             cell.style.fontWeight == FontWeight.dim ||
@@ -888,8 +909,12 @@ class TerminalBinding extends NoctermBinding
     // Get current terminal size (may have been updated by resize event)
     final size = terminal.size;
     final buffer = buf.Buffer(size.width.toInt(), size.height.toInt());
-    final screenRect =
-        Rect.fromLTWH(0, 0, size.width.toDouble(), size.height.toDouble());
+    final screenRect = Rect.fromLTWH(
+      0,
+      0,
+      size.width.toDouble(),
+      size.height.toDouble(),
+    );
 
     // Find render object in tree
     RenderObject? findRenderObject(Element element) {
@@ -912,8 +937,11 @@ class TerminalBinding extends NoctermBinding
       }
 
       // Layout phase
-      renderObject.layout(BoxConstraints.tight(
-          Size(size.width.toDouble(), size.height.toDouble())));
+      renderObject.layout(
+        BoxConstraints.tight(
+          Size(size.width.toDouble(), size.height.toDouble()),
+        ),
+      );
 
       // Flush layout pipeline
       pipelineOwner.flushLayout();

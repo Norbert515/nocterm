@@ -13,9 +13,7 @@ class TestSimpleScroll extends StatelessComponent {
       child: Container(
         width: 30,
         height: 10,
-        decoration: BoxDecoration(
-          border: BoxBorder.all(color: Colors.blue),
-        ),
+        decoration: BoxDecoration(border: BoxBorder.all(color: Colors.blue)),
         child: SingleChildScrollView(
           child: Column(
             children: [

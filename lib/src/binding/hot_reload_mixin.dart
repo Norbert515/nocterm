@@ -20,14 +20,17 @@ mixin HotReloadBinding on NoctermBinding {
 
     // Only enable hot reload if we're running with --enable-vm-service
     // This is automatically set when running with `dart run --enable-vm-service`
-    final bool vmServiceEnabled = Platform.executableArguments.any((arg) =>
-        arg.contains('--enable-vm-service') ||
-        arg.contains('--observe') ||
-        arg.contains('--enable-asserts'));
+    final bool vmServiceEnabled = Platform.executableArguments.any(
+      (arg) =>
+          arg.contains('--enable-vm-service') ||
+          arg.contains('--observe') ||
+          arg.contains('--enable-asserts'),
+    );
 
     if (!vmServiceEnabled) {
       print(
-          '[HotReload] VM service not enabled. Run with --enable-vm-service to enable hot reload.');
+        '[HotReload] VM service not enabled. Run with --enable-vm-service to enable hot reload.',
+      );
       return;
     }
 
@@ -38,7 +41,8 @@ mixin HotReloadBinding on NoctermBinding {
         if (info.serverUri != null) {
           if (info.serverWebSocketUri != null) {
             print(
-                '[HotReload] DevTools URL: ${info.serverUri}devtools/?uri=${info.serverWebSocketUri}');
+              '[HotReload] DevTools URL: ${info.serverUri}devtools/?uri=${info.serverWebSocketUri}',
+            );
           }
         }
       } catch (e) {
@@ -59,11 +63,13 @@ mixin HotReloadBinding on NoctermBinding {
         onAfterReload: (ctx) {
           switch (ctx.result) {
             case HotReloadResult.Failed:
-              NoctermError.reportError(NoctermErrorDetails(
-                exception: Exception('Compilation error during hot reload'),
-                library: 'nocterm hot reload',
-                context: 'during hot reload compilation',
-              ));
+              NoctermError.reportError(
+                NoctermErrorDetails(
+                  exception: Exception('Compilation error during hot reload'),
+                  library: 'nocterm hot reload',
+                  context: 'during hot reload compilation',
+                ),
+              );
             case HotReloadResult.Succeeded:
               // Trigger reassemble after successful reload
               _performReassembleAfterReload();
@@ -89,12 +95,14 @@ mixin HotReloadBinding on NoctermBinding {
         await performReassemble();
         print('[HotReload] Application reassembled successfully');
       } catch (e, stack) {
-        NoctermError.reportError(NoctermErrorDetails(
-          exception: e,
-          stack: stack,
-          library: 'nocterm hot reload',
-          context: 'during reassemble',
-        ));
+        NoctermError.reportError(
+          NoctermErrorDetails(
+            exception: e,
+            stack: stack,
+            library: 'nocterm hot reload',
+            context: 'during reassemble',
+          ),
+        );
       }
     });
   }

@@ -36,7 +36,9 @@ class _ResizeTestAppState extends State<ResizeTestApp> {
   void _updateSize() {
     if (stdout.hasTerminal) {
       final newSize = Size(
-          stdout.terminalColumns.toDouble(), stdout.terminalLines.toDouble());
+        stdout.terminalColumns.toDouble(),
+        stdout.terminalLines.toDouble(),
+      );
       if (_currentSize == null ||
           _currentSize!.width != newSize.width ||
           _currentSize!.height != newSize.height) {
@@ -73,9 +75,7 @@ class _ResizeTestAppState extends State<ResizeTestApp> {
 
         // Title
         Container(
-          decoration: BoxDecoration(
-            color: Colors.blue,
-          ),
+          decoration: BoxDecoration(color: Colors.blue),
           child: Text(
             ' Terminal Resize Monitor ',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -84,22 +84,28 @@ class _ResizeTestAppState extends State<ResizeTestApp> {
 
         // Current size display
         Text(''),
-        Text('Current Size: ${width}x$height',
-            style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+        Text(
+          'Current Size: ${width}x$height',
+          style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+        ),
         Text('Time: ${DateTime.now().toString().substring(11, 19)}'),
         Text('Resize Count: $_resizeCount'),
         Text(''),
 
         // Size history
-        Text('Resize History:',
-            style:
-                TextStyle(color: Colors.yellow, fontWeight: FontWeight.bold)),
-        ..._sizeHistory
-            .map((h) => Text(h, style: TextStyle(color: Colors.cyan))),
+        Text(
+          'Resize History:',
+          style: TextStyle(color: Colors.yellow, fontWeight: FontWeight.bold),
+        ),
+        ..._sizeHistory.map(
+          (h) => Text(h, style: TextStyle(color: Colors.cyan)),
+        ),
 
         // Fill vertical space
         ...List.generate(
-            verticalSpace > 0 ? verticalSpace : 0, (_) => Text('')),
+          verticalSpace > 0 ? verticalSpace : 0,
+          (_) => Text(''),
+        ),
 
         // Instructions at bottom
         Text(''),

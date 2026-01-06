@@ -11,7 +11,8 @@ import 'package:nocterm/nocterm.dart';
 void main() async {
   print('Starting Terminal Resize Demo...');
   print(
-      'The TUI will automatically detect and respond to terminal resize events.');
+    'The TUI will automatically detect and respond to terminal resize events.',
+  );
   print('Press any key to start...');
   stdin.readLineSync();
 
@@ -36,25 +37,37 @@ class TerminalResizeDemo extends StatelessComponent {
         return Column(
           children: [
             Text('╔$horizontalLine╗', style: TextStyle(color: Colors.cyan)),
-            Text('║${_centerText("Terminal Resize Demo", width - 2)}║',
-                style: TextStyle(color: Colors.cyan)),
+            Text(
+              '║${_centerText("Terminal Resize Demo", width - 2)}║',
+              style: TextStyle(color: Colors.cyan),
+            ),
             Text('╠$horizontalLine╣', style: TextStyle(color: Colors.cyan)),
             Text(
-                '║${_centerText("Current Size: ${width}x$height", width - 2)}║',
-                style: TextStyle(
-                    color: Colors.green, fontWeight: FontWeight.bold)),
-            Text('║${_centerText("", width - 2)}║',
-                style: TextStyle(color: Colors.cyan)),
+              '║${_centerText("Current Size: ${width}x$height", width - 2)}║',
+              style: TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             Text(
-                '║${_centerText("Resize your terminal to see the UI adapt!", width - 2)}║',
-                style: TextStyle(color: Colors.yellow)),
+              '║${_centerText("", width - 2)}║',
+              style: TextStyle(color: Colors.cyan),
+            ),
             Text(
-                '║${_centerText("SIGWINCH signal handling is active", width - 2)}║',
-                style: TextStyle(color: Colors.magenta)),
+              '║${_centerText("Resize your terminal to see the UI adapt!", width - 2)}║',
+              style: TextStyle(color: Colors.yellow),
+            ),
+            Text(
+              '║${_centerText("SIGWINCH signal handling is active", width - 2)}║',
+              style: TextStyle(color: Colors.magenta),
+            ),
             ...List.generate(
-                verticalPadding > 0 ? verticalPadding : 0,
-                (i) => Text('║${" " * (width - 2)}║',
-                    style: TextStyle(color: Colors.cyan))),
+              verticalPadding > 0 ? verticalPadding : 0,
+              (i) => Text(
+                '║${" " * (width - 2)}║',
+                style: TextStyle(color: Colors.cyan),
+              ),
+            ),
             Text('╚$horizontalLine╝', style: TextStyle(color: Colors.cyan)),
           ],
         );

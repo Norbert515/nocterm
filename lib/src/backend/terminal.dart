@@ -143,14 +143,15 @@ class Terminal {
         ?.firstWhere(_fgRegexp.hasMatch)
         .timeout(timeout)
         .then((event) {
-      final match = _fgRegexp.firstMatch(event);
-      if (match == null) return null;
-      return Color.fromRGB(
-        int.parse(match.group(1)!, radix: 16) ~/ 256,
-        int.parse(match.group(2)!, radix: 16) ~/ 256,
-        int.parse(match.group(3)!, radix: 16) ~/ 256,
-      );
-    }).catchError((_) => null);
+          final match = _fgRegexp.firstMatch(event);
+          if (match == null) return null;
+          return Color.fromRGB(
+            int.parse(match.group(1)!, radix: 16) ~/ 256,
+            int.parse(match.group(2)!, radix: 16) ~/ 256,
+            int.parse(match.group(3)!, radix: 16) ~/ 256,
+          );
+        })
+        .catchError((_) => null);
   }
 
   /// Get the terminal's default background color
@@ -163,14 +164,15 @@ class Terminal {
         ?.firstWhere(_bgRegexp.hasMatch)
         .timeout(timeout)
         .then((event) {
-      final match = _bgRegexp.firstMatch(event);
-      if (match == null) return null;
-      return Color.fromRGB(
-        int.parse(match.group(1)!, radix: 16) ~/ 256,
-        int.parse(match.group(2)!, radix: 16) ~/ 256,
-        int.parse(match.group(3)!, radix: 16) ~/ 256,
-      );
-    }).catchError((_) => null);
+          final match = _bgRegexp.firstMatch(event);
+          if (match == null) return null;
+          return Color.fromRGB(
+            int.parse(match.group(1)!, radix: 16) ~/ 256,
+            int.parse(match.group(2)!, radix: 16) ~/ 256,
+            int.parse(match.group(3)!, radix: 16) ~/ 256,
+          );
+        })
+        .catchError((_) => null);
   }
 
   /// Restore terminal colors to defaults

@@ -188,7 +188,9 @@ void main() {
       test('TuiThemeData.catppuccinMocha exists and has dark brightness', () {
         expect(TuiThemeData.catppuccinMocha, isA<TuiThemeData>());
         expect(
-            TuiThemeData.catppuccinMocha.brightness, equals(Brightness.dark));
+          TuiThemeData.catppuccinMocha.brightness,
+          equals(Brightness.dark),
+        );
       });
 
       test('TuiThemeData.gruvboxDark exists and has dark brightness', () {
@@ -199,34 +201,76 @@ void main() {
 
     group('required color properties', () {
       void verifyThemeHasAllColors(TuiThemeData theme, String themeName) {
-        expect(theme.background, isA<Color>(),
-            reason: '$themeName should have background');
-        expect(theme.onBackground, isA<Color>(),
-            reason: '$themeName should have onBackground');
-        expect(theme.surface, isA<Color>(),
-            reason: '$themeName should have surface');
-        expect(theme.onSurface, isA<Color>(),
-            reason: '$themeName should have onSurface');
-        expect(theme.primary, isA<Color>(),
-            reason: '$themeName should have primary');
-        expect(theme.onPrimary, isA<Color>(),
-            reason: '$themeName should have onPrimary');
-        expect(theme.secondary, isA<Color>(),
-            reason: '$themeName should have secondary');
-        expect(theme.onSecondary, isA<Color>(),
-            reason: '$themeName should have onSecondary');
-        expect(theme.error, isA<Color>(),
-            reason: '$themeName should have error');
-        expect(theme.onError, isA<Color>(),
-            reason: '$themeName should have onError');
-        expect(theme.success, isA<Color>(),
-            reason: '$themeName should have success');
-        expect(theme.warning, isA<Color>(),
-            reason: '$themeName should have warning');
-        expect(theme.outline, isA<Color>(),
-            reason: '$themeName should have outline');
-        expect(theme.outlineVariant, isA<Color>(),
-            reason: '$themeName should have outlineVariant');
+        expect(
+          theme.background,
+          isA<Color>(),
+          reason: '$themeName should have background',
+        );
+        expect(
+          theme.onBackground,
+          isA<Color>(),
+          reason: '$themeName should have onBackground',
+        );
+        expect(
+          theme.surface,
+          isA<Color>(),
+          reason: '$themeName should have surface',
+        );
+        expect(
+          theme.onSurface,
+          isA<Color>(),
+          reason: '$themeName should have onSurface',
+        );
+        expect(
+          theme.primary,
+          isA<Color>(),
+          reason: '$themeName should have primary',
+        );
+        expect(
+          theme.onPrimary,
+          isA<Color>(),
+          reason: '$themeName should have onPrimary',
+        );
+        expect(
+          theme.secondary,
+          isA<Color>(),
+          reason: '$themeName should have secondary',
+        );
+        expect(
+          theme.onSecondary,
+          isA<Color>(),
+          reason: '$themeName should have onSecondary',
+        );
+        expect(
+          theme.error,
+          isA<Color>(),
+          reason: '$themeName should have error',
+        );
+        expect(
+          theme.onError,
+          isA<Color>(),
+          reason: '$themeName should have onError',
+        );
+        expect(
+          theme.success,
+          isA<Color>(),
+          reason: '$themeName should have success',
+        );
+        expect(
+          theme.warning,
+          isA<Color>(),
+          reason: '$themeName should have warning',
+        );
+        expect(
+          theme.outline,
+          isA<Color>(),
+          reason: '$themeName should have outline',
+        );
+        expect(
+          theme.outlineVariant,
+          isA<Color>(),
+          reason: '$themeName should have outlineVariant',
+        );
       }
 
       test('dark theme has all required colors', () {
@@ -247,7 +291,9 @@ void main() {
 
       test('catppuccinMocha theme has all required colors', () {
         verifyThemeHasAllColors(
-            TuiThemeData.catppuccinMocha, 'catppuccinMocha');
+          TuiThemeData.catppuccinMocha,
+          'catppuccinMocha',
+        );
       });
 
       test('gruvboxDark theme has all required colors', () {
@@ -320,34 +366,32 @@ void main() {
 
   group('TuiTheme InheritedComponent', () {
     test('TuiTheme.of returns the provided theme data', () async {
-      await testNocterm(
-        'TuiTheme.of returns provided theme',
-        (tester) async {
-          TuiThemeData? capturedTheme;
+      await testNocterm('TuiTheme.of returns provided theme', (tester) async {
+        TuiThemeData? capturedTheme;
 
-          await tester.pumpComponent(
-            TuiTheme(
-              data: TuiThemeData.dracula,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  capturedTheme = TuiTheme.of(context);
-                  return Text('Test');
-                },
-              ),
+        await tester.pumpComponent(
+          TuiTheme(
+            data: TuiThemeData.dracula,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                capturedTheme = TuiTheme.of(context);
+                return Text('Test');
+              },
             ),
-          );
+          ),
+        );
 
-          expect(capturedTheme, isNotNull);
-          expect(capturedTheme, equals(TuiThemeData.dracula));
-        },
-      );
+        expect(capturedTheme, isNotNull);
+        expect(capturedTheme, equals(TuiThemeData.dracula));
+      });
     });
 
-    test('TuiTheme.of returns default (dark) when no TuiTheme ancestor',
-        () async {
-      await testNocterm(
-        'TuiTheme.of returns default dark theme',
-        (tester) async {
+    test(
+      'TuiTheme.of returns default (dark) when no TuiTheme ancestor',
+      () async {
+        await testNocterm('TuiTheme.of returns default dark theme', (
+          tester,
+        ) async {
           TuiThemeData? capturedTheme;
 
           await tester.pumpComponent(
@@ -361,102 +405,92 @@ void main() {
 
           expect(capturedTheme, isNotNull);
           expect(capturedTheme, equals(TuiThemeData.dark));
-        },
-      );
-    });
+        });
+      },
+    );
 
     test('TuiTheme.maybeOf returns null when no TuiTheme ancestor', () async {
-      await testNocterm(
-        'TuiTheme.maybeOf returns null',
-        (tester) async {
-          TuiThemeData? capturedTheme;
-          bool wasChecked = false;
+      await testNocterm('TuiTheme.maybeOf returns null', (tester) async {
+        TuiThemeData? capturedTheme;
+        bool wasChecked = false;
 
-          await tester.pumpComponent(
-            LayoutBuilder(
-              builder: (context, constraints) {
-                capturedTheme = TuiTheme.maybeOf(context);
-                wasChecked = true;
-                return Text('Test');
-              },
-            ),
-          );
+        await tester.pumpComponent(
+          LayoutBuilder(
+            builder: (context, constraints) {
+              capturedTheme = TuiTheme.maybeOf(context);
+              wasChecked = true;
+              return Text('Test');
+            },
+          ),
+        );
 
-          expect(wasChecked, isTrue);
-          expect(capturedTheme, isNull);
-        },
-      );
+        expect(wasChecked, isTrue);
+        expect(capturedTheme, isNull);
+      });
     });
 
     test('TuiTheme.maybeOf returns theme when ancestor exists', () async {
-      await testNocterm(
-        'TuiTheme.maybeOf returns theme',
-        (tester) async {
-          TuiThemeData? capturedTheme;
+      await testNocterm('TuiTheme.maybeOf returns theme', (tester) async {
+        TuiThemeData? capturedTheme;
 
-          await tester.pumpComponent(
-            TuiTheme(
-              data: TuiThemeData.nord,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  capturedTheme = TuiTheme.maybeOf(context);
-                  return Text('Test');
-                },
-              ),
+        await tester.pumpComponent(
+          TuiTheme(
+            data: TuiThemeData.nord,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                capturedTheme = TuiTheme.maybeOf(context);
+                return Text('Test');
+              },
             ),
-          );
+          ),
+        );
 
-          expect(capturedTheme, isNotNull);
-          expect(capturedTheme, equals(TuiThemeData.nord));
-        },
-      );
+        expect(capturedTheme, isNotNull);
+        expect(capturedTheme, equals(TuiThemeData.nord));
+      });
     });
 
     test('nested TuiTheme overrides parent theme', () async {
-      await testNocterm(
-        'nested TuiTheme overrides parent',
-        (tester) async {
-          TuiThemeData? outerTheme;
-          TuiThemeData? innerTheme;
+      await testNocterm('nested TuiTheme overrides parent', (tester) async {
+        TuiThemeData? outerTheme;
+        TuiThemeData? innerTheme;
 
-          await tester.pumpComponent(
-            TuiTheme(
-              data: TuiThemeData.dark,
-              child: Column(
-                children: [
-                  LayoutBuilder(
+        await tester.pumpComponent(
+          TuiTheme(
+            data: TuiThemeData.dark,
+            child: Column(
+              children: [
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    outerTheme = TuiTheme.of(context);
+                    return Text('Outer');
+                  },
+                ),
+                TuiTheme(
+                  data: TuiThemeData.catppuccinMocha,
+                  child: LayoutBuilder(
                     builder: (context, constraints) {
-                      outerTheme = TuiTheme.of(context);
-                      return Text('Outer');
+                      innerTheme = TuiTheme.of(context);
+                      return Text('Inner');
                     },
                   ),
-                  TuiTheme(
-                    data: TuiThemeData.catppuccinMocha,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        innerTheme = TuiTheme.of(context);
-                        return Text('Inner');
-                      },
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          );
+          ),
+        );
 
-          expect(outerTheme, equals(TuiThemeData.dark));
-          expect(innerTheme, equals(TuiThemeData.catppuccinMocha));
-        },
-      );
+        expect(outerTheme, equals(TuiThemeData.dark));
+        expect(innerTheme, equals(TuiThemeData.catppuccinMocha));
+      });
     });
   });
 
   group('Component Theme Integration', () {
-    test('ProgressBar uses theme primary and outline colors by default',
-        () async {
-      await testNocterm(
-        'ProgressBar uses theme colors',
-        (tester) async {
+    test(
+      'ProgressBar uses theme primary and outline colors by default',
+      () async {
+        await testNocterm('ProgressBar uses theme colors', (tester) async {
           // Test with dark theme
           await tester.pumpComponent(
             TuiTheme(
@@ -473,160 +507,127 @@ void main() {
           final content = tester.terminalState.getText();
           expect(content, contains('█'));
           expect(content, contains('░'));
-        },
-      );
-    });
+        });
+      },
+    );
 
     test('ProgressBar renders with different themes', () async {
-      await testNocterm(
-        'ProgressBar with dracula theme',
-        (tester) async {
-          await tester.pumpComponent(
-            TuiTheme(
-              data: TuiThemeData.dracula,
-              child: SizedBox(
-                width: 20,
-                height: 1,
-                child: ProgressBar(value: 0.5),
-              ),
+      await testNocterm('ProgressBar with dracula theme', (tester) async {
+        await tester.pumpComponent(
+          TuiTheme(
+            data: TuiThemeData.dracula,
+            child: SizedBox(
+              width: 20,
+              height: 1,
+              child: ProgressBar(value: 0.5),
             ),
-          );
+          ),
+        );
 
-          final content = tester.terminalState.getText();
-          expect(content, contains('█'));
-        },
-      );
+        final content = tester.terminalState.getText();
+        expect(content, contains('█'));
+      });
 
-      await testNocterm(
-        'ProgressBar with nord theme',
-        (tester) async {
-          await tester.pumpComponent(
-            TuiTheme(
-              data: TuiThemeData.nord,
-              child: SizedBox(
-                width: 20,
-                height: 1,
-                child: ProgressBar(value: 0.5),
-              ),
+      await testNocterm('ProgressBar with nord theme', (tester) async {
+        await tester.pumpComponent(
+          TuiTheme(
+            data: TuiThemeData.nord,
+            child: SizedBox(
+              width: 20,
+              height: 1,
+              child: ProgressBar(value: 0.5),
             ),
-          );
+          ),
+        );
 
-          final content = tester.terminalState.getText();
-          expect(content, contains('█'));
-        },
-      );
+        final content = tester.terminalState.getText();
+        expect(content, contains('█'));
+      });
     });
 
     test('Divider uses theme outline color by default', () async {
-      await testNocterm(
-        'Divider uses theme colors',
-        (tester) async {
-          await tester.pumpComponent(
-            TuiTheme(
-              data: TuiThemeData.dark,
-              child: Container(
-                width: 20,
-                height: 3,
-                child: Column(
-                  children: [
-                    Text('Above'),
-                    Divider(),
-                    Text('Below'),
-                  ],
-                ),
+      await testNocterm('Divider uses theme colors', (tester) async {
+        await tester.pumpComponent(
+          TuiTheme(
+            data: TuiThemeData.dark,
+            child: Container(
+              width: 20,
+              height: 3,
+              child: Column(
+                children: [Text('Above'), Divider(), Text('Below')],
               ),
             ),
-          );
+          ),
+        );
 
-          expect(tester.terminalState, containsText('─'));
-        },
-      );
+        expect(tester.terminalState, containsText('─'));
+      });
     });
 
     test('Divider renders with different themes', () async {
-      await testNocterm(
-        'Divider with catppuccinMocha theme',
-        (tester) async {
-          await tester.pumpComponent(
-            TuiTheme(
-              data: TuiThemeData.catppuccinMocha,
-              child: Container(
-                width: 20,
-                height: 3,
-                child: Divider(),
-              ),
-            ),
-          );
+      await testNocterm('Divider with catppuccinMocha theme', (tester) async {
+        await tester.pumpComponent(
+          TuiTheme(
+            data: TuiThemeData.catppuccinMocha,
+            child: Container(width: 20, height: 3, child: Divider()),
+          ),
+        );
 
-          expect(tester.terminalState, containsText('─'));
-        },
-      );
+        expect(tester.terminalState, containsText('─'));
+      });
 
-      await testNocterm(
-        'Divider with gruvboxDark theme',
-        (tester) async {
-          await tester.pumpComponent(
-            TuiTheme(
-              data: TuiThemeData.gruvboxDark,
-              child: Container(
-                width: 20,
-                height: 3,
-                child: Divider(),
-              ),
-            ),
-          );
+      await testNocterm('Divider with gruvboxDark theme', (tester) async {
+        await tester.pumpComponent(
+          TuiTheme(
+            data: TuiThemeData.gruvboxDark,
+            child: Container(width: 20, height: 3, child: Divider()),
+          ),
+        );
 
-          expect(tester.terminalState, containsText('─'));
-        },
-      );
+        expect(tester.terminalState, containsText('─'));
+      });
     });
 
     test('custom colors override theme colors for ProgressBar', () async {
-      await testNocterm(
-        'ProgressBar custom colors',
-        (tester) async {
-          final customValueColor = Colors.red;
-          final customBackgroundColor = Colors.blue;
+      await testNocterm('ProgressBar custom colors', (tester) async {
+        final customValueColor = Colors.red;
+        final customBackgroundColor = Colors.blue;
 
-          await tester.pumpComponent(
-            TuiTheme(
-              data: TuiThemeData.dark,
-              child: SizedBox(
-                width: 20,
-                height: 1,
-                child: ProgressBar(
-                  value: 0.5,
-                  valueColor: customValueColor,
-                  backgroundColor: customBackgroundColor,
-                ),
+        await tester.pumpComponent(
+          TuiTheme(
+            data: TuiThemeData.dark,
+            child: SizedBox(
+              width: 20,
+              height: 1,
+              child: ProgressBar(
+                value: 0.5,
+                valueColor: customValueColor,
+                backgroundColor: customBackgroundColor,
               ),
             ),
-          );
+          ),
+        );
 
-          final content = tester.terminalState.getText();
-          expect(content, contains('█'));
-        },
-      );
+        final content = tester.terminalState.getText();
+        expect(content, contains('█'));
+      });
     });
 
     test('custom color overrides theme color for Divider', () async {
-      await testNocterm(
-        'Divider custom color',
-        (tester) async {
-          await tester.pumpComponent(
-            TuiTheme(
-              data: TuiThemeData.dark,
-              child: Container(
-                width: 20,
-                height: 3,
-                child: Divider(color: Colors.green),
-              ),
+      await testNocterm('Divider custom color', (tester) async {
+        await tester.pumpComponent(
+          TuiTheme(
+            data: TuiThemeData.dark,
+            child: Container(
+              width: 20,
+              height: 3,
+              child: Divider(color: Colors.green),
             ),
-          );
+          ),
+        );
 
-          expect(tester.terminalState, containsText('─'));
-        },
-      );
+        expect(tester.terminalState, containsText('─'));
+      });
     });
   });
 }

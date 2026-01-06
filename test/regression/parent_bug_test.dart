@@ -6,11 +6,7 @@ void main() {
     await testNocterm(
       'Parent bug',
       (tester) async {
-        await tester.pumpComponent(
-          Navigator(
-            home: _Pusher(),
-          ),
-        );
+        await tester.pumpComponent(Navigator(home: _Pusher()));
 
         // Push page
         await tester.sendKey(LogicalKey.enter);
@@ -46,18 +42,20 @@ class _PusherState extends State<_Pusher> {
         print('  mounted: $mounted');
 
         Navigator.of(context)
-            .push(PageRoute(
-          builder: (context) => _SecondPage(),
-          settings: RouteSettings(name: 'second'),
-        ))
+            .push(
+              PageRoute(
+                builder: (context) => _SecondPage(),
+                settings: RouteSettings(name: 'second'),
+              ),
+            )
             .then((it) {
-          print('After pop:');
-          print('  context: $context');
-          print('  context.parent: ${context.parent}');
-          print('  context.parent?.parent: ${context.parent?.parent}');
-          print('  mounted: $mounted');
-          expect(context.parent?.parent, isNotNull);
-        });
+              print('After pop:');
+              print('  context: $context');
+              print('  context.parent: ${context.parent}');
+              print('  context.parent?.parent: ${context.parent?.parent}');
+              print('  mounted: $mounted');
+              expect(context.parent?.parent, isNotNull);
+            });
         return true;
       },
       child: Container(),

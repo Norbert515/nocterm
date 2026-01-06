@@ -3,23 +3,24 @@ import 'package:nocterm/nocterm.dart';
 
 void main() {
   test('visual color test', () async {
-    await testNocterm(
-      'new color palette',
-      (tester) async {
-        await tester.pumpComponent(
-          Column(
-            children: [
-              Text('Regular Colors:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              SizedBox(height: 1),
-              Row(children: [
+    await testNocterm('new color palette', (tester) async {
+      await tester.pumpComponent(
+        Column(
+          children: [
+            Text(
+              'Regular Colors:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 1),
+            Row(
+              children: [
                 Container(
                   width: 10,
                   height: 2,
                   color: Colors.black,
                   child: Center(
-                      child:
-                          Text('BLACK', style: TextStyle(color: Colors.white))),
+                    child: Text('BLACK', style: TextStyle(color: Colors.white)),
+                  ),
                 ),
                 Container(
                   width: 10,
@@ -39,8 +40,10 @@ void main() {
                   color: Colors.yellow,
                   child: Center(child: Text('YELLOW')),
                 ),
-              ]),
-              Row(children: [
+              ],
+            ),
+            Row(
+              children: [
                 Container(
                   width: 10,
                   height: 2,
@@ -64,22 +67,29 @@ void main() {
                   height: 2,
                   color: Colors.white,
                   child: Center(
-                      child:
-                          Text('WHITE', style: TextStyle(color: Colors.black))),
+                    child: Text('WHITE', style: TextStyle(color: Colors.black)),
+                  ),
                 ),
-              ]),
-              SizedBox(height: 2),
-              Text('Bright Colors:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              SizedBox(height: 1),
-              Row(children: [
+              ],
+            ),
+            SizedBox(height: 2),
+            Text(
+              'Bright Colors:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 1),
+            Row(
+              children: [
                 Container(
                   width: 10,
                   height: 2,
                   color: Colors.brightBlack,
                   child: Center(
-                      child: Text('BR BLACK',
-                          style: TextStyle(color: Colors.white))),
+                    child: Text(
+                      'BR BLACK',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
                 ),
                 Container(
                   width: 10,
@@ -99,8 +109,10 @@ void main() {
                   color: Colors.brightYellow,
                   child: Center(child: Text('BR YELLO')),
                 ),
-              ]),
-              Row(children: [
+              ],
+            ),
+            Row(
+              children: [
                 Container(
                   width: 10,
                   height: 2,
@@ -124,23 +136,27 @@ void main() {
                   height: 2,
                   color: Colors.brightWhite,
                   child: Center(
-                      child: Text('BR WHITE',
-                          style: TextStyle(color: Colors.black))),
+                    child: Text(
+                      'BR WHITE',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
                 ),
-              ]),
-              SizedBox(height: 2),
-              Text('Sample Text Styles:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('Error message', style: TextStyle(color: Colors.red)),
-              Text('Success message', style: TextStyle(color: Colors.green)),
-              Text('Warning message', style: TextStyle(color: Colors.yellow)),
-              Text('Info message', style: TextStyle(color: Colors.blue)),
-              Text('Secondary text', style: TextStyle(color: Colors.grey)),
-            ],
-          ),
-        );
-      },
-      debugPrintAfterPump: true,
-    );
+              ],
+            ),
+            SizedBox(height: 2),
+            Text(
+              'Sample Text Styles:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text('Error message', style: TextStyle(color: Colors.red)),
+            Text('Success message', style: TextStyle(color: Colors.green)),
+            Text('Warning message', style: TextStyle(color: Colors.yellow)),
+            Text('Info message', style: TextStyle(color: Colors.blue)),
+            Text('Secondary text', style: TextStyle(color: Colors.grey)),
+          ],
+        ),
+      );
+    }, debugPrintAfterPump: true);
   });
 }

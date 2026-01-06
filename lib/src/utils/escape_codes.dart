@@ -24,12 +24,12 @@ class _Disable {
   String get bracketedPasteMode => '\x1B[?2004l';
 
   List<String> get values => [
-        motionTracking,
-        sgrMouseMode,
-        buttonEventTracking,
-        basicMouseTracking,
-        bracketedPasteMode,
-      ];
+    motionTracking,
+    sgrMouseMode,
+    buttonEventTracking,
+    basicMouseTracking,
+    bracketedPasteMode,
+  ];
 }
 
 class _Enable {
@@ -42,10 +42,10 @@ class _Enable {
   String get bracketedPasteMode => '\x1B[?2004h';
 
   List<String> get values => [
-        motionTracking,
-        sgrMouseMode,
-        buttonEventTracking,
-        basicMouseTracking,
-        bracketedPasteMode,
-      ];
+    motionTracking,
+    sgrMouseMode,
+    buttonEventTracking,
+    basicMouseTracking,
+    bracketedPasteMode,
+  ];
 }

@@ -23,9 +23,7 @@ void main() {
     });
 
     test('constructor with minimal fields (just exception)', () {
-      final details = NoctermErrorDetails(
-        exception: 'Simple string error',
-      );
+      final details = NoctermErrorDetails(exception: 'Simple string error');
 
       expect(details.exception, equals('Simple string error'));
       expect(details.stack, isNull);
@@ -94,8 +92,10 @@ void main() {
 
       // Check order and structure
       expect(output, contains('══╡ Exception caught by complete library ╞══'));
-      expect(output,
-          contains('The following exception was thrown while completing:'));
+      expect(
+        output,
+        contains('The following exception was thrown while completing:'),
+      );
       expect(output, contains('Complete error'));
       expect(output, contains('Stack trace:'));
       expect(output, contains('#0 main (test.dart:1:1)'));
@@ -150,16 +150,16 @@ void main() {
       NoctermError.reportError(testDetails);
 
       expect(capturedDetails, hasLength(1));
-      expect(capturedDetails.first.exception,
-          equals('Test error for custom handler'));
+      expect(
+        capturedDetails.first.exception,
+        equals('Test error for custom handler'),
+      );
     });
 
     test('setting onError to null does not crash on reportError', () {
       NoctermError.onError = null;
 
-      final testDetails = NoctermErrorDetails(
-        exception: 'Should not crash',
-      );
+      final testDetails = NoctermErrorDetails(exception: 'Should not crash');
 
       // Should not throw
       expect(() => NoctermError.reportError(testDetails), returnsNormally);
@@ -235,9 +235,7 @@ void main() {
         wasCalled = true;
       };
 
-      NoctermError.reportError(
-        NoctermErrorDetails(exception: 'Test'),
-      );
+      NoctermError.reportError(NoctermErrorDetails(exception: 'Test'));
 
       expect(wasCalled, isTrue);
     });
@@ -346,118 +344,106 @@ void main() {
     });
 
     test('layout error triggers NoctermError.onError', () async {
-      await testNocterm(
-        'layout error integration',
-        (tester) async {
-          await tester.pumpComponent(
-            const ErrorThrowingWidget(
-              throwInLayout: true,
-              throwInPaint: false,
-              errorMessage: 'Layout integration test',
-            ),
-          );
+      await testNocterm('layout error integration', (tester) async {
+        await tester.pumpComponent(
+          const ErrorThrowingWidget(
+            throwInLayout: true,
+            throwInPaint: false,
+            errorMessage: 'Layout integration test',
+          ),
+        );
 
-          // Error should have been captured (layout errors throw IntegerDivisionByZeroException)
-          expect(capturedErrors, isNotEmpty);
-          // Layout error context contains "performLayout"
-          expect(
-            capturedErrors.any(
-              (d) => d.context?.contains('performLayout') ?? false,
-            ),
-            isTrue,
-          );
-        },
-      );
+        // Error should have been captured (layout errors throw IntegerDivisionByZeroException)
+        expect(capturedErrors, isNotEmpty);
+        // Layout error context contains "performLayout"
+        expect(
+          capturedErrors.any(
+            (d) => d.context?.contains('performLayout') ?? false,
+          ),
+          isTrue,
+        );
+      });
     });
 
     test('paint error triggers NoctermError.onError', () async {
-      await testNocterm(
-        'paint error integration',
-        (tester) async {
-          await tester.pumpComponent(
-            const ErrorThrowingWidget(
-              throwInLayout: false,
-              throwInPaint: true,
-              errorMessage: 'Paint integration test',
-            ),
-          );
+      await testNocterm('paint error integration', (tester) async {
+        await tester.pumpComponent(
+          const ErrorThrowingWidget(
+            throwInLayout: false,
+            throwInPaint: true,
+            errorMessage: 'Paint integration test',
+          ),
+        );
 
-          // Error should have been captured
-          expect(capturedErrors, isNotEmpty);
-          // Paint error uses the errorMessage in the exception
-          expect(
-            capturedErrors.any(
-              (d) => d.exception.toString().contains('Paint integration test'),
-            ),
-            isTrue,
-          );
-        },
-      );
+        // Error should have been captured
+        expect(capturedErrors, isNotEmpty);
+        // Paint error uses the errorMessage in the exception
+        expect(
+          capturedErrors.any(
+            (d) => d.exception.toString().contains('Paint integration test'),
+          ),
+          isTrue,
+        );
+      });
     });
 
     test('errors contain contextual information', () async {
-      await testNocterm(
-        'error context',
-        (tester) async {
-          await tester.pumpComponent(
-            const ErrorThrowingWidget(
-              throwInLayout: true,
-              errorMessage: 'Contextual error',
-            ),
-          );
+      await testNocterm('error context', (tester) async {
+        await tester.pumpComponent(
+          const ErrorThrowingWidget(
+            throwInLayout: true,
+            errorMessage: 'Contextual error',
+          ),
+        );
 
-          // Should have captured at least one error
-          expect(capturedErrors, isNotEmpty);
+        // Should have captured at least one error
+        expect(capturedErrors, isNotEmpty);
 
-          // Find any error from rendering (layout errors are IntegerDivisionByZeroException)
-          final relevantError = capturedErrors.first;
+        // Find any error from rendering (layout errors are IntegerDivisionByZeroException)
+        final relevantError = capturedErrors.first;
 
-          // Should have library information
-          expect(relevantError.library, isNotNull);
+        // Should have library information
+        expect(relevantError.library, isNotNull);
 
-          // Should have context about what was happening
-          expect(relevantError.context, isNotNull);
-        },
-      );
+        // Should have context about what was happening
+        expect(relevantError.context, isNotNull);
+      });
     });
 
     test('multiple paint errors are captured separately', () async {
-      await testNocterm(
-        'multiple errors',
-        (tester) async {
-          // Use paint errors since they include the errorMessage in the exception
-          await tester.pumpComponent(
-            Column(
-              children: [
-                const ErrorThrowingWidget(
-                  throwInLayout: false,
-                  throwInPaint: true,
-                  errorMessage: 'First paint error',
-                ),
-                const ErrorThrowingWidget(
-                  throwInLayout: false,
-                  throwInPaint: true,
-                  errorMessage: 'Second paint error',
-                ),
-              ],
-            ),
-          );
+      await testNocterm('multiple errors', (tester) async {
+        // Use paint errors since they include the errorMessage in the exception
+        await tester.pumpComponent(
+          Column(
+            children: [
+              const ErrorThrowingWidget(
+                throwInLayout: false,
+                throwInPaint: true,
+                errorMessage: 'First paint error',
+              ),
+              const ErrorThrowingWidget(
+                throwInLayout: false,
+                throwInPaint: true,
+                errorMessage: 'Second paint error',
+              ),
+            ],
+          ),
+        );
 
-          // Both errors should be captured
-          expect(
-            capturedErrors.any(
-              (d) => d.exception.toString().contains('First paint error'),
-            ),
-            isTrue,
-          );
-          expect(
-            capturedErrors.any(
-              (d) => d.exception.toString().contains('Second paint error'),
-            ),
-            isTrue,
-          );
-        },
-      );
+        // Both errors should be captured
+        expect(
+          capturedErrors.any(
+            (d) => d.exception.toString().contains('First paint error'),
+          ),
+          isTrue,
+        );
+        expect(
+          capturedErrors.any(
+            (d) => d.exception.toString().contains('Second paint error'),
+          ),
+          isTrue,
+        );
+      });
     });
   });
 
@@ -472,27 +458,21 @@ void main() {
     });
 
     test('handles Error objects', () {
-      final details = NoctermErrorDetails(
-        exception: StateError('State error'),
-      );
+      final details = NoctermErrorDetails(exception: StateError('State error'));
 
       expect(details.exception, isA<StateError>());
       expect(details.toString(), contains('State error'));
     });
 
     test('handles String errors', () {
-      final details = NoctermErrorDetails(
-        exception: 'Plain string error',
-      );
+      final details = NoctermErrorDetails(exception: 'Plain string error');
 
       expect(details.exception, isA<String>());
       expect(details.toString(), contains('Plain string error'));
     });
 
     test('handles arbitrary objects', () {
-      final details = NoctermErrorDetails(
-        exception: {'error': 'map error'},
-      );
+      final details = NoctermErrorDetails(exception: {'error': 'map error'});
 
       expect(details.exception, isA<Map>());
       expect(details.toString(), contains('error'));

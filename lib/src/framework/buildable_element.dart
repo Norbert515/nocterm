@@ -35,12 +35,14 @@ abstract class BuildableElement extends Element {
       // Handle build errors
       _debugDoingBuild = false;
       built = ErrorComponent(error: e, stackTrace: stack);
-      NoctermError.reportError(NoctermErrorDetails(
-        exception: e,
-        stack: stack,
-        library: 'nocterm framework',
-        context: 'while building $runtimeType',
-      ));
+      NoctermError.reportError(
+        NoctermErrorDetails(
+          exception: e,
+          stack: stack,
+          library: 'nocterm framework',
+          context: 'while building $runtimeType',
+        ),
+      );
     } finally {
       _dirty = false;
       assert(() {
@@ -71,10 +73,7 @@ abstract class BuildableElement extends Element {
 
 /// Component shown when there's an error during build
 class ErrorComponent extends StatelessComponent {
-  const ErrorComponent({
-    required this.error,
-    required this.stackTrace,
-  });
+  const ErrorComponent({required this.error, required this.stackTrace});
 
   final Object error;
   final StackTrace stackTrace;

@@ -260,12 +260,14 @@ class UnicodeWidth {
 
       // Skip zero-width characters for positioning
       if (width > 0) {
-        result.add(GraphemeInfo(
-          character: String.fromCharCode(rune),
-          runeIndex: i,
-          columnPosition: columnPosition,
-          displayWidth: width,
-        ));
+        result.add(
+          GraphemeInfo(
+            character: String.fromCharCode(rune),
+            runeIndex: i,
+            columnPosition: columnPosition,
+            displayWidth: width,
+          ),
+        );
         columnPosition += width;
       }
     }

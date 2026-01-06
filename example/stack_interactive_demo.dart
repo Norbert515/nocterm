@@ -77,8 +77,10 @@ class _StackInteractiveDemoState extends State<StackInteractiveDemo> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Interactive Stack Demo',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  'Interactive Stack Demo',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 2),
                 Text('Counter: $counter'),
                 Text('Selected: $selectedItem'),
@@ -132,7 +134,9 @@ class _StackInteractiveDemoState extends State<StackInteractiveDemo> {
                 margin: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
                   border: BoxBorder.all(
-                      style: BoxBorderStyle.double, color: Colors.red),
+                    style: BoxBorderStyle.double,
+                    color: Colors.red,
+                  ),
                   color: Color.fromRGB(100, 0, 0),
                 ),
                 child: Center(
@@ -147,11 +151,15 @@ class _StackInteractiveDemoState extends State<StackInteractiveDemo> {
                         ),
                       ),
                       const SizedBox(height: 1),
-                      Text('Press O to close',
-                          style: TextStyle(color: Colors.white)),
+                      Text(
+                        'Press O to close',
+                        style: TextStyle(color: Colors.white),
+                      ),
                       const SizedBox(height: 2),
-                      Text('Current values:',
-                          style: TextStyle(color: Colors.yellow)),
+                      Text(
+                        'Current values:',
+                        style: TextStyle(color: Colors.yellow),
+                      ),
                       Text('Counter: $counter'),
                       Text('Selected: $selectedItem'),
                     ],
@@ -167,9 +175,7 @@ class _StackInteractiveDemoState extends State<StackInteractiveDemo> {
             bottom: 0,
             child: Container(
               height: 1,
-              decoration: BoxDecoration(
-                color: Color.fromRGB(0, 50, 0),
-              ),
+              decoration: BoxDecoration(color: Color.fromRGB(0, 50, 0)),
               child: Center(
                 child: Text(
                   showOverlay

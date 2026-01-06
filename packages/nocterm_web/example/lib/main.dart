@@ -24,8 +24,10 @@ class _InteractiveDemoState extends State<InteractiveDemo> {
   void initState() {
     super.initState();
     _updateTime();
-    _clockTimer =
-        Timer.periodic(const Duration(seconds: 1), (_) => _updateTime());
+    _clockTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => _updateTime(),
+    );
   }
 
   @override
@@ -118,8 +120,11 @@ class _InteractiveDemoState extends State<InteractiveDemo> {
                   color: i == _selectedTab ? const Color(0xFF2D2E40) : null,
                   border: i == _selectedTab
                       ? const BoxBorder(
-                          bottom:
-                              BorderSide(color: Color(0xFF7AA2F7), width: 2))
+                          bottom: BorderSide(
+                            color: Color(0xFF7AA2F7),
+                            width: 2,
+                          ),
+                        )
                       : null,
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
@@ -222,20 +227,32 @@ class _DashboardTabState extends State<DashboardTab> {
           Row(
             children: [
               Expanded(
-                  child: _buildStatCard(
-                      'CPU', '${_cpu.toStringAsFixed(1)}%', Colors.cyan)),
+                child: _buildStatCard(
+                  'CPU',
+                  '${_cpu.toStringAsFixed(1)}%',
+                  Colors.cyan,
+                ),
+              ),
               const SizedBox(width: 2),
               Expanded(
-                  child: _buildStatCard('Memory',
-                      '${_memory.toStringAsFixed(1)}%', Colors.green)),
+                child: _buildStatCard(
+                  'Memory',
+                  '${_memory.toStringAsFixed(1)}%',
+                  Colors.green,
+                ),
+              ),
               const SizedBox(width: 2),
               Expanded(
-                  child: _buildStatCard('Network',
-                      '${_network.toStringAsFixed(1)} MB/s', Colors.yellow)),
+                child: _buildStatCard(
+                  'Network',
+                  '${_network.toStringAsFixed(1)} MB/s',
+                  Colors.yellow,
+                ),
+              ),
               const SizedBox(width: 2),
               Expanded(
-                  child:
-                      _buildStatCard('Requests', '$_requests', Colors.magenta)),
+                child: _buildStatCard('Requests', '$_requests', Colors.magenta),
+              ),
             ],
           ),
           const SizedBox(height: 2),
@@ -312,8 +329,10 @@ class _DashboardTabState extends State<DashboardTab> {
           child: Text(label, style: const TextStyle(color: Color(0xFF565869))),
         ),
         Text('█' * filledLength, style: TextStyle(color: color)),
-        Text('░' * emptyLength,
-            style: const TextStyle(color: Color(0xFF565869))),
+        Text(
+          '░' * emptyLength,
+          style: const TextStyle(color: Color(0xFF565869)),
+        ),
         const SizedBox(width: 1),
         Text('${value.toStringAsFixed(0)}%', style: TextStyle(color: color)),
       ],
@@ -363,11 +382,15 @@ class _DashboardTabState extends State<DashboardTab> {
                         Text(activity.$1),
                         const SizedBox(width: 1),
                         Expanded(
-                          child: Text(activity.$2,
-                              style: const TextStyle(color: Colors.white)),
+                          child: Text(
+                            activity.$2,
+                            style: const TextStyle(color: Colors.white),
+                          ),
                         ),
-                        Text(activity.$3,
-                            style: const TextStyle(color: Color(0xFF565869))),
+                        Text(
+                          activity.$3,
+                          style: const TextStyle(color: Color(0xFF565869)),
+                        ),
                       ],
                     ),
                   ),
@@ -428,7 +451,9 @@ class _WidgetsTabState extends State<WidgetsTab> {
           Text(
             '$_counter',
             style: const TextStyle(
-                color: Color(0xFF7AA2F7), fontWeight: FontWeight.bold),
+              color: Color(0xFF7AA2F7),
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 2),
           Row(
@@ -438,8 +463,10 @@ class _WidgetsTabState extends State<WidgetsTab> {
                 onTap: () => setState(() => _counter--),
                 child: Container(
                   decoration: const BoxDecoration(color: Color(0xFF565869)),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 2,
+                    vertical: 1,
+                  ),
                   child: const Text('-', style: TextStyle(color: Colors.white)),
                 ),
               ),
@@ -448,10 +475,14 @@ class _WidgetsTabState extends State<WidgetsTab> {
                 onTap: () => setState(() => _counter++),
                 child: Container(
                   decoration: const BoxDecoration(color: Color(0xFF7AA2F7)),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
-                  child: const Text('+',
-                      style: TextStyle(color: Color(0xFF1A1B26))),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 2,
+                    vertical: 1,
+                  ),
+                  child: const Text(
+                    '+',
+                    style: TextStyle(color: Color(0xFF1A1B26)),
+                  ),
                 ),
               ),
             ],
@@ -465,8 +496,8 @@ class _WidgetsTabState extends State<WidgetsTab> {
                 child: Text(
                   _toggleOn ? '◉ ON ' : '○ OFF',
                   style: TextStyle(
-                      color:
-                          _toggleOn ? Colors.green : const Color(0xFF565869)),
+                    color: _toggleOn ? Colors.green : const Color(0xFF565869),
+                  ),
                 ),
               ),
             ],
@@ -498,20 +529,24 @@ class _WidgetsTabState extends State<WidgetsTab> {
                 padding: const EdgeInsets.only(bottom: 1),
                 child: Row(
                   children: [
-                    Text(_selectedItem == i ? '▶ ' : '  ',
-                        style: const TextStyle(color: Color(0xFF7AA2F7))),
+                    Text(
+                      _selectedItem == i ? '▶ ' : '  ',
+                      style: const TextStyle(color: Color(0xFF7AA2F7)),
+                    ),
                     Container(
                       decoration: BoxDecoration(
-                          color: _selectedItem == i
-                              ? const Color(0xFF2D2E40)
-                              : null),
+                        color: _selectedItem == i
+                            ? const Color(0xFF2D2E40)
+                            : null,
+                      ),
                       padding: const EdgeInsets.symmetric(horizontal: 1),
                       child: Text(
                         _items[i],
                         style: TextStyle(
-                            color: _selectedItem == i
-                                ? const Color(0xFF7AA2F7)
-                                : Colors.white),
+                          color: _selectedItem == i
+                              ? const Color(0xFF7AA2F7)
+                              : Colors.white,
+                        ),
                       ),
                     ),
                   ],
@@ -549,7 +584,9 @@ class _WidgetsTabState extends State<WidgetsTab> {
           Text(
             'Underlined',
             style: TextStyle(
-                color: Colors.white, decoration: TextDecoration.underline),
+              color: Colors.white,
+              decoration: TextDecoration.underline,
+            ),
           ),
           Text(
             'Dim text',
@@ -640,8 +677,10 @@ class _AnimationTabState extends State<AnimationTab> {
           const SizedBox(height: 2),
           Row(
             children: [
-              Text(spinnerChars[_spinnerFrame],
-                  style: const TextStyle(color: Colors.cyan)),
+              Text(
+                spinnerChars[_spinnerFrame],
+                style: const TextStyle(color: Colors.cyan),
+              ),
               const SizedBox(width: 2),
               const Text('Loading...', style: TextStyle(color: Colors.white)),
             ],
@@ -649,18 +688,24 @@ class _AnimationTabState extends State<AnimationTab> {
           const SizedBox(height: 1),
           Row(
             children: [
-              Text(altSpinners[_spinnerFrame % 4],
-                  style: const TextStyle(color: Colors.green)),
+              Text(
+                altSpinners[_spinnerFrame % 4],
+                style: const TextStyle(color: Colors.green),
+              ),
               const SizedBox(width: 2),
-              const Text('Processing...',
-                  style: TextStyle(color: Colors.white)),
+              const Text(
+                'Processing...',
+                style: TextStyle(color: Colors.white),
+              ),
             ],
           ),
           const SizedBox(height: 1),
           Row(
             children: [
-              Text(barSpinners[_spinnerFrame],
-                  style: const TextStyle(color: Colors.yellow)),
+              Text(
+                barSpinners[_spinnerFrame],
+                style: const TextStyle(color: Colors.yellow),
+              ),
               const SizedBox(width: 2),
               const Text('Building...', style: TextStyle(color: Colors.white)),
             ],
@@ -691,12 +736,18 @@ class _AnimationTabState extends State<AnimationTab> {
           const SizedBox(height: 2),
           Row(
             children: [
-              Text('█' * filledLength,
-                  style: const TextStyle(color: Color(0xFF7AA2F7))),
-              Text('░' * emptyLength,
-                  style: const TextStyle(color: Color(0xFF565869))),
-              Text(' ${(_progressValue * 100).toStringAsFixed(0)}%',
-                  style: const TextStyle(color: Colors.white)),
+              Text(
+                '█' * filledLength,
+                style: const TextStyle(color: Color(0xFF7AA2F7)),
+              ),
+              Text(
+                '░' * emptyLength,
+                style: const TextStyle(color: Color(0xFF565869)),
+              ),
+              Text(
+                ' ${(_progressValue * 100).toStringAsFixed(0)}%',
+                style: const TextStyle(color: Colors.white),
+              ),
             ],
           ),
           const SizedBox(height: 2),
@@ -709,8 +760,9 @@ class _AnimationTabState extends State<AnimationTab> {
   Component _buildBouncingProgress() {
     final barLength = 20;
     final position = (_frame ~/ 3) % (barLength * 2);
-    final actualPos =
-        position < barLength ? position : (barLength * 2 - position - 1);
+    final actualPos = position < barLength
+        ? position
+        : (barLength * 2 - position - 1);
 
     String bar = '';
     for (int i = 0; i < barLength; i++) {
@@ -796,42 +848,68 @@ class AboutTab extends StatelessComponent {
           child: const Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('╔═══════════════════════════════════╗',
-                  style: TextStyle(color: Color(0xFF7AA2F7))),
-              Text('║   🚀 NOCTERM WEB TERMINAL DEMO    ║',
-                  style: TextStyle(color: Color(0xFF7AA2F7))),
-              Text('╚═══════════════════════════════════╝',
-                  style: TextStyle(color: Color(0xFF7AA2F7))),
+              Text(
+                '╔═══════════════════════════════════╗',
+                style: TextStyle(color: Color(0xFF7AA2F7)),
+              ),
+              Text(
+                '║   🚀 NOCTERM WEB TERMINAL DEMO    ║',
+                style: TextStyle(color: Color(0xFF7AA2F7)),
+              ),
+              Text(
+                '╚═══════════════════════════════════╝',
+                style: TextStyle(color: Color(0xFF7AA2F7)),
+              ),
               SizedBox(height: 2),
               Text(
                 'A powerful Terminal User Interface',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              Text('running in your browser!',
-                  style: TextStyle(color: Colors.white)),
+              Text(
+                'running in your browser!',
+                style: TextStyle(color: Colors.white),
+              ),
               SizedBox(height: 2),
               Text(
                 '✨ Features',
                 style: TextStyle(
-                    color: Color(0xFF7AA2F7), fontWeight: FontWeight.bold),
+                  color: Color(0xFF7AA2F7),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               SizedBox(height: 1),
-              Text('• Flutter-like component system',
-                  style: TextStyle(color: Colors.white)),
-              Text('• Reactive state management',
-                  style: TextStyle(color: Colors.white)),
-              Text('• Rich text and color support',
-                  style: TextStyle(color: Colors.white)),
-              Text('• Mouse and keyboard input',
-                  style: TextStyle(color: Colors.white)),
-              Text('• Animations and timers',
-                  style: TextStyle(color: Colors.white)),
+              Text(
+                '• Flutter-like component system',
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                '• Reactive state management',
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                '• Rich text and color support',
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                '• Mouse and keyboard input',
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                '• Animations and timers',
+                style: TextStyle(color: Colors.white),
+              ),
               SizedBox(height: 2),
-              Text('🛠️ Built with Dart',
-                  style: TextStyle(color: Color(0xFF565869))),
-              Text('💙 Powered by nocterm',
-                  style: TextStyle(color: Color(0xFF565869))),
+              Text(
+                '🛠️ Built with Dart',
+                style: TextStyle(color: Color(0xFF565869)),
+              ),
+              Text(
+                '💙 Powered by nocterm',
+                style: TextStyle(color: Color(0xFF565869)),
+              ),
             ],
           ),
         ),

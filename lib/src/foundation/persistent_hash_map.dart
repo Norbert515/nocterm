@@ -12,8 +12,12 @@ class PersistentHashMap<K extends Object, V> {
   final _TrieNode? _root;
 
   PersistentHashMap<K, V> put(K key, V value) {
-    final _TrieNode newRoot =
-        (_root ?? _CompressedNode.empty).put(0, key, key.hashCode, value);
+    final _TrieNode newRoot = (_root ?? _CompressedNode.empty).put(
+      0,
+      key,
+      key.hashCode,
+      value,
+    );
     if (newRoot == _root) {
       return this;
     }
@@ -54,8 +58,12 @@ class _FullNode extends _TrieNode {
     final int index = _TrieNode.trieIndex(keyHash, bitIndex);
     final _TrieNode node =
         _unsafeCast<_TrieNode?>(descendants[index]) ?? _CompressedNode.empty;
-    final _TrieNode newNode =
-        node.put(bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash, value);
+    final _TrieNode newNode = node.put(
+      bitIndex + _TrieNode.hashBitsPerLevel,
+      key,
+      keyHash,
+      value,
+    );
     return identical(newNode, node)
         ? this
         : _FullNode(_copy(descendants)..[index] = newNode);
@@ -104,14 +112,18 @@ class _CompressedNode extends _TrieNode {
           return this;
         }
         return _CompressedNode(
-            occupiedIndices, _copy(keyValuePairs)..[2 * index + 1] = newNode);
+          occupiedIndices,
+          _copy(keyValuePairs)..[2 * index + 1] = newNode,
+        );
       }
 
       if (key == keyOrNull) {
         return identical(value, valueOrNode)
             ? this
             : _CompressedNode(
-                occupiedIndices, _copy(keyValuePairs)..[2 * index + 1] = value);
+                occupiedIndices,
+                _copy(keyValuePairs)..[2 * index + 1] = value,
+              );
       }
 
       final _TrieNode newNode = _resolveCollision(
@@ -132,8 +144,10 @@ class _CompressedNode extends _TrieNode {
       final int occupiedCount = _bitCount(occupiedIndices);
       if (occupiedCount >= 16) {
         return _inflate(bitIndex)
-          ..descendants[_TrieNode.trieIndex(keyHash, bitIndex)] =
-              _CompressedNode.empty.put(
+          ..descendants[_TrieNode.trieIndex(
+            keyHash,
+            bitIndex,
+          )] = _CompressedNode.empty.put(
             bitIndex + _TrieNode.hashBitsPerLevel,
             key,
             keyHash,
@@ -148,9 +162,11 @@ class _CompressedNode extends _TrieNode {
         }
         newKeyValuePairs[prefixLength] = key;
         newKeyValuePairs[prefixLength + 1] = value;
-        for (int srcIndex = prefixLength, dstIndex = prefixLength + 2;
-            srcIndex < totalLength;
-            srcIndex++, dstIndex++) {
+        for (
+          int srcIndex = prefixLength, dstIndex = prefixLength + 2;
+          srcIndex < totalLength;
+          srcIndex++, dstIndex++
+        ) {
           newKeyValuePairs[dstIndex] = keyValuePairs[srcIndex];
         }
         return _CompressedNode(occupiedIndices | bit, newKeyValuePairs);
@@ -217,10 +233,15 @@ class _CompressedNode extends _TrieNode {
     final existingKeyHash = existingKey.hashCode;
     return (existingKeyHash == keyHash)
         ? _HashCollisionNode.fromCollision(
-            keyHash, existingKey, existingValue, key, value)
+            keyHash,
+            existingKey,
+            existingValue,
+            key,
+            value,
+          )
         : _CompressedNode.empty
-            .put(bitIndex, existingKey, existingKeyHash, existingValue)
-            .put(bitIndex, key, keyHash, value);
+              .put(bitIndex, existingKey, existingKeyHash, existingValue)
+              .put(bitIndex, key, keyHash, value);
   }
 }
 
@@ -254,7 +275,9 @@ class _HashCollisionNode extends _TrieNode {
         return identical(keyValuePairs[index + 1], val)
             ? this
             : _HashCollisionNode(
-                keyHash, _copy(keyValuePairs)..[index + 1] = val);
+                keyHash,
+                _copy(keyValuePairs)..[index + 1] = val,
+              );
       }
       final int length = keyValuePairs.length;
       final List<Object?> newArray = _makeArray(length + 2);
@@ -266,8 +289,11 @@ class _HashCollisionNode extends _TrieNode {
       return _HashCollisionNode(keyHash, newArray);
     }
 
-    return _CompressedNode.single(bitIndex, hash, this)
-        .put(bitIndex, key, keyHash, val);
+    return _CompressedNode.single(
+      bitIndex,
+      hash,
+      this,
+    ).put(bitIndex, key, keyHash, val);
   }
 
   @override

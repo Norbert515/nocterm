@@ -278,8 +278,10 @@ void main() {
     test('double flip returns to original', () {
       final doubleFlipped = Curves.ease.flipped.flipped;
       expect(doubleFlipped.transform(0.0), closeTo(0.0, 0.001));
-      expect(doubleFlipped.transform(0.5),
-          closeTo(Curves.ease.transform(0.5), 0.01));
+      expect(
+        doubleFlipped.transform(0.5),
+        closeTo(Curves.ease.transform(0.5), 0.01),
+      );
       expect(doubleFlipped.transform(1.0), closeTo(1.0, 0.001));
     });
 

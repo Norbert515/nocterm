@@ -130,9 +130,7 @@ class _TodoAppState extends State<TodoApp> {
               child: Center(
                 child: Text(
                   '↑↓ Navigate  ␣ Toggle  N New  ESC Cancel',
-                  style: TextStyle(
-                    color: Colors.brightBlack,
-                  ),
+                  style: TextStyle(color: Colors.brightBlack),
                 ),
               ),
             ),
@@ -149,16 +147,12 @@ class _TodoAppState extends State<TodoApp> {
             color: Colors.brightBlack,
             decoration: TextDecoration.lineThrough,
           )
-        : TextStyle(
-            color: isSelected ? Colors.brightWhite : Colors.white,
-          );
+        : TextStyle(color: isSelected ? Colors.brightWhite : Colors.white);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 1),
       decoration: isSelected
-          ? BoxDecoration(
-              color: Color.fromRGB(30, 40, 50),
-            )
+          ? BoxDecoration(color: Color.fromRGB(30, 40, 50))
           : null,
       child: Row(
         children: [
@@ -172,12 +166,7 @@ class _TodoAppState extends State<TodoApp> {
               color: todo.completed ? Colors.brightGreen : Colors.brightYellow,
             ),
           ),
-          Expanded(
-            child: Text(
-              todo.text,
-              style: textStyle,
-            ),
-          ),
+          Expanded(child: Text(todo.text, style: textStyle)),
         ],
       ),
     );
@@ -186,15 +175,15 @@ class _TodoAppState extends State<TodoApp> {
   Component _buildNewTodoInput() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 1),
-      decoration: BoxDecoration(
-        color: Color.fromRGB(30, 35, 40),
-      ),
+      decoration: BoxDecoration(color: Color.fromRGB(30, 35, 40)),
       child: Row(
         children: [
           Text(
             '+ ',
             style: TextStyle(
-                color: Colors.brightGreen, fontWeight: FontWeight.bold),
+              color: Colors.brightGreen,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           Expanded(
             child: TextField(

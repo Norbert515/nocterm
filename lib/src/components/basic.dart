@@ -72,26 +72,21 @@ class Text extends SingleChildRenderObjectComponent {
 
 /// A box with a specified size
 class SizedBox extends SingleChildRenderObjectComponent {
-  const SizedBox({
-    super.key,
-    this.width,
-    this.height,
-    super.child,
-  });
+  const SizedBox({super.key, this.width, this.height, super.child});
 
   final double? width;
   final double? height;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return RenderConstrainedBox(
-      additionalConstraints: _createConstraints(),
-    );
+    return RenderConstrainedBox(additionalConstraints: _createConstraints());
   }
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderConstrainedBox renderObject) {
+    BuildContext context,
+    RenderConstrainedBox renderObject,
+  ) {
     renderObject.additionalConstraints = _createConstraints();
   }
 
@@ -107,11 +102,7 @@ class SizedBox extends SingleChildRenderObjectComponent {
 
 /// Apply padding around a child
 class Padding extends SingleChildRenderObjectComponent {
-  const Padding({
-    super.key,
-    required this.padding,
-    super.child,
-  });
+  const Padding({super.key, required this.padding, super.child});
 
   final EdgeInsets padding;
 
@@ -151,7 +142,9 @@ class Align extends SingleChildRenderObjectComponent {
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderPositionedBox renderObject) {
+    BuildContext context,
+    RenderPositionedBox renderObject,
+  ) {
     renderObject
       ..alignment = alignment
       ..widthFactor = widthFactor
@@ -242,11 +235,10 @@ class Flex extends RenderObjectComponent {
 
 /// Take up remaining space in a flex container
 class Expanded extends ParentDataComponent<FlexParentData> {
-  Expanded({
-    super.key,
-    int flex = 1,
-    required super.child,
-  }) : super(data: FlexParentData(flex: flex, fit: FlexFit.tight));
+  Expanded({super.key, int flex = 1, required super.child})
+    : super(
+        data: FlexParentData(flex: flex, fit: FlexFit.tight),
+      );
 }
 
 /// Flexible widget for flex containers
@@ -256,7 +248,9 @@ class Flexible extends ParentDataComponent<FlexParentData> {
     int flex = 1,
     FlexFit fit = FlexFit.loose,
     required super.child,
-  }) : super(data: FlexParentData(flex: flex, fit: fit));
+  }) : super(
+         data: FlexParentData(flex: flex, fit: fit),
+       );
 }
 
 /// Proxy component that wraps a single child
@@ -312,11 +306,7 @@ class LimitedBox extends StatelessComponent {
 /// respect both the additional constraints and the parent's constraints.
 class ConstrainedBox extends SingleChildRenderObjectComponent {
   /// Creates a widget that imposes additional constraints on its child.
-  const ConstrainedBox({
-    super.key,
-    required this.constraints,
-    super.child,
-  });
+  const ConstrainedBox({super.key, required this.constraints, super.child});
 
   /// The additional constraints to impose on the child.
   final BoxConstraints constraints;
@@ -328,17 +318,15 @@ class ConstrainedBox extends SingleChildRenderObjectComponent {
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderConstrainedBox renderObject) {
+    BuildContext context,
+    RenderConstrainedBox renderObject,
+  ) {
     renderObject.additionalConstraints = constraints;
   }
 }
 
 class Transform extends StatelessComponent {
-  const Transform({
-    super.key,
-    required this.transform,
-    this.child,
-  });
+  const Transform({super.key, required this.transform, this.child});
 
   final Matrix4 transform;
   final Component? child;
@@ -366,7 +354,7 @@ enum MainAxisAlignment {
   center,
   spaceBetween,
   spaceAround,
-  spaceEvenly
+  spaceEvenly,
 }
 
 enum MainAxisSize { min, max }
@@ -380,10 +368,7 @@ enum TextBaseline { alphabetic, ideographic }
 enum FlexFit { tight, loose }
 
 class FlexParentData extends BoxParentData {
-  FlexParentData({
-    this.flex,
-    this.fit,
-  });
+  FlexParentData({this.flex, this.fit});
   final int? flex;
   final FlexFit? fit;
 
@@ -395,7 +380,7 @@ class FlexParentData extends BoxParentData {
 class RenderConstrainedBox extends RenderObject
     with RenderObjectWithChildMixin<RenderObject> {
   RenderConstrainedBox({required BoxConstraints additionalConstraints})
-      : _additionalConstraints = additionalConstraints;
+    : _additionalConstraints = additionalConstraints;
 
   BoxConstraints get additionalConstraints => _additionalConstraints;
   BoxConstraints _additionalConstraints;
@@ -418,8 +403,10 @@ class RenderConstrainedBox extends RenderObject
   void performLayout() {
     if (child != null) {
       // Apply additional constraints using enforce method
-      child!.layout(_additionalConstraints.enforce(constraints),
-          parentUsesSize: true);
+      child!.layout(
+        _additionalConstraints.enforce(constraints),
+        parentUsesSize: true,
+      );
 
       // Position child at origin
       final BoxParentData childParentData = child!.parentData as BoxParentData;
@@ -473,10 +460,12 @@ class RenderPadding extends RenderObject
 
     // Set our size
     final childSize = child?.size ?? Size.zero;
-    size = constraints.constrain(Size(
-      childSize.width + padding.left + padding.right,
-      childSize.height + padding.top + padding.bottom,
-    ));
+    size = constraints.constrain(
+      Size(
+        childSize.width + padding.left + padding.right,
+        childSize.height + padding.top + padding.bottom,
+      ),
+    );
   }
 
   @override
@@ -557,11 +546,16 @@ class RenderPositionedBox extends RenderObject
 
     // Calculate and store the child's position in parent data
     if (child != null) {
-      final Alignment align =
-          alignment is Alignment ? alignment as Alignment : Alignment.center;
+      final Alignment align = alignment is Alignment
+          ? alignment as Alignment
+          : Alignment.center;
       final BoxParentData childParentData = child!.parentData as BoxParentData;
-      childParentData.offset = align.alongOffset(Offset(
-          size.width - child!.size.width, size.height - child!.size.height));
+      childParentData.offset = align.alongOffset(
+        Offset(
+          size.width - child!.size.width,
+          size.height - child!.size.height,
+        ),
+      );
     }
   }
 

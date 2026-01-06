@@ -192,10 +192,7 @@ class _TextFieldDemoState extends State<TextFieldDemo> {
 
             // Display submitted text
             if (_submittedText.isNotEmpty) ...[
-              Text(
-                _submittedText,
-                style: const TextStyle(color: Colors.green),
-              ),
+              Text(_submittedText, style: const TextStyle(color: Colors.green)),
               const SizedBox(height: 1),
             ],
 
@@ -208,11 +205,14 @@ class _TextFieldDemoState extends State<TextFieldDemo> {
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Keyboard Shortcuts:',
-                      style: TextStyle(color: Colors.yellow)),
+                  Text(
+                    'Keyboard Shortcuts:',
+                    style: TextStyle(color: Colors.yellow),
+                  ),
                   Text('• Ctrl+A: Select all'),
                   Text(
-                      '• Ctrl+C/X/V: Copy/Cut/Paste (clipboard integration pending)'),
+                    '• Ctrl+C/X/V: Copy/Cut/Paste (clipboard integration pending)',
+                  ),
                   Text('• Ctrl+←/→: Move by word'),
                   Text('• Ctrl+Backspace: Delete word'),
                   Text('• Ctrl+T: Transpose characters'),

@@ -47,10 +47,13 @@ class CursorMovement {
       if (cursorOffset < lineEndWithNewline ||
           i == layoutResult.lines.length - 1) {
         // Cursor is on this line
-        final positionInLine =
-            math.min(math.max(0, cursorOffset - textOffset), lineLength);
-        final textBeforeCursor =
-            positionInLine > 0 ? line.substring(0, positionInLine) : '';
+        final positionInLine = math.min(
+          math.max(0, cursorOffset - textOffset),
+          lineLength,
+        );
+        final textBeforeCursor = positionInLine > 0
+            ? line.substring(0, positionInLine)
+            : '';
         final visualColumn = UnicodeWidth.stringWidth(textBeforeCursor);
 
         return CursorPosition(
@@ -108,8 +111,10 @@ class CursorMovement {
     }
 
     // Move by one grapheme cluster
-    final newGraphemeIndex =
-        (currentGraphemeIndex + direction).clamp(0, graphemes.length);
+    final newGraphemeIndex = (currentGraphemeIndex + direction).clamp(
+      0,
+      graphemes.length,
+    );
 
     // Calculate new character offset
     int newOffset = 0;
@@ -136,8 +141,10 @@ class CursorMovement {
       cursorOffset: currentOffset,
     );
 
-    final targetLine =
-        (currentPos.line + direction).clamp(0, layoutResult.lines.length - 1);
+    final targetLine = (currentPos.line + direction).clamp(
+      0,
+      layoutResult.lines.length - 1,
+    );
     if (targetLine == currentPos.line) return currentOffset;
 
     // Find the new cursor position on the target line

@@ -57,11 +57,7 @@ void main() {
   group('TUI Testing Framework', () {
     test('can render simple text', () async {
       await testNocterm('simple text', (tester) async {
-        await tester.pumpComponent(
-          Container(
-            child: const Text('Hello, TUI!'),
-          ),
-        );
+        await tester.pumpComponent(Container(child: const Text('Hello, TUI!')));
 
         // Check that text is rendered
         expect(tester.terminalState, containsText('Hello, TUI!'));
@@ -96,8 +92,10 @@ void main() {
         // Check for styled text
         expect(
           tester.terminalState,
-          hasStyledText('Styled Text',
-              TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          hasStyledText(
+            'Styled Text',
+            TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+          ),
         );
       });
     });
@@ -124,11 +122,7 @@ void main() {
           Container(
             padding: const EdgeInsets.all(1),
             child: Column(
-              children: const [
-                Text('Line 1'),
-                Text('Line 2'),
-                Text('Line 3'),
-              ],
+              children: const [Text('Line 1'), Text('Line 2'), Text('Line 3')],
             ),
           ),
         );
@@ -155,13 +149,7 @@ void main() {
               children: [
                 Text('Header', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 1),
-                Row(
-                  children: const [
-                    Text('Left'),
-                    Spacer(),
-                    Text('Right'),
-                  ],
-                ),
+                Row(children: const [Text('Left'), Spacer(), Text('Right')]),
                 const SizedBox(height: 1),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 2),
@@ -214,9 +202,7 @@ void main() {
           Column(
             children: [
               const Text('First'),
-              Container(
-                child: const Text('Second'),
-              ),
+              Container(child: const Text('Second')),
               const Text('Third'),
             ],
           ),
@@ -232,21 +218,15 @@ void main() {
     });
 
     test('can specify terminal size', () async {
-      await testNocterm(
-        'custom size',
-        (tester) async {
-          await tester.pumpComponent(
-            Container(
-              child: const Text('Small Terminal'),
-            ),
-          );
+      await testNocterm('custom size', (tester) async {
+        await tester.pumpComponent(
+          Container(child: const Text('Small Terminal')),
+        );
 
-          // Verify terminal size
-          expect(tester.terminalState.size.width, 40);
-          expect(tester.terminalState.size.height, 10);
-        },
-        size: const Size(40, 10),
-      );
+        // Verify terminal size
+        expect(tester.terminalState.size.width, 40);
+        expect(tester.terminalState.size.height, 10);
+      }, size: const Size(40, 10));
     });
   });
 }

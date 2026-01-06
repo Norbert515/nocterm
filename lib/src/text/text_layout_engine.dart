@@ -92,8 +92,10 @@ class TextLayoutEngine {
       finalLines = lines.take(config.maxLines!).toList();
 
       if (config.overflow == TextOverflow.ellipsis && finalLines.isNotEmpty) {
-        finalLines[finalLines.length - 1] =
-            _addEllipsisToLine(finalLines.last, config.maxWidth);
+        finalLines[finalLines.length - 1] = _addEllipsisToLine(
+          finalLines.last,
+          config.maxWidth,
+        );
       }
     }
 
@@ -108,7 +110,9 @@ class TextLayoutEngine {
 
   /// Layout text with word wrapping
   static TextLayoutResult _layoutWithWrap(
-      String text, TextLayoutConfig config) {
+    String text,
+    TextLayoutConfig config,
+  ) {
     final List<String> wrappedLines = [];
     final paragraphs = text.split('\n');
 
@@ -131,8 +135,10 @@ class TextLayoutEngine {
       finalLines = wrappedLines.take(config.maxLines!).toList();
 
       if (config.overflow == TextOverflow.ellipsis && finalLines.isNotEmpty) {
-        finalLines[finalLines.length - 1] =
-            _addEllipsisToLine(finalLines.last, config.maxWidth);
+        finalLines[finalLines.length - 1] = _addEllipsisToLine(
+          finalLines.last,
+          config.maxWidth,
+        );
       }
     }
 
@@ -362,8 +368,11 @@ class TextLayoutEngine {
   }
 
   /// Apply justification to a line by adding spaces between words
-  static String justifyLine(String line, int maxWidth,
-      {bool isLastLine = false}) {
+  static String justifyLine(
+    String line,
+    int maxWidth, {
+    bool isLastLine = false,
+  }) {
     if (isLastLine) {
       return line; // Don't justify last line of paragraph
     }
@@ -373,8 +382,10 @@ class TextLayoutEngine {
       return line; // Can't justify single word
     }
 
-    final totalWordWidth =
-        words.fold(0, (sum, word) => sum + UnicodeWidth.stringWidth(word));
+    final totalWordWidth = words.fold(
+      0,
+      (sum, word) => sum + UnicodeWidth.stringWidth(word),
+    );
     final totalSpaces = maxWidth - totalWordWidth;
     final gaps = words.length - 1;
 

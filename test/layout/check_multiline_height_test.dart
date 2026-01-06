@@ -38,7 +38,8 @@ void main() {
 
         print('\n=== TOTAL NEEDED ===');
         print(
-            '5 (first row) + 1 (space) + 1 (center) + 1 (space) + 1 (bottom row) + 2 (padding) = 11 lines');
+          '5 (first row) + 1 (space) + 1 (center) + 1 (space) + 1 (bottom row) + 2 (padding) = 11 lines',
+        );
 
         // Now test the actual component with sufficient height
         await tester.pumpComponent(
@@ -60,18 +61,18 @@ void main() {
                   ],
                 ),
                 const SizedBox(height: 1),
-                Center(
-                  child: Text('── Center Line ──'),
-                ),
+                Center(child: Text('── Center Line ──')),
                 const SizedBox(height: 1),
                 Row(
                   children: [
                     Expanded(child: Text('Left')),
                     Expanded(child: Center(child: Text('Center'))),
                     Expanded(
-                        child: Align(
-                            alignment: Alignment.centerRight,
-                            child: Text('Right'))),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text('Right'),
+                      ),
+                    ),
                   ],
                 ),
               ],

@@ -6,16 +6,10 @@ class RouteSettings {
   /// Arguments passed to the route
   final Object? arguments;
 
-  const RouteSettings({
-    this.name,
-    this.arguments,
-  });
+  const RouteSettings({this.name, this.arguments});
 
   /// Create a copy with updated values
-  RouteSettings copyWith({
-    String? name,
-    Object? arguments,
-  }) {
+  RouteSettings copyWith({String? name, Object? arguments}) {
     return RouteSettings(
       name: name ?? this.name,
       arguments: arguments ?? this.arguments,

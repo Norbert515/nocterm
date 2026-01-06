@@ -14,8 +14,11 @@ void main() {
     // ⚠ (U+26A0) is in the Miscellaneous Symbols range (0x2600-0x26FF)
     // It's currently being treated as emoji (width 2)
     // but it should be width 1
-    expect(UnicodeWidth.stringWidth(warning), equals(1),
-        reason: 'Warning symbol ⚠ should be width 1');
+    expect(
+      UnicodeWidth.stringWidth(warning),
+      equals(1),
+      reason: 'Warning symbol ⚠ should be width 1',
+    );
   });
 
   test('various symbols in Miscellaneous Symbols range', () {
@@ -38,8 +41,10 @@ void main() {
     symbols.forEach((symbol, expectedWidth) {
       final actual = UnicodeWidth.stringWidth(symbol);
       final code = symbol.runes.first;
-      print('$symbol (U+${code.toRadixString(16).toUpperCase()}): '
-          'actual=$actual, expected=$expectedWidth');
+      print(
+        '$symbol (U+${code.toRadixString(16).toUpperCase()}): '
+        'actual=$actual, expected=$expectedWidth',
+      );
 
       expect(
         actual,

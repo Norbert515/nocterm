@@ -170,14 +170,8 @@ class AutoThemeDemo extends StatelessComponent {
   Component _colorDot(Color color, String label) {
     return Column(
       children: [
-        Text(
-          '*',
-          style: TextStyle(color: color),
-        ),
-        Text(
-          label,
-          style: TextStyle(color: color),
-        ),
+        Text('*', style: TextStyle(color: color)),
+        Text(label, style: TextStyle(color: color)),
       ],
     );
   }

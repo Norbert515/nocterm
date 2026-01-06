@@ -7,93 +7,82 @@ void main() {
   test('Basic Riverpod integration works', () async {
     final provider = Provider<String>((ref) => 'Hello from Riverpod!');
 
-    await testNocterm(
-      'basic provider read',
-      (tester) async {
-        await tester.pumpComponent(
-          ProviderScope(
-            child: StatelessBuilder(
-              builder: (context) {
-                // Use read for now - watch needs more complex integration
-                final value = context.read(provider);
-                return Text(value);
-              },
-            ),
+    await testNocterm('basic provider read', (tester) async {
+      await tester.pumpComponent(
+        ProviderScope(
+          child: StatelessBuilder(
+            builder: (context) {
+              // Use read for now - watch needs more complex integration
+              final value = context.read(provider);
+              return Text(value);
+            },
           ),
-        );
+        ),
+      );
 
-        expect(tester.terminalState, containsText('Hello from Riverpod!'));
-      },
-    );
+      expect(tester.terminalState, containsText('Hello from Riverpod!'));
+    });
   });
 
   test('StateProvider can be modified', () async {
     final counterProvider = StateProvider<int>((ref) => 0);
 
-    await testNocterm(
-      'state provider modification',
-      (tester) async {
-        await tester.pumpComponent(
-          ProviderScope(
-            child: StatefulBuilder(
-              builder: (context, setState) {
-                // Re-read the provider on each build
-                final count = context.read(counterProvider);
+    await testNocterm('state provider modification', (tester) async {
+      await tester.pumpComponent(
+        ProviderScope(
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              // Re-read the provider on each build
+              final count = context.read(counterProvider);
 
-                return Column(
-                  children: [
-                    Text('Count: $count'),
-                    KeyboardListener(
-                      onKeyEvent: (key) {
-                        if (key == LogicalKey.arrowUp) {
-                          context.read(counterProvider.notifier).state++;
-                          setState(() {}); // Manually trigger rebuild
-                        }
-                        return false;
-                      },
-                      child: const Text('Press up to increment'),
-                    ),
-                  ],
-                );
-              },
-            ),
+              return Column(
+                children: [
+                  Text('Count: $count'),
+                  KeyboardListener(
+                    onKeyEvent: (key) {
+                      if (key == LogicalKey.arrowUp) {
+                        context.read(counterProvider.notifier).state++;
+                        setState(() {}); // Manually trigger rebuild
+                      }
+                      return false;
+                    },
+                    child: const Text('Press up to increment'),
+                  ),
+                ],
+              );
+            },
           ),
-        );
+        ),
+      );
 
-        // Initial state
-        expect(tester.terminalState, containsText('Count: 0'));
+      // Initial state
+      expect(tester.terminalState, containsText('Count: 0'));
 
-        // Increment
-        await tester.sendKey(LogicalKey.arrowUp);
-        await tester.pump();
-        expect(tester.terminalState, containsText('Count: 1'));
-      },
-    );
+      // Increment
+      await tester.sendKey(LogicalKey.arrowUp);
+      await tester.pump();
+      expect(tester.terminalState, containsText('Count: 1'));
+    });
   });
 
   test('Provider overrides work', () async {
     final greetingProvider = Provider<String>((ref) => 'Default');
 
-    await testNocterm(
-      'provider override',
-      (tester) async {
-        await tester.pumpComponent(
-          ProviderScope(
-            overrides: [
-              greetingProvider.overrideWith((ref) => 'Overridden!'),
-            ],
-            child: StatelessBuilder(
-              builder: (context) {
-                final value = context.read(greetingProvider);
-                return Text(value);
-              },
-            ),
+    await testNocterm('provider override', (tester) async {
+      await tester.pumpComponent(
+        ProviderScope(
+          overrides: [greetingProvider.overrideWith((ref) => 'Overridden!')],
+          child: StatelessBuilder(
+            builder: (context) {
+              final value = context.read(greetingProvider);
+              return Text(value);
+            },
           ),
-        );
+        ),
+      );
 
-        expect(tester.terminalState, containsText('Overridden!'));
-      },
-    );
+      expect(tester.terminalState, containsText('Overridden!'));
+    });
   });
 }
 

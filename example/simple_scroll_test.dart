@@ -19,22 +19,21 @@ class _SimpleScrollTestState extends State<SimpleScrollTest> {
       child: Container(
         height: 30,
         width: 30,
-        decoration: BoxDecoration(
-          border: BoxBorder.all(color: Colors.blue),
-        ),
+        decoration: BoxDecoration(border: BoxBorder.all(color: Colors.blue)),
         margin: EdgeInsets.all(10),
         child: Scrollbar(
-            thumbVisibility: true,
+          thumbVisibility: true,
+          controller: scrollController,
+          child: SingleChildScrollView(
             controller: scrollController,
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: Column(
-                children: [
-                  for (int i = 0; i < 50; i++)
-                    Text('Line $i: This is scrollable content'),
-                ],
-              ),
-            )),
+            child: Column(
+              children: [
+                for (int i = 0; i < 50; i++)
+                  Text('Line $i: This is scrollable content'),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

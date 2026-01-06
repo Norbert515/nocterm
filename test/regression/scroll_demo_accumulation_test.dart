@@ -78,7 +78,8 @@ void main() {
 
         if (hasAccumulation) {
           print(
-              '\n⚠️ BUG CONFIRMED: Content is accumulating after tab switches!');
+            '\n⚠️ BUG CONFIRMED: Content is accumulating after tab switches!',
+          );
         } else {
           print('\n✅ No accumulation detected - counts remain stable');
         }
@@ -87,8 +88,11 @@ void main() {
         print('\n--- Final terminal state ---');
         print(tester.renderToString());
 
-        expect(hasAccumulation, isFalse,
-            reason: 'Content should not accumulate after tab switches');
+        expect(
+          hasAccumulation,
+          isFalse,
+          reason: 'Content should not accumulate after tab switches',
+        );
       },
       size: Size(100, 50), // Larger size to see more content
     );

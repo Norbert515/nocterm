@@ -50,10 +50,12 @@ void main() {
 
       // 24-bit background
       buffer.write(
-          '\x1b[48;2;255;0;0m\x1b[38;2;255;255;255mWhite on RED (24-bit)\x1b[0m\n');
+        '\x1b[48;2;255;0;0m\x1b[38;2;255;255;255mWhite on RED (24-bit)\x1b[0m\n',
+      );
       // 256-color background
       buffer.write(
-          '\x1b[48;5;196m\x1b[38;5;15mWhite on RED (256-color)\x1b[0m\n');
+        '\x1b[48;5;196m\x1b[38;5;15mWhite on RED (256-color)\x1b[0m\n',
+      );
       // 16-color background
       buffer.write('\x1b[41m\x1b[37mWhite on RED (16-color)\x1b[0m\n');
 
@@ -75,8 +77,9 @@ void main() {
       final buffer = StringBuffer();
 
       // Combine foreground and background
-      buffer
-          .write('\x1b[38;2;255;255;0m\x1b[48;2;0;0;255mYellow on Blue\x1b[0m');
+      buffer.write(
+        '\x1b[38;2;255;255;0m\x1b[48;2;0;0;255mYellow on Blue\x1b[0m',
+      );
 
       final output = buffer.toString();
       expect(output, contains('\x1b[38;2;255;255;0m'));

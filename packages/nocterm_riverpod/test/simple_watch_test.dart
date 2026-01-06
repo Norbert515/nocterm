@@ -6,23 +6,19 @@ void main() {
   test('Basic watch functionality', () async {
     final counterProvider = StateProvider<int>((ref) => 0);
 
-    await testNocterm(
-      'basic watch',
-      (tester) async {
-        await tester.pumpComponent(
-          ProviderScope(
-            child: _SimpleWatchWidget(counterProvider: counterProvider),
-          ),
-        );
+    await testNocterm('basic watch', (tester) async {
+      await tester.pumpComponent(
+        ProviderScope(
+          child: _SimpleWatchWidget(counterProvider: counterProvider),
+        ),
+      );
 
-        // Initial state
-        expect(tester.terminalState, containsText('Count: 0'));
+      // Initial state
+      expect(tester.terminalState, containsText('Count: 0'));
 
-        // Manually trigger state change and rebuild
-        // For now, we'll need manual setState since automatic rebuild isn't working yet
-      },
-      debugPrintAfterPump: true,
-    );
+      // Manually trigger state change and rebuild
+      // For now, we'll need manual setState since automatic rebuild isn't working yet
+    }, debugPrintAfterPump: true);
   });
 }
 

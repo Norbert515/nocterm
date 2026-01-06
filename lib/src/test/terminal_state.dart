@@ -6,29 +6,26 @@ class TerminalState {
   final Buffer buffer;
   final Size size;
 
-  const TerminalState({
-    required this.buffer,
-    required this.size,
-  });
+  const TerminalState({required this.buffer, required this.size});
 
   /// Get the text content of the entire terminal as a string
   String getText({Rect? area}) {
-    final targetArea = area ??
-        Rect.fromLTWH(
-          0,
-          0,
-          size.width.toDouble(),
-          size.height.toDouble(),
-        );
+    final targetArea =
+        area ??
+        Rect.fromLTWH(0, 0, size.width.toDouble(), size.height.toDouble());
 
     final lines = <String>[];
-    for (int y = targetArea.top.toInt();
-        y < targetArea.bottom.toInt() && y < size.height;
-        y++) {
+    for (
+      int y = targetArea.top.toInt();
+      y < targetArea.bottom.toInt() && y < size.height;
+      y++
+    ) {
       final line = StringBuffer();
-      for (int x = targetArea.left.toInt();
-          x < targetArea.right.toInt() && x < size.width;
-          x++) {
+      for (
+        int x = targetArea.left.toInt();
+        x < targetArea.right.toInt() && x < size.width;
+        x++
+      ) {
         final cell = buffer.getCell(x, y);
         // Skip zero-width space markers
         if (cell.char != '\u200B') {
@@ -81,11 +78,7 @@ class TerminalState {
       final line = lines[y];
       int index = 0;
       while ((index = line.indexOf(searchText, index)) != -1) {
-        matches.add(TextMatch(
-          text: searchText,
-          x: index,
-          y: y,
-        ));
+        matches.add(TextMatch(text: searchText, x: index, y: y));
         index += searchText.length;
       }
     }
@@ -118,12 +111,9 @@ class TerminalState {
         }
 
         if (text.isNotEmpty && !_isDefaultStyle(style)) {
-          segments.add(StyledText(
-            text: text.toString(),
-            style: style,
-            x: startX,
-            y: y,
-          ));
+          segments.add(
+            StyledText(text: text.toString(), style: style, x: startX, y: y),
+          );
         }
 
         if (x == startX) x++; // Prevent infinite loop
@@ -214,11 +204,7 @@ class TextMatch {
   final int x;
   final int y;
 
-  const TextMatch({
-    required this.text,
-    required this.x,
-    required this.y,
-  });
+  const TextMatch({required this.text, required this.x, required this.y});
 
   @override
   String toString() => 'TextMatch("$text" at $x,$y)';

@@ -39,11 +39,16 @@ class _ChatDemoState extends State<ChatDemo> {
   void initState() {
     super.initState();
     // Add initial messages
-    _addMessage('System',
-        'Chat demo started. Press "a" to toggle auto messages, "c" to clear.',
-        isSystem: true);
-    _addMessage('System', 'Type a message and press Enter to send.',
-        isSystem: true);
+    _addMessage(
+      'System',
+      'Chat demo started. Press "a" to toggle auto messages, "c" to clear.',
+      isSystem: true,
+    );
+    _addMessage(
+      'System',
+      'Type a message and press Enter to send.',
+      isSystem: true,
+    );
   }
 
   @override
@@ -56,12 +61,14 @@ class _ChatDemoState extends State<ChatDemo> {
 
   void _addMessage(String sender, String text, {bool isSystem = false}) {
     setState(() {
-      messages.add(ChatMessage(
-        sender: sender,
-        text: text,
-        timestamp: DateTime.now(),
-        isSystem: isSystem,
-      ));
+      messages.add(
+        ChatMessage(
+          sender: sender,
+          text: text,
+          timestamp: DateTime.now(),
+          isSystem: isSystem,
+        ),
+      );
     });
   }
 
@@ -229,8 +236,10 @@ class _ChatDemoState extends State<ChatDemo> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('[a] Toggle auto messages | ',
-                    style: TextStyle(color: Colors.gray)),
+                Text(
+                  '[a] Toggle auto messages | ',
+                  style: TextStyle(color: Colors.gray),
+                ),
                 Text('[c] Clear chat | ', style: TextStyle(color: Colors.gray)),
                 Text('[↑↓] Scroll | ', style: TextStyle(color: Colors.gray)),
                 Text('[Enter] Send', style: TextStyle(color: Colors.gray)),
@@ -250,7 +259,8 @@ class _MessageWidget extends StatelessComponent {
 
   @override
   Component build(BuildContext context) {
-    final timeStr = '${message.timestamp.hour.toString().padLeft(2, '0')}:'
+    final timeStr =
+        '${message.timestamp.hour.toString().padLeft(2, '0')}:'
         '${message.timestamp.minute.toString().padLeft(2, '0')}:'
         '${message.timestamp.second.toString().padLeft(2, '0')}';
 
@@ -271,17 +281,15 @@ class _MessageWidget extends StatelessComponent {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '[$timeStr]',
-            style: TextStyle(color: Colors.gray),
-          ),
+          Text('[$timeStr]', style: TextStyle(color: Colors.gray)),
           SizedBox(width: 1),
           Text(
             '${message.sender}:',
             style: TextStyle(
               color: senderColor,
-              fontWeight:
-                  message.isSystem ? FontWeight.bold : FontWeight.normal,
+              fontWeight: message.isSystem
+                  ? FontWeight.bold
+                  : FontWeight.normal,
             ),
           ),
           SizedBox(width: 1),

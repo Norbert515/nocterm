@@ -15,9 +15,7 @@ class MultipleScrollablesTest extends StatelessComponent {
         Container(
           height: 3,
           width: double.infinity,
-          decoration: BoxDecoration(
-            border: BoxBorder.all(color: Colors.cyan),
-          ),
+          decoration: BoxDecoration(border: BoxBorder.all(color: Colors.cyan)),
           child: Center(
             child: Text(
               'Multiple Scrollables Test - Hover and scroll different areas',
@@ -44,7 +42,9 @@ class MultipleScrollablesTest extends StatelessComponent {
                         child: Text(
                           'Left Panel (Green)',
                           style: TextStyle(
-                              color: Colors.green, fontWeight: FontWeight.bold),
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       Expanded(
@@ -87,7 +87,9 @@ class MultipleScrollablesTest extends StatelessComponent {
                         child: Text(
                           'Middle Panel (Blue)',
                           style: TextStyle(
-                              color: Colors.blue, fontWeight: FontWeight.bold),
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       Expanded(
@@ -130,8 +132,9 @@ class MultipleScrollablesTest extends StatelessComponent {
                         child: Text(
                           'Right Panel (Magenta)',
                           style: TextStyle(
-                              color: Colors.magenta,
-                              fontWeight: FontWeight.bold),
+                            color: Colors.magenta,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       Expanded(
@@ -176,7 +179,9 @@ class MultipleScrollablesTest extends StatelessComponent {
                 child: Text(
                   'Bottom Panel (Yellow) - Also scrollable',
                   style: TextStyle(
-                      color: Colors.yellow, fontWeight: FontWeight.bold),
+                    color: Colors.yellow,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               Expanded(

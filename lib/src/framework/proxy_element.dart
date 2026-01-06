@@ -71,7 +71,10 @@ abstract class ProxyElement extends Element {
   }
 
   void moveRenderObjectChild(
-      RenderObject child, dynamic oldSlot, dynamic newSlot) {
+    RenderObject child,
+    dynamic oldSlot,
+    dynamic newSlot,
+  ) {
     final RenderObjectElement? renderObjectElement =
         _findAncestorRenderObjectElement();
     renderObjectElement?.moveRenderObjectChild(child, oldSlot, newSlot);

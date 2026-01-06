@@ -30,9 +30,7 @@ class AdaptiveColor {
   ///
   /// Use this when a color should remain the same regardless of theme,
   /// such as brand colors or specific accent colors.
-  const AdaptiveColor.all(Color color)
-      : light = color,
-        dark = color;
+  const AdaptiveColor.all(Color color) : light = color, dark = color;
 
   /// Resolves this color based on the given brightness.
   ///

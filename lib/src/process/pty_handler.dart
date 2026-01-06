@@ -30,10 +30,7 @@ class PtyHandler {
   });
 
   /// Start the process with pseudo-terminal support
-  Future<void> start({
-    required int columns,
-    required int rows,
-  }) async {
+  Future<void> start({required int columns, required int rows}) async {
     _outputController = StreamController<String>.broadcast();
 
     // Build environment with terminal settings
@@ -101,14 +98,14 @@ class PtyHandler {
     _stdoutSubscription = _process!.stdout
         .transform(const Utf8Decoder(allowMalformed: true))
         .listen((data) {
-      _outputController?.add(data);
-    });
+          _outputController?.add(data);
+        });
 
     _stderrSubscription = _process!.stderr
         .transform(const Utf8Decoder(allowMalformed: true))
         .listen((data) {
-      _outputController?.add(data);
-    });
+          _outputController?.add(data);
+        });
   }
 
   /// Get the output stream from the process
@@ -193,10 +190,7 @@ class UnixPtyHandler extends PtyHandler {
   });
 
   @override
-  Future<void> start({
-    required int columns,
-    required int rows,
-  }) async {
+  Future<void> start({required int columns, required int rows}) async {
     _outputController = StreamController<String>.broadcast();
 
     // Build environment with terminal settings
@@ -243,8 +237,12 @@ class UnixPtyHandler extends PtyHandler {
       scriptArgs.addAll(['-q', '/dev/null', command, ...arguments]);
     } else {
       // Linux script command syntax
-      scriptArgs
-          .addAll(['-q', '-c', '$command ${arguments.join(' ')}', '/dev/null']);
+      scriptArgs.addAll([
+        '-q',
+        '-c',
+        '$command ${arguments.join(' ')}',
+        '/dev/null',
+      ]);
     }
 
     // Start the process wrapped in 'script' to get PTY
@@ -261,14 +259,14 @@ class UnixPtyHandler extends PtyHandler {
     _stdoutSubscription = _process!.stdout
         .transform(const Utf8Decoder(allowMalformed: true))
         .listen((data) {
-      _outputController?.add(data);
-    });
+          _outputController?.add(data);
+        });
 
     _stderrSubscription = _process!.stderr
         .transform(const Utf8Decoder(allowMalformed: true))
         .listen((data) {
-      _outputController?.add(data);
-    });
+          _outputController?.add(data);
+        });
   }
 
   @override

@@ -119,13 +119,16 @@ class KeyboardParser {
     if (decodedChar != null && bytesConsumed > 0) {
       // Remove consumed bytes from buffer
       _buffer.removeRange(
-          0, bytesConsumed - 1); // Keep one byte for the main parser to clear
+        0,
+        bytesConsumed - 1,
+      ); // Keep one byte for the main parser to clear
 
       // Regular character
       final key = LogicalKey.fromCharacter(decodedChar);
       // Check if it's uppercase to infer shift was pressed
       final code = decodedChar.codeUnitAt(0);
-      final isUpperCase = (code >= 0x41 && code <= 0x5A) || // A-Z
+      final isUpperCase =
+          (code >= 0x41 && code <= 0x5A) || // A-Z
           (decodedChar != decodedChar.toLowerCase()); // Other uppercase chars
       return KeyboardEvent(
         logicalKey: key ?? LogicalKey(code, 'unknown'),
@@ -449,7 +452,8 @@ class KeyboardParser {
       // Convert to the base letter (A=0x41, B=0x42, etc.)
       final letterCode = code + 0x40; // 0x01 + 0x40 = 0x41 ('A')
       final letter = String.fromCharCode(letterCode).toLowerCase();
-      final baseKey = LogicalKey.fromCharacter(letter) ??
+      final baseKey =
+          LogicalKey.fromCharacter(letter) ??
           LogicalKey(letterCode, 'ctrl+$letter');
 
       return KeyboardEvent(

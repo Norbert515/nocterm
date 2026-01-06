@@ -54,10 +54,12 @@ class _TerminalPageState extends State<TerminalPage> {
     WebBackend.initializeHost();
 
     // Set initial size from xterm
-    WebBackend.setSize(nocterm.Size(
-      terminal.viewWidth.toDouble(),
-      terminal.viewHeight.toDouble(),
-    ));
+    WebBackend.setSize(
+      nocterm.Size(
+        terminal.viewWidth.toDouble(),
+        terminal.viewHeight.toDouble(),
+      ),
+    );
 
     // Clear terminal and scroll to top before loading app
     terminal.write('\x1b[2J'); // Clear entire screen
@@ -95,10 +97,12 @@ class _TerminalPageState extends State<TerminalPage> {
 
       // Force a size update now that app is connected and xterm is rendered
       if (WebBackend.isAppConnected) {
-        WebBackend.setSize(nocterm.Size(
-          terminal.viewWidth.toDouble(),
-          terminal.viewHeight.toDouble(),
-        ));
+        WebBackend.setSize(
+          nocterm.Size(
+            terminal.viewWidth.toDouble(),
+            terminal.viewHeight.toDouble(),
+          ),
+        );
       }
     } catch (e) {
       // Show error in terminal

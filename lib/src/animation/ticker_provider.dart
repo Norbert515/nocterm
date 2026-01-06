@@ -155,11 +155,7 @@ mixin TickerProviderStateMixin<T extends StatefulComponent> on State<T>
 ///
 /// This ticker automatically removes itself from the provider when disposed.
 class _WidgetTicker extends Ticker {
-  _WidgetTicker(
-    super.onTick,
-    this._creator, {
-    super.debugLabel,
-  });
+  _WidgetTicker(super.onTick, this._creator, {super.debugLabel});
 
   final TickerProviderStateMixin _creator;
 

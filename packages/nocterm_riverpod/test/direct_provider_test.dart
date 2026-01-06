@@ -7,51 +7,48 @@ void main() {
     final counterProvider = StateProvider<int>((ref) => 0);
     int buildCount = 0;
 
-    await testNocterm(
-      'direct provider test',
-      (tester) async {
-        late ProviderContainer container;
+    await testNocterm('direct provider test', (tester) async {
+      late ProviderContainer container;
 
-        await tester.pumpComponent(
-          ProviderScope(
-            child: Builder(
-              builder: (context) {
-                // Store the container for later use
-                container = ProviderScope.containerOf(context, listen: false);
+      await tester.pumpComponent(
+        ProviderScope(
+          child: Builder(
+            builder: (context) {
+              // Store the container for later use
+              container = ProviderScope.containerOf(context, listen: false);
 
-                buildCount++;
-                print('[BUILD] Build #$buildCount');
-                final count = context.watch(counterProvider);
-                print('[BUILD] Count value: $count');
+              buildCount++;
+              print('[BUILD] Build #$buildCount');
+              final count = context.watch(counterProvider);
+              print('[BUILD] Count value: $count');
 
-                return Text('Count: $count, Builds: $buildCount');
-              },
-            ),
+              return Text('Count: $count, Builds: $buildCount');
+            },
           ),
-        );
+        ),
+      );
 
-        // Initial state
-        print('[TEST] Initial state check');
-        expect(buildCount, 1);
-        expect(tester.terminalState, containsText('Count: 0, Builds: 1'));
+      // Initial state
+      print('[TEST] Initial state check');
+      expect(buildCount, 1);
+      expect(tester.terminalState, containsText('Count: 0, Builds: 1'));
 
-        // Directly modify the provider through the container
-        print('[TEST] Modifying provider directly...');
-        container.read(counterProvider.notifier).state = 1;
+      // Directly modify the provider through the container
+      print('[TEST] Modifying provider directly...');
+      container.read(counterProvider.notifier).state = 1;
 
-        // Give time for the subscription callback to fire
-        await Future.delayed(Duration(milliseconds: 100));
+      // Give time for the subscription callback to fire
+      await Future.delayed(Duration(milliseconds: 100));
 
-        // Force a frame
-        print('[TEST] Pumping frame...');
-        await tester.pump();
+      // Force a frame
+      print('[TEST] Pumping frame...');
+      await tester.pump();
 
-        // Check if rebuild happened
-        print('[TEST] Final build count: $buildCount');
-        expect(buildCount, 2, reason: 'Widget should have rebuilt');
-        expect(tester.terminalState, containsText('Count: 1, Builds: 2'));
-      },
-    );
+      // Check if rebuild happened
+      print('[TEST] Final build count: $buildCount');
+      expect(buildCount, 2, reason: 'Widget should have rebuilt');
+      expect(tester.terminalState, containsText('Count: 1, Builds: 2'));
+    });
   });
 }
 

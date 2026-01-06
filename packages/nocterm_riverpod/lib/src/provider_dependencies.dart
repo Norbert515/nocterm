@@ -44,19 +44,15 @@ class ProviderDependencies {
         _watchers[provider] = _oldWatchers.remove(provider)!;
       } else {
         // Create a new subscription
-        final subscription = container.listen<T>(
-          provider,
-          (previous, next) {
-            // Only trigger rebuild if this subscription is still active
-            if (_watchers.containsKey(provider) ||
-                _oldWatchers.containsKey(provider)) {
-              if (dependent.mounted) {
-                dependent.markNeedsBuild();
-              }
+        final subscription = container.listen<T>(provider, (previous, next) {
+          // Only trigger rebuild if this subscription is still active
+          if (_watchers.containsKey(provider) ||
+              _oldWatchers.containsKey(provider)) {
+            if (dependent.mounted) {
+              dependent.markNeedsBuild();
             }
-          },
-          fireImmediately: false,
-        );
+          }
+        }, fireImmediately: false);
         _watchers[provider] = subscription;
       }
     }

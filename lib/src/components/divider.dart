@@ -1,14 +1,7 @@
 import 'package:nocterm/nocterm.dart';
 import 'package:nocterm/src/framework/terminal_canvas.dart';
 
-enum DividerStyle {
-  single,
-  double,
-  dashed,
-  dotted,
-  bold,
-  ascii,
-}
+enum DividerStyle { single, double, dashed, dotted, bold, ascii }
 
 class Divider extends SingleChildRenderObjectComponent {
   const Divider({
@@ -95,7 +88,9 @@ class VerticalDivider extends SingleChildRenderObjectComponent {
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderVerticalDivider renderObject) {
+    BuildContext context,
+    RenderVerticalDivider renderObject,
+  ) {
     final theme = TuiTheme.of(context);
     renderObject
       ..width = width
@@ -115,12 +110,12 @@ class RenderDivider extends RenderObject {
     required double endIndent,
     required Color color,
     required DividerStyle style,
-  })  : _height = height,
-        _thickness = thickness,
-        _indent = indent,
-        _endIndent = endIndent,
-        _color = color,
-        _style = style;
+  }) : _height = height,
+       _thickness = thickness,
+       _indent = indent,
+       _endIndent = endIndent,
+       _color = color,
+       _style = style;
 
   double _height;
   double get height => _height;
@@ -194,11 +189,7 @@ class RenderDivider extends RenderObject {
     String char = _getCharacterForStyle(style, horizontal: true);
 
     for (double x = startX; x < endX; x += 1) {
-      canvas.drawText(
-        Offset(x, y),
-        char,
-        style: TextStyle(color: color),
-      );
+      canvas.drawText(Offset(x, y), char, style: TextStyle(color: color));
     }
   }
 
@@ -228,12 +219,12 @@ class RenderVerticalDivider extends RenderObject {
     required double endIndent,
     required Color color,
     required DividerStyle style,
-  })  : _width = width,
-        _thickness = thickness,
-        _indent = indent,
-        _endIndent = endIndent,
-        _color = color,
-        _style = style;
+  }) : _width = width,
+       _thickness = thickness,
+       _indent = indent,
+       _endIndent = endIndent,
+       _color = color,
+       _style = style;
 
   double _width;
   double get width => _width;
@@ -307,11 +298,7 @@ class RenderVerticalDivider extends RenderObject {
     String char = _getCharacterForStyle(style, horizontal: false);
 
     for (double y = startY; y < endY; y += 1) {
-      canvas.drawText(
-        Offset(x, y),
-        char,
-        style: TextStyle(color: color),
-      );
+      canvas.drawText(Offset(x, y), char, style: TextStyle(color: color));
     }
   }
 

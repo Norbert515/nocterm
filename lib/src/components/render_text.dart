@@ -15,12 +15,12 @@ class RenderText extends RenderObject {
     TextOverflow overflow = TextOverflow.clip,
     TextAlign textAlign = TextAlign.left,
     int? maxLines,
-  })  : _text = text,
-        _style = style,
-        _softWrap = softWrap,
-        _overflow = overflow,
-        _textAlign = textAlign,
-        _maxLines = maxLines;
+  }) : _text = text,
+       _style = style,
+       _softWrap = softWrap,
+       _overflow = overflow,
+       _textAlign = textAlign,
+       _maxLines = maxLines;
 
   String _text;
   String get text => _text;
@@ -96,10 +96,12 @@ class RenderText extends RenderObject {
 
     _layoutResult = TextLayoutEngine.layout(_text, config);
 
-    size = constraints.constrain(Size(
-      _layoutResult!.actualWidth.toDouble(),
-      _layoutResult!.actualHeight.toDouble(),
-    ));
+    size = constraints.constrain(
+      Size(
+        _layoutResult!.actualWidth.toDouble(),
+        _layoutResult!.actualHeight.toDouble(),
+      ),
+    );
   }
 
   @override
@@ -127,12 +129,16 @@ class RenderText extends RenderObject {
       // Apply justification if needed
       String displayLine = line;
       if (_textAlign == TextAlign.justify && !isLastLine) {
-        displayLine = TextLayoutEngine.justifyLine(line, alignmentWidth,
-            isLastLine: isLastLine);
+        displayLine = TextLayoutEngine.justifyLine(
+          line,
+          alignmentWidth,
+          isLastLine: isLastLine,
+        );
       }
 
       // Calculate horizontal offset based on text alignment
-      final xOffset = offset.dx +
+      final xOffset =
+          offset.dx +
           TextLayoutEngine.calculateAlignmentOffset(
             displayLine,
             alignmentWidth,

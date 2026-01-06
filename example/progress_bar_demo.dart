@@ -58,199 +58,209 @@ class _ProgressBarDemoState extends State<ProgressBarDemo> {
     return Container(
       padding: EdgeInsets.all(2),
       child: Scrollbar(
+        controller: scrollController,
+        thumbVisibility: true,
+        child: SingleChildScrollView(
           controller: scrollController,
-          thumbVisibility: true,
-          child: SingleChildScrollView(
-              controller: scrollController,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Progress Bar Demo',
+                style: TextStyle(
+                  color: Colors.cyan,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+              SizedBox(height: 2),
+
+              // Basic progress bars
+              Text(
+                'Basic Progress Bars:',
+                style: TextStyle(color: Colors.yellow),
+              ),
+              SizedBox(height: 1),
+
+              Text('Download: ${(downloadProgress * 100).toInt()}%'),
+              SizedBox(
+                width: 50,
+                height: 1,
+                child: ProgressBar(
+                  value: downloadProgress,
+                  valueColor: Colors.green,
+                  backgroundColor: Colors.grey,
+                ),
+              ),
+              SizedBox(height: 1),
+
+              Text('Upload: ${(uploadProgress * 100).toInt()}%'),
+              SizedBox(
+                width: 50,
+                height: 1,
+                child: ProgressBar(
+                  value: uploadProgress,
+                  valueColor: Colors.blue,
+                  backgroundColor: Colors.grey,
+                  fillCharacter: '=',
+                  emptyCharacter: '-',
+                ),
+              ),
+              SizedBox(height: 2),
+
+              // Progress bar with border and percentage
+              Text(
+                'With Border and Percentage:',
+                style: TextStyle(color: Colors.yellow),
+              ),
+              SizedBox(height: 1),
+              SizedBox(
+                width: 50,
+                height: 3,
+                child: ProgressBar(
+                  value: processingProgress,
+                  showPercentage: true,
+                  borderStyle: ProgressBarBorderStyle.rounded,
+                  valueColor: Colors.magenta,
+                  backgroundColor: Colors.grey,
+                ),
+              ),
+              SizedBox(height: 2),
+
+              // Progress bar with custom label
+              Text(
+                'With Custom Label:',
+                style: TextStyle(color: Colors.yellow),
+              ),
+              SizedBox(height: 1),
+              SizedBox(
+                width: 50,
+                height: 3,
+                child: ProgressBar(
+                  value: processingProgress * 0.7,
+                  label: 'Processing...',
+                  borderStyle: ProgressBarBorderStyle.single,
+                  valueColor: Colors.cyan,
+                  backgroundColor: Colors.grey,
+                ),
+              ),
+              SizedBox(height: 2),
+
+              // Indeterminate progress
+              Text(
+                'Indeterminate Progress:',
+                style: TextStyle(color: Colors.yellow),
+              ),
+              SizedBox(height: 1),
+              SizedBox(
+                width: 50,
+                height: 1,
+                child: ProgressBar(
+                  indeterminate: true,
+                  valueColor: Colors.yellow,
+                  backgroundColor: Colors.grey,
+                ),
+              ),
+              SizedBox(height: 1),
+              SizedBox(
+                width: 50,
+                height: 3,
+                child: ProgressBar(
+                  indeterminate: true,
+                  borderStyle: ProgressBarBorderStyle.double,
+                  valueColor: Colors.red,
+                  backgroundColor: Colors.grey,
+                ),
+              ),
+              SizedBox(height: 2),
+
+              // Different styles showcase
+              Text('Different Styles:', style: TextStyle(color: Colors.yellow)),
+              SizedBox(height: 1),
+
+              Row(
                 children: [
-                  Text(
-                    'Progress Bar Demo',
-                    style: TextStyle(
-                        color: Colors.cyan,
-                        decoration: TextDecoration.underline),
-                  ),
-                  SizedBox(height: 2),
-
-                  // Basic progress bars
-                  Text('Basic Progress Bars:',
-                      style: TextStyle(color: Colors.yellow)),
-                  SizedBox(height: 1),
-
-                  Text('Download: ${(downloadProgress * 100).toInt()}%'),
-                  SizedBox(
-                    width: 50,
-                    height: 1,
-                    child: ProgressBar(
-                      value: downloadProgress,
-                      valueColor: Colors.green,
-                      backgroundColor: Colors.grey,
-                    ),
-                  ),
-                  SizedBox(height: 1),
-
-                  Text('Upload: ${(uploadProgress * 100).toInt()}%'),
-                  SizedBox(
-                    width: 50,
-                    height: 1,
-                    child: ProgressBar(
-                      value: uploadProgress,
-                      valueColor: Colors.blue,
-                      backgroundColor: Colors.grey,
-                      fillCharacter: '=',
-                      emptyCharacter: '-',
-                    ),
-                  ),
-                  SizedBox(height: 2),
-
-                  // Progress bar with border and percentage
-                  Text('With Border and Percentage:',
-                      style: TextStyle(color: Colors.yellow)),
-                  SizedBox(height: 1),
-                  SizedBox(
-                    width: 50,
-                    height: 3,
-                    child: ProgressBar(
-                      value: processingProgress,
-                      showPercentage: true,
-                      borderStyle: ProgressBarBorderStyle.rounded,
-                      valueColor: Colors.magenta,
-                      backgroundColor: Colors.grey,
-                    ),
-                  ),
-                  SizedBox(height: 2),
-
-                  // Progress bar with custom label
-                  Text('With Custom Label:',
-                      style: TextStyle(color: Colors.yellow)),
-                  SizedBox(height: 1),
-                  SizedBox(
-                    width: 50,
-                    height: 3,
-                    child: ProgressBar(
-                      value: processingProgress * 0.7,
-                      label: 'Processing...',
-                      borderStyle: ProgressBarBorderStyle.single,
-                      valueColor: Colors.cyan,
-                      backgroundColor: Colors.grey,
-                    ),
-                  ),
-                  SizedBox(height: 2),
-
-                  // Indeterminate progress
-                  Text('Indeterminate Progress:',
-                      style: TextStyle(color: Colors.yellow)),
-                  SizedBox(height: 1),
-                  SizedBox(
-                    width: 50,
-                    height: 1,
-                    child: ProgressBar(
-                      indeterminate: true,
-                      valueColor: Colors.yellow,
-                      backgroundColor: Colors.grey,
-                    ),
-                  ),
-                  SizedBox(height: 1),
-                  SizedBox(
-                    width: 50,
-                    height: 3,
-                    child: ProgressBar(
-                      indeterminate: true,
-                      borderStyle: ProgressBarBorderStyle.double,
-                      valueColor: Colors.red,
-                      backgroundColor: Colors.grey,
-                    ),
-                  ),
-                  SizedBox(height: 2),
-
-                  // Different styles showcase
-                  Text('Different Styles:',
-                      style: TextStyle(color: Colors.yellow)),
-                  SizedBox(height: 1),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('ASCII:',
-                                style: TextStyle(color: Colors.white)),
-                            SizedBox(
-                              height: 3,
-                              child: ProgressBar(
-                                value: 0.75,
-                                borderStyle: ProgressBarBorderStyle.ascii,
-                                valueColor: Colors.green,
-                                backgroundColor: Colors.grey,
-                              ),
-                            ),
-                          ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('ASCII:', style: TextStyle(color: Colors.white)),
+                        SizedBox(
+                          height: 3,
+                          child: ProgressBar(
+                            value: 0.75,
+                            borderStyle: ProgressBarBorderStyle.ascii,
+                            valueColor: Colors.green,
+                            backgroundColor: Colors.grey,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 2),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Bold:',
-                                style: TextStyle(color: Colors.white)),
-                            SizedBox(
-                              height: 3,
-                              child: ProgressBar(
-                                value: 0.75,
-                                borderStyle: ProgressBarBorderStyle.bold,
-                                valueColor: Colors.cyan,
-                                backgroundColor: Colors.grey,
-                              ),
-                            ),
-                          ],
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 2),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Bold:', style: TextStyle(color: Colors.white)),
+                        SizedBox(
+                          height: 3,
+                          child: ProgressBar(
+                            value: 0.75,
+                            borderStyle: ProgressBarBorderStyle.bold,
+                            valueColor: Colors.cyan,
+                            backgroundColor: Colors.grey,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 2),
-
-                  // Custom characters showcase
-                  Text('Custom Characters:',
-                      style: TextStyle(color: Colors.yellow)),
-                  SizedBox(height: 1),
-
-                  Text('Blocks: ▓░'),
-                  SizedBox(
-                    width: 50,
-                    height: 1,
-                    child: ProgressBar(
-                      value: 0.6,
-                      fillCharacter: '▓',
-                      emptyCharacter: '░',
-                      valueColor: Colors.white,
-                      backgroundColor: Colors.grey,
+                      ],
                     ),
-                  ),
-                  SizedBox(height: 1),
-
-                  Text('Dots: ●○'),
-                  SizedBox(
-                    width: 50,
-                    height: 1,
-                    child: ProgressBar(
-                      value: 0.4,
-                      fillCharacter: '●',
-                      emptyCharacter: '○',
-                      valueColor: Colors.red,
-                      backgroundColor: Colors.grey,
-                    ),
-                  ),
-
-                  SizedBox(height: 2),
-                  Text(
-                    'Press Ctrl+C to exit',
-                    style: TextStyle(color: Colors.grey),
                   ),
                 ],
-              ))),
+              ),
+              SizedBox(height: 2),
+
+              // Custom characters showcase
+              Text(
+                'Custom Characters:',
+                style: TextStyle(color: Colors.yellow),
+              ),
+              SizedBox(height: 1),
+
+              Text('Blocks: ▓░'),
+              SizedBox(
+                width: 50,
+                height: 1,
+                child: ProgressBar(
+                  value: 0.6,
+                  fillCharacter: '▓',
+                  emptyCharacter: '░',
+                  valueColor: Colors.white,
+                  backgroundColor: Colors.grey,
+                ),
+              ),
+              SizedBox(height: 1),
+
+              Text('Dots: ●○'),
+              SizedBox(
+                width: 50,
+                height: 1,
+                child: ProgressBar(
+                  value: 0.4,
+                  fillCharacter: '●',
+                  emptyCharacter: '○',
+                  valueColor: Colors.red,
+                  backgroundColor: Colors.grey,
+                ),
+              ),
+
+              SizedBox(height: 2),
+              Text(
+                'Press Ctrl+C to exit',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

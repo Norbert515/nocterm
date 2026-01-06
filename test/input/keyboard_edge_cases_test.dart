@@ -200,14 +200,26 @@ void main() {
           final bytes = [0x1B, 0x5B, ...mod.$1.codeUnits, dir.$1];
           final event = parser.parseBytes(bytes);
 
-          expect(event!.logicalKey, equals(dir.$2),
-              reason: 'Direction ${dir.$2} with modifier ${mod.$1}');
-          expect(event.modifiers.shift, equals(mod.$2),
-              reason: 'Shift for ${mod.$1}');
-          expect(event.modifiers.alt, equals(mod.$3),
-              reason: 'Alt for ${mod.$1}');
-          expect(event.modifiers.ctrl, equals(mod.$4),
-              reason: 'Ctrl for ${mod.$1}');
+          expect(
+            event!.logicalKey,
+            equals(dir.$2),
+            reason: 'Direction ${dir.$2} with modifier ${mod.$1}',
+          );
+          expect(
+            event.modifiers.shift,
+            equals(mod.$2),
+            reason: 'Shift for ${mod.$1}',
+          );
+          expect(
+            event.modifiers.alt,
+            equals(mod.$3),
+            reason: 'Alt for ${mod.$1}',
+          );
+          expect(
+            event.modifiers.ctrl,
+            equals(mod.$4),
+            reason: 'Ctrl for ${mod.$1}',
+          );
         }
       }
     });

@@ -133,11 +133,6 @@ class StyledAsciiText extends StatelessComponent {
 
   @override
   Component build(BuildContext context) {
-    return AsciiText(
-      data,
-      font: font,
-      textAlign: textAlign,
-      style: style,
-    );
+    return AsciiText(data, font: font, textAlign: textAlign, style: style);
   }
 }

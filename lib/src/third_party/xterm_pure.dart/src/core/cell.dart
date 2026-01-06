@@ -9,12 +9,7 @@ class CellData {
   });
 
   factory CellData.empty() {
-    return CellData(
-      foreground: 0,
-      background: 0,
-      flags: 0,
-      content: 0,
-    );
+    return CellData(foreground: 0, background: 0, flags: 0, content: 0);
   }
 
   int foreground;

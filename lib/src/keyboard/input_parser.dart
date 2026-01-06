@@ -145,7 +145,7 @@ class InputParser {
           character: '\t',
           modifiers: const ModifierKeys(),
         ),
-        1
+        1,
       );
     }
 
@@ -157,7 +157,7 @@ class InputParser {
           character: '\n',
           modifiers: const ModifierKeys(),
         ),
-        1
+        1,
       );
     }
 
@@ -168,7 +168,7 @@ class InputParser {
           logicalKey: LogicalKey.backspace,
           modifiers: const ModifierKeys(),
         ),
-        1
+        1,
       );
     }
 
@@ -236,7 +236,8 @@ class InputParser {
       final key = LogicalKey.fromCharacter(decodedChar);
       // Check if it's uppercase to infer shift was pressed
       final code = decodedChar.codeUnitAt(0);
-      final isUpperCase = (code >= 0x41 && code <= 0x5A) || // A-Z
+      final isUpperCase =
+          (code >= 0x41 && code <= 0x5A) || // A-Z
           (decodedChar != decodedChar.toLowerCase()); // Other uppercase chars
       return (
         KeyboardEvent(
@@ -244,7 +245,7 @@ class InputParser {
           character: decodedChar,
           modifiers: ModifierKeys(shift: isUpperCase),
         ),
-        bytesConsumed
+        bytesConsumed,
       );
     }
 
@@ -254,7 +255,7 @@ class InputParser {
         logicalKey: LogicalKey(first, 'unknown'),
         modifiers: const ModifierKeys(),
       ),
-      1
+      1,
     );
   }
 
@@ -266,7 +267,7 @@ class InputParser {
           logicalKey: LogicalKey.escape,
           modifiers: const ModifierKeys(),
         ),
-        1
+        1,
       );
     }
 
@@ -286,7 +287,7 @@ class InputParser {
             character: char,
             modifiers: const ModifierKeys(alt: true),
           ),
-          2
+          2,
         );
       }
 
@@ -298,7 +299,7 @@ class InputParser {
             logicalKey: LogicalKey.escape,
             modifiers: const ModifierKeys(),
           ),
-          1
+          1,
         );
       }
     }
@@ -332,7 +333,7 @@ class InputParser {
               logicalKey: LogicalKey.arrowUp,
               modifiers: const ModifierKeys(),
             ),
-            3
+            3,
           );
         case 0x42:
           return (
@@ -340,7 +341,7 @@ class InputParser {
               logicalKey: LogicalKey.arrowDown,
               modifiers: const ModifierKeys(),
             ),
-            3
+            3,
           );
         case 0x43:
           return (
@@ -348,7 +349,7 @@ class InputParser {
               logicalKey: LogicalKey.arrowRight,
               modifiers: const ModifierKeys(),
             ),
-            3
+            3,
           );
         case 0x44:
           return (
@@ -356,7 +357,7 @@ class InputParser {
               logicalKey: LogicalKey.arrowLeft,
               modifiers: const ModifierKeys(),
             ),
-            3
+            3,
           );
         case 0x48:
           return (
@@ -364,7 +365,7 @@ class InputParser {
               logicalKey: LogicalKey.home,
               modifiers: const ModifierKeys(),
             ),
-            3
+            3,
           );
         case 0x46:
           return (
@@ -372,7 +373,7 @@ class InputParser {
               logicalKey: LogicalKey.end,
               modifiers: const ModifierKeys(),
             ),
-            3
+            3,
           );
         case 0x5A:
           return (
@@ -380,7 +381,7 @@ class InputParser {
               logicalKey: LogicalKey.tab,
               modifiers: const ModifierKeys(shift: true),
             ),
-            3
+            3,
           ); // ESC [ Z is Shift+Tab
       }
     }
@@ -398,7 +399,7 @@ class InputParser {
                 logicalKey: LogicalKey.arrowUp,
                 modifiers: const ModifierKeys(shift: true),
               ),
-              6
+              6,
             );
           case 0x42:
             return (
@@ -406,7 +407,7 @@ class InputParser {
                 logicalKey: LogicalKey.arrowDown,
                 modifiers: const ModifierKeys(shift: true),
               ),
-              6
+              6,
             );
           case 0x43:
             return (
@@ -414,7 +415,7 @@ class InputParser {
                 logicalKey: LogicalKey.arrowRight,
                 modifiers: const ModifierKeys(shift: true),
               ),
-              6
+              6,
             );
           case 0x44:
             return (
@@ -422,7 +423,7 @@ class InputParser {
                 logicalKey: LogicalKey.arrowLeft,
                 modifiers: const ModifierKeys(shift: true),
               ),
-              6
+              6,
             );
         }
       }
@@ -436,7 +437,7 @@ class InputParser {
                 logicalKey: LogicalKey.arrowUp,
                 modifiers: const ModifierKeys(alt: true),
               ),
-              6
+              6,
             );
           case 0x42:
             return (
@@ -444,7 +445,7 @@ class InputParser {
                 logicalKey: LogicalKey.arrowDown,
                 modifiers: const ModifierKeys(alt: true),
               ),
-              6
+              6,
             );
           case 0x43:
             return (
@@ -452,7 +453,7 @@ class InputParser {
                 logicalKey: LogicalKey.arrowRight,
                 modifiers: const ModifierKeys(alt: true),
               ),
-              6
+              6,
             );
           case 0x44:
             return (
@@ -460,7 +461,7 @@ class InputParser {
                 logicalKey: LogicalKey.arrowLeft,
                 modifiers: const ModifierKeys(alt: true),
               ),
-              6
+              6,
             );
         }
       }
@@ -474,7 +475,7 @@ class InputParser {
                 logicalKey: LogicalKey.arrowUp,
                 modifiers: const ModifierKeys(ctrl: true),
               ),
-              6
+              6,
             );
           case 0x42:
             return (
@@ -482,7 +483,7 @@ class InputParser {
                 logicalKey: LogicalKey.arrowDown,
                 modifiers: const ModifierKeys(ctrl: true),
               ),
-              6
+              6,
             );
           case 0x43:
             return (
@@ -490,7 +491,7 @@ class InputParser {
                 logicalKey: LogicalKey.arrowRight,
                 modifiers: const ModifierKeys(ctrl: true),
               ),
-              6
+              6,
             );
           case 0x44:
             return (
@@ -498,7 +499,7 @@ class InputParser {
                 logicalKey: LogicalKey.arrowLeft,
                 modifiers: const ModifierKeys(ctrl: true),
               ),
-              6
+              6,
             );
         }
       }
@@ -516,7 +517,7 @@ class InputParser {
             logicalKey: LogicalKey.insert,
             modifiers: const ModifierKeys(),
           ),
-          4
+          4,
         );
       }
       if (sequence == '\x1B[3~') {
@@ -525,7 +526,7 @@ class InputParser {
             logicalKey: LogicalKey.delete,
             modifiers: const ModifierKeys(),
           ),
-          4
+          4,
         );
       }
       if (sequence == '\x1B[5~') {
@@ -534,7 +535,7 @@ class InputParser {
             logicalKey: LogicalKey.pageUp,
             modifiers: const ModifierKeys(),
           ),
-          4
+          4,
         );
       }
       if (sequence == '\x1B[6~') {
@@ -543,7 +544,7 @@ class InputParser {
             logicalKey: LogicalKey.pageDown,
             modifiers: const ModifierKeys(),
           ),
-          4
+          4,
         );
       }
 
@@ -555,7 +556,7 @@ class InputParser {
             logicalKey: LogicalKey.f5,
             modifiers: const ModifierKeys(),
           ),
-          5
+          5,
         );
       }
       if (sequence == '\x1B[17~') {
@@ -564,7 +565,7 @@ class InputParser {
             logicalKey: LogicalKey.f6,
             modifiers: const ModifierKeys(),
           ),
-          5
+          5,
         );
       }
       if (sequence == '\x1B[18~') {
@@ -573,7 +574,7 @@ class InputParser {
             logicalKey: LogicalKey.f7,
             modifiers: const ModifierKeys(),
           ),
-          5
+          5,
         );
       }
       if (sequence == '\x1B[19~') {
@@ -582,7 +583,7 @@ class InputParser {
             logicalKey: LogicalKey.f8,
             modifiers: const ModifierKeys(),
           ),
-          5
+          5,
         );
       }
       if (sequence == '\x1B[20~') {
@@ -591,7 +592,7 @@ class InputParser {
             logicalKey: LogicalKey.f9,
             modifiers: const ModifierKeys(),
           ),
-          5
+          5,
         );
       }
       if (sequence == '\x1B[21~') {
@@ -600,7 +601,7 @@ class InputParser {
             logicalKey: LogicalKey.f10,
             modifiers: const ModifierKeys(),
           ),
-          5
+          5,
         );
       }
       if (sequence == '\x1B[23~') {
@@ -609,7 +610,7 @@ class InputParser {
             logicalKey: LogicalKey.f11,
             modifiers: const ModifierKeys(),
           ),
-          5
+          5,
         );
       }
       if (sequence == '\x1B[24~') {
@@ -618,7 +619,7 @@ class InputParser {
             logicalKey: LogicalKey.f12,
             modifiers: const ModifierKeys(),
           ),
-          5
+          5,
         );
       }
 
@@ -649,7 +650,7 @@ class InputParser {
             logicalKey: LogicalKey.f1,
             modifiers: const ModifierKeys(),
           ),
-          3
+          3,
         );
       case 0x51:
         return (
@@ -657,7 +658,7 @@ class InputParser {
             logicalKey: LogicalKey.f2,
             modifiers: const ModifierKeys(),
           ),
-          3
+          3,
         );
       case 0x52:
         return (
@@ -665,7 +666,7 @@ class InputParser {
             logicalKey: LogicalKey.f3,
             modifiers: const ModifierKeys(),
           ),
-          3
+          3,
         );
       case 0x53:
         return (
@@ -673,7 +674,7 @@ class InputParser {
             logicalKey: LogicalKey.f4,
             modifiers: const ModifierKeys(),
           ),
-          3
+          3,
         );
     }
 
@@ -687,7 +688,8 @@ class InputParser {
       // Convert to the base letter (A=0x41, B=0x42, etc.)
       final letterCode = code + 0x40; // 0x01 + 0x40 = 0x41 ('A')
       final letter = String.fromCharCode(letterCode).toLowerCase();
-      final baseKey = LogicalKey.fromCharacter(letter) ??
+      final baseKey =
+          LogicalKey.fromCharacter(letter) ??
           LogicalKey(letterCode, 'ctrl+$letter');
 
       return KeyboardEvent(
@@ -702,7 +704,8 @@ class InputParser {
   /// Parse bracketed paste content (ESC[200~ ... ESC[201~)
   (InputEvent, int)? _parseBracketedPaste() {
     print(
-        '[DEBUG] InputParser: Detected bracketed paste START marker (ESC[200~)');
+      '[DEBUG] InputParser: Detected bracketed paste START marker (ESC[200~)',
+    );
 
     // We know buffer starts with ESC[200~ (6 bytes)
     // Look for the end marker ESC[201~
@@ -722,7 +725,8 @@ class InputParser {
     if (endMarkerStart == -1) {
       // Haven't received the end marker yet, wait for more data
       print(
-          '[DEBUG] InputParser: Waiting for paste END marker (ESC[201~), buffer.length=${_buffer.length}');
+        '[DEBUG] InputParser: Waiting for paste END marker (ESC[201~), buffer.length=${_buffer.length}',
+      );
       return null;
     }
 
@@ -731,9 +735,11 @@ class InputParser {
     final pasteText = utf8.decode(pasteBytes, allowMalformed: true);
 
     print(
-        '[DEBUG] InputParser: Found paste END marker, extracted ${pasteText.length} chars');
+      '[DEBUG] InputParser: Found paste END marker, extracted ${pasteText.length} chars',
+    );
     print(
-        '[DEBUG] InputParser: Pasted text: "${pasteText.substring(0, pasteText.length > 100 ? 100 : pasteText.length)}${pasteText.length > 100 ? '...' : ''}"');
+      '[DEBUG] InputParser: Pasted text: "${pasteText.substring(0, pasteText.length > 100 ? 100 : pasteText.length)}${pasteText.length > 100 ? '...' : ''}"',
+    );
 
     // Total bytes consumed: start marker (6) + paste content + end marker (6)
     final totalBytes = endMarkerStart + 6;

@@ -28,9 +28,7 @@ class _OverlayDemoState extends State<OverlayDemo> {
         child: Container(
           width: 30,
           height: 10,
-          decoration: BoxDecoration(
-            border: BoxBorder.all(color: Colors.cyan),
-          ),
+          decoration: BoxDecoration(border: BoxBorder.all(color: Colors.cyan)),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -45,7 +43,9 @@ class _OverlayDemoState extends State<OverlayDemo> {
                 Text(
                   'Press ESC to close',
                   style: TextStyle(
-                      color: Colors.yellow, fontStyle: FontStyle.italic),
+                    color: Colors.yellow,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
               ],
             ),
@@ -104,7 +104,8 @@ class _OverlayDemoState extends State<OverlayDemo> {
                       ),
                       const SizedBox(height: 2),
                       const Text(
-                          'This demo shows overlays with terminal default background'),
+                        'This demo shows overlays with terminal default background',
+                      ),
                       const SizedBox(height: 1),
                       Text(
                         'The overlay won\'t have a gray background - it uses terminal\'s default!',
@@ -118,10 +119,14 @@ class _OverlayDemoState extends State<OverlayDemo> {
                         ),
                         child: Column(
                           children: [
-                            Text('Press "O" to show overlay',
-                                style: TextStyle(color: Colors.yellow)),
-                            Text('Press ESC to close overlay/exit',
-                                style: TextStyle(color: Colors.red)),
+                            Text(
+                              'Press "O" to show overlay',
+                              style: TextStyle(color: Colors.yellow),
+                            ),
+                            Text(
+                              'Press ESC to close overlay/exit',
+                              style: TextStyle(color: Colors.red),
+                            ),
                           ],
                         ),
                       ),

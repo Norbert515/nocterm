@@ -16,11 +16,11 @@ class RenderParagraph extends RenderObject {
     bool softWrap = true,
     TextOverflow overflow = TextOverflow.clip,
     int? maxLines,
-  })  : _text = text,
-        _textAlign = textAlign,
-        _softWrap = softWrap,
-        _overflow = overflow,
-        _maxLines = maxLines;
+  }) : _text = text,
+       _textAlign = textAlign,
+       _softWrap = softWrap,
+       _overflow = overflow,
+       _maxLines = maxLines;
 
   InlineSpan _text;
   InlineSpan get text => _text;
@@ -100,10 +100,12 @@ class RenderParagraph extends RenderObject {
     // Now map the styled segments to the laid out lines
     _styledLines = _mapSegmentsToLines(_segments, _layoutResult!.lines);
 
-    size = constraints.constrain(Size(
-      _layoutResult!.actualWidth.toDouble(),
-      _layoutResult!.actualHeight.toDouble(),
-    ));
+    size = constraints.constrain(
+      Size(
+        _layoutResult!.actualWidth.toDouble(),
+        _layoutResult!.actualHeight.toDouble(),
+      ),
+    );
   }
 
   /// Maps styled segments to the laid out lines.
@@ -138,8 +140,8 @@ class RenderParagraph extends RenderObject {
       final List<StyledTextSegment> lineSegments = [];
 
       // Skip any newlines at current position (paragraph breaks)
-      while (
-          charIndex < charStyles.length && charStyles[charIndex].$1 == '\n') {
+      while (charIndex < charStyles.length &&
+          charStyles[charIndex].$1 == '\n') {
         charIndex++;
       }
 
@@ -202,12 +204,16 @@ class RenderParagraph extends RenderObject {
       String displayLine = lineText;
       bool isLastLine = i == _styledLines!.length - 1;
       if (_textAlign == TextAlign.justify && !isLastLine) {
-        displayLine = TextLayoutEngine.justifyLine(lineText, alignmentWidth,
-            isLastLine: isLastLine);
+        displayLine = TextLayoutEngine.justifyLine(
+          lineText,
+          alignmentWidth,
+          isLastLine: isLastLine,
+        );
       }
 
       // Calculate horizontal offset based on text alignment
-      final xOffset = offset.dx +
+      final xOffset =
+          offset.dx +
           TextLayoutEngine.calculateAlignmentOffset(
             displayLine,
             alignmentWidth,

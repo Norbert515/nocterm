@@ -46,8 +46,11 @@ class Clipboard {
   ///
   /// Returns true if the sequence was written successfully.
   static bool copy(String text, {bool useStringTerminator = true}) {
-    return _copyToTarget(text, _clipboardTarget,
-        useStringTerminator: useStringTerminator);
+    return _copyToTarget(
+      text,
+      _clipboardTarget,
+      useStringTerminator: useStringTerminator,
+    );
   }
 
   /// Copy text to the primary selection (X11 systems).
@@ -62,13 +65,19 @@ class Clipboard {
   ///
   /// Returns true if the sequence was written successfully.
   static bool copyToPrimary(String text, {bool useStringTerminator = true}) {
-    return _copyToTarget(text, _primaryTarget,
-        useStringTerminator: useStringTerminator);
+    return _copyToTarget(
+      text,
+      _primaryTarget,
+      useStringTerminator: useStringTerminator,
+    );
   }
 
   /// Internal method to copy text to a specific target (clipboard or primary).
-  static bool _copyToTarget(String text, String target,
-      {required bool useStringTerminator}) {
+  static bool _copyToTarget(
+    String text,
+    String target, {
+    required bool useStringTerminator,
+  }) {
     try {
       // Encode the text in base64
       final base64Text = base64Encode(utf8.encode(text));
@@ -166,11 +175,14 @@ class Clipboard {
     buffer.writeln('  Has Terminal: ${stdout.hasTerminal}');
     buffer.writeln('  TERM: ${Platform.environment['TERM'] ?? 'not set'}');
     buffer.writeln(
-        '  TERM_PROGRAM: ${Platform.environment['TERM_PROGRAM'] ?? 'not set'}');
+      '  TERM_PROGRAM: ${Platform.environment['TERM_PROGRAM'] ?? 'not set'}',
+    );
     buffer.writeln(
-        '  TMUX: ${Platform.environment['TMUX'] != null ? 'yes' : 'no'}');
+      '  TMUX: ${Platform.environment['TMUX'] != null ? 'yes' : 'no'}',
+    );
     buffer.writeln(
-        '  SSH: ${Platform.environment['SSH_CONNECTION'] != null ? 'yes' : 'no'}');
+      '  SSH: ${Platform.environment['SSH_CONNECTION'] != null ? 'yes' : 'no'}',
+    );
     buffer.writeln('  OSC 52 Likely Supported: ${isSupported()}');
     return buffer.toString();
   }

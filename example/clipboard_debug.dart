@@ -41,13 +41,15 @@ void main() async {
   // Check internal buffer
   final internalAfter = ClipboardManager.paste();
   print(
-      '   Internal buffer after copy: ${internalAfter == null ? 'null/empty' : '"$internalAfter"'}');
+    '   Internal buffer after copy: ${internalAfter == null ? 'null/empty' : '"$internalAfter"'}',
+  );
 
   // Check system clipboard again
   if (Platform.isMacOS) {
     print('\n4. System clipboard after our copy (via pbpaste):');
     await Future.delayed(
-        Duration(milliseconds: 100)); // Give terminal time to process
+      Duration(milliseconds: 100),
+    ); // Give terminal time to process
     try {
       final result = await Process.run('pbpaste', []);
       if (result.exitCode == 0) {

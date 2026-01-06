@@ -114,8 +114,10 @@ class TerminalCanvas {
         // Get existing cell and blend style (handles alpha + background preservation)
         final nextExistingCell = _buffer.getCell(nextCellX, nextCellY);
         final nextEffectiveStyle = style ?? const TextStyle();
-        final nextFinalStyle =
-            _blendStyle(nextEffectiveStyle, nextExistingCell);
+        final nextFinalStyle = _blendStyle(
+          nextEffectiveStyle,
+          nextExistingCell,
+        );
 
         _buffer.setCell(
           nextCellX,
@@ -149,14 +151,7 @@ class TerminalCanvas {
         final existingCell = _buffer.getCell(cellX, cellY);
         final finalStyle = _blendStyle(effectiveStyle, existingCell);
 
-        _buffer.setCell(
-          cellX,
-          cellY,
-          Cell(
-            char: char,
-            style: finalStyle,
-          ),
-        );
+        _buffer.setCell(cellX, cellY, Cell(char: char, style: finalStyle));
       }
     }
   }
@@ -203,14 +198,7 @@ class TerminalCanvas {
     final effectiveStyle = style ?? const TextStyle();
     final finalStyle = _blendStyle(effectiveStyle, existingCell);
 
-    _buffer.setCell(
-      cellX,
-      cellY,
-      Cell(
-        char: char,
-        style: finalStyle,
-      ),
-    );
+    _buffer.setCell(cellX, cellY, Cell(char: char, style: finalStyle));
   }
 
   /// Create a clipped canvas for drawing within a sub-region

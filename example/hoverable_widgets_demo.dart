@@ -27,9 +27,7 @@ class _HoverableWidgetsDemoState extends State<HoverableWidgetsDemo> {
   @override
   Component build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        border: BoxBorder.all(),
-      ),
+      decoration: BoxDecoration(border: BoxBorder.all()),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -172,13 +170,7 @@ class _HoverableWidgetsDemoState extends State<HoverableWidgetsDemo> {
 }
 
 // Button Styles Enum
-enum ButtonStyle {
-  primary,
-  success,
-  warning,
-  danger,
-  outlined,
-}
+enum ButtonStyle { primary, success, warning, danger, outlined }
 
 // Hoverable Button Widget
 class HoverButton extends StatefulComponent {
@@ -234,14 +226,14 @@ class _HoverButtonState extends State<HoverButton> {
     final color = _isPressed
         ? _getPressedColor()
         : _isHovering
-            ? _getHoverColor()
-            : _getBaseColor();
+        ? _getHoverColor()
+        : _getBaseColor();
 
     final prefix = _isPressed
         ? '▼'
         : _isHovering
-            ? '▶'
-            : ' ';
+        ? '▶'
+        : ' ';
 
     return MouseRegion(
       onEnter: (event) {
@@ -369,9 +361,7 @@ class _HoverCardState extends State<HoverCard> {
                     ),
                     Text(
                       component.description,
-                      style: const TextStyle(
-                        color: Color(0xFF888888),
-                      ),
+                      style: const TextStyle(color: Color(0xFF888888)),
                     ),
                   ],
                 ),
@@ -414,9 +404,7 @@ class _HoverMenuListState extends State<HoverMenuList> {
   @override
   Component build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        border: BoxBorder.all(),
-      ),
+      decoration: BoxDecoration(border: BoxBorder.all()),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: List.generate(_items.length, (index) {
@@ -449,8 +437,8 @@ class _HoverMenuListState extends State<HoverMenuList> {
                   color: isSelected
                       ? const Color(0xFF0066CC)
                       : isHovered
-                          ? const Color(0xFF444444)
-                          : null,
+                      ? const Color(0xFF444444)
+                      : null,
                   border: index < _items.length - 1
                       ? const BoxBorder(bottom: BorderSide())
                       : null,
@@ -474,8 +462,9 @@ class _HoverMenuListState extends State<HoverMenuList> {
                           color: isSelected || isHovered
                               ? const Color(0xFFFFFFFF)
                               : null,
-                          fontWeight:
-                              isSelected || isHovered ? FontWeight.bold : null,
+                          fontWeight: isSelected || isHovered
+                              ? FontWeight.bold
+                              : null,
                         ),
                       ),
                     ),
@@ -490,9 +479,7 @@ class _HoverMenuListState extends State<HoverMenuList> {
                     else if (isHovered)
                       const Text(
                         '→',
-                        style: TextStyle(
-                          color: Color(0xFFFFFFFF),
-                        ),
+                        style: TextStyle(color: Color(0xFFFFFFFF)),
                       ),
                   ],
                 ),
@@ -547,7 +534,8 @@ class _HoverToggleState extends State<HoverToggle> {
             _isEnabled = !_isEnabled;
           });
           _log(
-              'Toggle "${component.label}" - TOGGLED to ${_isEnabled ? "ON" : "OFF"}');
+            'Toggle "${component.label}" - TOGGLED to ${_isEnabled ? "ON" : "OFF"}',
+          );
         },
         child: Container(
           decoration: BoxDecoration(
@@ -625,9 +613,7 @@ class _HoverTabBarState extends State<HoverTabBar> {
       children: [
         // Tab headers
         Container(
-          decoration: BoxDecoration(
-            border: BoxBorder.all(),
-          ),
+          decoration: BoxDecoration(border: BoxBorder.all()),
           child: Row(
             children: List.generate(_tabs.length, (index) {
               final isHovered = _hoveredTab == index;
@@ -659,8 +645,8 @@ class _HoverTabBarState extends State<HoverTabBar> {
                         color: isSelected
                             ? const Color(0xFF0066CC)
                             : isHovered
-                                ? const Color(0xFF444444)
-                                : null,
+                            ? const Color(0xFF444444)
+                            : null,
                         border: index < _tabs.length - 1
                             ? const BoxBorder(right: BorderSide())
                             : null,
@@ -685,9 +671,7 @@ class _HoverTabBarState extends State<HoverTabBar> {
         ),
         // Tab content
         Container(
-          decoration: BoxDecoration(
-            border: BoxBorder.all(),
-          ),
+          decoration: BoxDecoration(border: BoxBorder.all()),
           padding: const EdgeInsets.all(2),
           child: Text(
             'Content for ${_tabs[_selectedTab]} tab',

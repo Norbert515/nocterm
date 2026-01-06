@@ -23,9 +23,7 @@ void main() {
   test('Direct widget replacement in Column', () async {
     await testNocterm('direct replacement', (tester) async {
       // Create a Column with FirstWidget
-      await tester.pumpComponent(
-        Column(children: [FirstWidget()]),
-      );
+      await tester.pumpComponent(Column(children: [FirstWidget()]));
 
       print('Initial state:');
       print(tester.renderToString(showBorders: false));
@@ -33,9 +31,7 @@ void main() {
       expect(tester.terminalState, isNot(containsText('SECOND')));
 
       // Replace with SecondWidget
-      await tester.pumpComponent(
-        Column(children: [SecondWidget()]),
-      );
+      await tester.pumpComponent(Column(children: [SecondWidget()]));
 
       print('\nAfter replacement:');
       print(tester.renderToString(showBorders: false));
@@ -52,11 +48,7 @@ void main() {
 
       // Helper to build the column
       Component buildColumn() {
-        return Column(
-          children: [
-            showFirst ? FirstWidget() : SecondWidget(),
-          ],
-        );
+        return Column(children: [showFirst ? FirstWidget() : SecondWidget()]);
       }
 
       // Initial state

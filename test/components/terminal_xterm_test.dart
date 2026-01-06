@@ -10,9 +10,7 @@ void main() {
       );
 
       // Should be able to create with required controller
-      final terminal = TerminalXterm(
-        controller: controller,
-      );
+      final terminal = TerminalXterm(controller: controller);
 
       expect(terminal.controller, equals(controller));
       expect(terminal.focused, isFalse);
@@ -47,9 +45,7 @@ void main() {
       expect(terminal.onKeyEvent, isNotNull);
 
       // Test that onKeyEvent callback works
-      terminal.onKeyEvent!(KeyboardEvent(
-        logicalKey: LogicalKey.enter,
-      ));
+      terminal.onKeyEvent!(KeyboardEvent(logicalKey: LogicalKey.enter));
       expect(keyEventCalled, isTrue);
 
       controller.dispose();
@@ -66,9 +62,7 @@ void main() {
       );
 
       // Terminal only needs the controller
-      final terminal = TerminalXterm(
-        controller: controller,
-      );
+      final terminal = TerminalXterm(controller: controller);
 
       // Process configuration is in the controller
       expect(controller.command, equals('/bin/bash'));

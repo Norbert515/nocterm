@@ -71,13 +71,14 @@ class ZModemMux {
   /// space is available in local buffers.
   late final StreamSubscription<Uint8List> _stdoutSubscription;
 
-  late final _terminalSink = StreamController<List<int>>(
-      // onPause: _stdoutSubscription.pause,
-      // onResume: _stdoutSubscription.resume,
-      )
-    ..stream
-        .transform(Utf8Decoder(allowMalformed: true))
-        .listen(onTerminalInput);
+  late final _terminalSink =
+      StreamController<List<int>>(
+          // onPause: _stdoutSubscription.pause,
+          // onResume: _stdoutSubscription.resume,
+        )
+        ..stream
+            .transform(Utf8Decoder(allowMalformed: true))
+            .listen(onTerminalInput);
 
   /// Current ZModem session. If null, no session is active.
   ZModemCore? _session;
@@ -115,7 +116,8 @@ class ZModemMux {
   /// Detects a ZModem session in [chunk] and starts it if found. Returns true
   /// if a session was started.
   bool _detectZModem(Uint8List chunk) {
-    final index = chunk.listIndexOf(_zmodemSenderInit) ??
+    final index =
+        chunk.listIndexOf(_zmodemSenderInit) ??
         chunk.listIndexOf(_zmodemReceiverInit);
 
     if (index != null) {
@@ -146,7 +148,6 @@ class ZModemMux {
       } else if (event is ZSessionFinishedEvent) {
         await _handleZSessionFinishedEvent(event);
       }
-
       /// remote is rz
       else if (event is ZReadyToSendEvent) {
         await _handleFileRequestEvent(event);

@@ -34,11 +34,7 @@ class _MouseDemoState extends State<MouseDemo> {
   Component build(BuildContext context) {
     return Stack(
       children: [
-        Container(
-          width: 100,
-          height: 30,
-          color: Color.fromRGB(100, 100, 100),
-        ),
+        Container(width: 100, height: 30, color: Color.fromRGB(100, 100, 100)),
         Positioned(
           left: 0,
           right: 0,
@@ -49,57 +45,58 @@ class _MouseDemoState extends State<MouseDemo> {
               final isHovered = _hoveredListItem == index;
               final isSelected = _selectedListItem == index;
               return Container(
-                  child: Column(
-                children: [
-                  MouseRegion(
-                    onEnter: (event) {
-                      _log('ListView item $index: onEnter');
-                      setState(() {
-                        _hoveredListItem = index;
-                      });
-                    },
-                    onExit: (event) {
-                      _log('ListView item $index: onExit');
-                      setState(() {
-                        _hoveredListItem = null;
-                      });
-                    },
-                    child: GestureDetector(
-                      onTap: () {
-                        shutdownApp();
-                        _log('ListView item $index: onTap');
+                child: Column(
+                  children: [
+                    MouseRegion(
+                      onEnter: (event) {
+                        _log('ListView item $index: onEnter');
                         setState(() {
-                          _selectedListItem = index;
+                          _hoveredListItem = index;
                         });
                       },
-                      child: Container(
-                        //padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 2),
-                        decoration: BoxDecoration(
-                          //border: BoxBorder.all(),
-                          color: Colors.red,
-                        ),
-                        child: Text(
-                          isSelected
-                              ? '▶ Item $index (Selected)'
-                              : isHovered
-                                  ? '→ Item $index (Hovered)'
-                                  : '  Item $index',
-                          style: TextStyle(
-                            fontWeight: isSelected || isHovered
-                                ? FontWeight.bold
-                                : null,
-                            color: isSelected
-                                ? const Color(0xFF00FF00)
+                      onExit: (event) {
+                        _log('ListView item $index: onExit');
+                        setState(() {
+                          _hoveredListItem = null;
+                        });
+                      },
+                      child: GestureDetector(
+                        onTap: () {
+                          shutdownApp();
+                          _log('ListView item $index: onTap');
+                          setState(() {
+                            _selectedListItem = index;
+                          });
+                        },
+                        child: Container(
+                          //padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 2),
+                          decoration: BoxDecoration(
+                            //border: BoxBorder.all(),
+                            color: Colors.red,
+                          ),
+                          child: Text(
+                            isSelected
+                                ? '▶ Item $index (Selected)'
                                 : isHovered
-                                    ? const Color(0xFFFFFF00)
-                                    : null,
+                                ? '→ Item $index (Hovered)'
+                                : '  Item $index',
+                            style: TextStyle(
+                              fontWeight: isSelected || isHovered
+                                  ? FontWeight.bold
+                                  : null,
+                              color: isSelected
+                                  ? const Color(0xFF00FF00)
+                                  : isHovered
+                                  ? const Color(0xFFFFFF00)
+                                  : null,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  )
-                ],
-              ));
+                  ],
+                ),
+              );
             }),
           ),
         ),

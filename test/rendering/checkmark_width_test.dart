@@ -10,13 +10,15 @@ void main() {
 
       print('Checkmark ✓:');
       print(
-          '  Code: U+${checkmark.runes.first.toRadixString(16).toUpperCase()}');
+        '  Code: U+${checkmark.runes.first.toRadixString(16).toUpperCase()}',
+      );
       print('  Current width: ${UnicodeWidth.stringWidth(checkmark)}');
       print('  Expected width: 1');
 
       print('\nCheckmark Button ✅:');
       print(
-          '  Code: U+${checkmarkButton.runes.first.toRadixString(16).toUpperCase()}');
+        '  Code: U+${checkmarkButton.runes.first.toRadixString(16).toUpperCase()}',
+      );
       print('  Current width: ${UnicodeWidth.stringWidth(checkmarkButton)}');
       print('  Expected width: 2');
 
@@ -24,15 +26,22 @@ void main() {
       // because it falls in the Dingbats range (0x2700-0x27BF)
       // which is incorrectly marked as all emoji
       print(
-          '\nBUG: ✓ is currently width ${UnicodeWidth.stringWidth(checkmark)}, but should be 1');
+        '\nBUG: ✓ is currently width ${UnicodeWidth.stringWidth(checkmark)}, but should be 1',
+      );
 
       // This will fail with current implementation
-      expect(UnicodeWidth.stringWidth(checkmark), equals(1),
-          reason: 'Check mark (✓) should be width 1, not emoji width');
+      expect(
+        UnicodeWidth.stringWidth(checkmark),
+        equals(1),
+        reason: 'Check mark (✓) should be width 1, not emoji width',
+      );
 
       // This should pass
-      expect(UnicodeWidth.stringWidth(checkmarkButton), equals(2),
-          reason: 'Check mark button (✅) should be width 2 as it is an emoji');
+      expect(
+        UnicodeWidth.stringWidth(checkmarkButton),
+        equals(2),
+        reason: 'Check mark button (✅) should be width 2 as it is an emoji',
+      );
     });
 
     test('other common checkmark-like symbols', () {
@@ -49,8 +58,9 @@ void main() {
       symbols.forEach((symbol, expectedWidth) {
         final actual = UnicodeWidth.stringWidth(symbol);
         print(
-            '$symbol (U+${symbol.runes.first.toRadixString(16).toUpperCase()}): '
-            'actual=$actual, expected=$expectedWidth');
+          '$symbol (U+${symbol.runes.first.toRadixString(16).toUpperCase()}): '
+          'actual=$actual, expected=$expectedWidth',
+        );
 
         expect(
           actual,

@@ -106,10 +106,7 @@ class PtyController {
   List<String> get outputBuffer => List.unmodifiable(_outputBuffer);
 
   /// Starts the PTY process with the specified dimensions.
-  Future<void> start({
-    required int columns,
-    required int rows,
-  }) async {
+  Future<void> start({required int columns, required int rows}) async {
     if (_status == PtyStatus.running) {
       throw StateError('Terminal is already running');
     }
@@ -149,16 +146,14 @@ class PtyController {
       );
 
       // Subscribe to exit
-      _exitSubscription = _ptyHandler!.exitCode.asStream().listen(
-        (code) {
-          _exitCode = code;
-          _status = PtyStatus.exited;
-          _notifyListeners();
-          for (final callback in _exitCallbacks) {
-            callback(code);
-          }
-        },
-      );
+      _exitSubscription = _ptyHandler!.exitCode.asStream().listen((code) {
+        _exitCode = code;
+        _status = PtyStatus.exited;
+        _notifyListeners();
+        for (final callback in _exitCallbacks) {
+          callback(code);
+        }
+      });
 
       _status = PtyStatus.running;
       _notifyListeners();

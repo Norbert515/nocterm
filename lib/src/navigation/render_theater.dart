@@ -22,7 +22,8 @@ class TheaterParentData extends stack_lib.StackParentData {
 
   /// Visit overlay portal children on this overlay entry.
   void visitOverlayPortalChildrenOnOverlayEntry(
-      void Function(RenderObject) visitor) {
+    void Function(RenderObject) visitor,
+  ) {
     final iterable = overlayEntry?.paintOrderIterable;
     if (iterable != null) {
       for (final child in iterable) {
@@ -45,9 +46,9 @@ class RenderTheater extends RenderObject
     required TextDirection textDirection,
     int skipCount = 0,
     stack_lib.Clip clipBehavior = stack_lib.Clip.hardEdge,
-  })  : _textDirection = textDirection,
-        _skipCount = skipCount,
-        _clipBehavior = clipBehavior {
+  }) : _textDirection = textDirection,
+       _skipCount = skipCount,
+       _clipBehavior = clipBehavior {
     if (children != null) {
       for (final child in children) {
         addChild(child);
@@ -63,8 +64,10 @@ class RenderTheater extends RenderObject
   }
 
   stack_lib.Alignment? _alignmentCache;
-  stack_lib.Alignment get resolvedAlignment => _alignmentCache ??=
-      stack_lib.AlignmentDirectional.topStart.resolve(textDirection);
+  stack_lib.Alignment get resolvedAlignment => _alignmentCache ??= stack_lib
+      .AlignmentDirectional
+      .topStart
+      .resolve(textDirection);
 
   void _markNeedResolution() {
     _alignmentCache = null;
@@ -162,7 +165,9 @@ class RenderTheater extends RenderObject
 
   /// Layout a child with the given constraints.
   void layoutChild(
-      RenderObject child, BoxConstraints nonPositionedChildConstraints) {
+    RenderObject child,
+    BoxConstraints nonPositionedChildConstraints,
+  ) {
     final TheaterParentData childParentData =
         child.parentData! as TheaterParentData;
     final stack_lib.Alignment alignment = resolvedAlignment;
@@ -305,8 +310,9 @@ class RenderTheater extends RenderObject
       }
     }
 
-    final BoxConstraints nonPositionedChildConstraints =
-        BoxConstraints.tight(size);
+    final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(
+      size,
+    );
 
     for (final child in childrenInPaintOrder) {
       if (child != sizeDeterminingChild) {

@@ -33,9 +33,12 @@ class _ScrollDemoState extends State<ScrollDemo> {
       focused: true,
       onKeyEvent: (event) {
         if (event.logicalKey == LogicalKey.keyQ) {
-          Navigator.of(context).push(PageRoute(
+          Navigator.of(context).push(
+            PageRoute(
               builder: (context) => const ScrollDemo(),
-              settings: const RouteSettings(name: 'scroll_demo')));
+              settings: const RouteSettings(name: 'scroll_demo'),
+            ),
+          );
           return true;
         }
         if (event.logicalKey == LogicalKey.tab) {
@@ -49,9 +52,7 @@ class _ScrollDemoState extends State<ScrollDemo> {
       child: Column(
         children: [
           _buildTabBar(),
-          Expanded(
-            child: _buildContent(),
-          ),
+          Expanded(child: _buildContent()),
         ],
       ),
     );
@@ -59,9 +60,7 @@ class _ScrollDemoState extends State<ScrollDemo> {
 
   Component _buildTabBar() {
     return Container(
-      decoration: BoxDecoration(
-        border: BoxBorder.all(color: Colors.cyan),
-      ),
+      decoration: BoxDecoration(border: BoxBorder.all(color: Colors.cyan)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -78,11 +77,7 @@ class _ScrollDemoState extends State<ScrollDemo> {
     final isSelected = selectedTab == index;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 1),
-      decoration: isSelected
-          ? BoxDecoration(
-              color: Colors.blue,
-            )
-          : null,
+      decoration: isSelected ? BoxDecoration(color: Colors.blue) : null,
       child: Text(
         label,
         style: TextStyle(
@@ -102,20 +97,14 @@ class _ScrollDemoState extends State<ScrollDemo> {
           child: _buildSingleChildScrollViewDemo(),
         );
       case 1:
-        return Container(
-          key: ValueKey('tab-1'),
-          child: _buildListViewDemo(),
-        );
+        return Container(key: ValueKey('tab-1'), child: _buildListViewDemo());
       case 2:
         return Container(
           key: ValueKey('tab-2'),
           child: _buildListViewBuilderDemo(),
         );
       case 3:
-        return Container(
-          key: ValueKey('tab-3'),
-          child: _buildScrollbarDemo(),
-        );
+        return Container(key: ValueKey('tab-3'), child: _buildScrollbarDemo());
       default:
         return Container();
     }
@@ -141,15 +130,20 @@ class _ScrollDemoState extends State<ScrollDemo> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('ScrollController Info:',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(
+                          'ScrollController Info:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         Text(''),
                         for (int i = 0; i < 50; i++)
                           Text(
-                              'Line $i: This is scrollable content that extends beyond the viewport'),
+                            'Line $i: This is scrollable content that extends beyond the viewport',
+                          ),
                         Text(''),
-                        Text('--- END OF CONTENT ---',
-                            style: TextStyle(color: Colors.yellow)),
+                        Text(
+                          '--- END OF CONTENT ---',
+                          style: TextStyle(color: Colors.yellow),
+                        ),
                       ],
                     ),
                   ),
@@ -177,10 +171,12 @@ class _ScrollDemoState extends State<ScrollDemo> {
                   child: Row(
                     children: [
                       Text(
-                          'This is a very long line of text that requires horizontal scrolling to read completely. '),
+                        'This is a very long line of text that requires horizontal scrolling to read completely. ',
+                      ),
                       Text('It continues with more content here. '),
                       Text(
-                          'And even more content to demonstrate horizontal scrolling capabilities.'),
+                        'And even more content to demonstrate horizontal scrolling capabilities.',
+                      ),
                     ],
                   ),
                 ),
@@ -194,9 +190,7 @@ class _ScrollDemoState extends State<ScrollDemo> {
 
   Component _buildListViewDemo() {
     return Container(
-      decoration: BoxDecoration(
-        border: BoxBorder.all(color: Colors.magenta),
-      ),
+      decoration: BoxDecoration(border: BoxBorder.all(color: Colors.magenta)),
       child: ListView(
         controller: scrollController2,
         padding: EdgeInsets.all(1),
@@ -205,14 +199,14 @@ class _ScrollDemoState extends State<ScrollDemo> {
             Container(
               padding: EdgeInsets.symmetric(vertical: 1),
               decoration: BoxDecoration(
-                border: BoxBorder(
-                  bottom: BorderSide(color: Colors.gray),
-                ),
+                border: BoxBorder(bottom: BorderSide(color: Colors.gray)),
               ),
               child: Row(
                 children: [
-                  Text('[${i.toString().padLeft(2, '0')}]',
-                      style: TextStyle(color: Colors.cyan)),
+                  Text(
+                    '[${i.toString().padLeft(2, '0')}]',
+                    style: TextStyle(color: Colors.cyan),
+                  ),
                   SizedBox(width: 2),
                   Text('List item $i - Static content'),
                 ],
@@ -243,7 +237,8 @@ class _ScrollDemoState extends State<ScrollDemo> {
                       return Container(
                         padding: EdgeInsets.all(1),
                         child: Text(
-                            'Item #$index (of 1000) - Efficiently rendered on demand'),
+                          'Item #$index (of 1000) - Efficiently rendered on demand',
+                        ),
                       );
                     },
                   ),
@@ -278,8 +273,10 @@ class _ScrollDemoState extends State<ScrollDemo> {
                       return Container(
                         height: 1,
                         child: Center(
-                          child: Text('─' * 20,
-                              style: TextStyle(color: Colors.gray)),
+                          child: Text(
+                            '─' * 20,
+                            style: TextStyle(color: Colors.gray),
+                          ),
                         ),
                       );
                     },
@@ -323,8 +320,10 @@ class _ScrollDemoState extends State<ScrollDemo> {
         Expanded(
           child: Column(
             children: [
-              Text('SingleChildScrollView + Scrollbar:',
-                  style: TextStyle(color: Colors.cyan)),
+              Text(
+                'SingleChildScrollView + Scrollbar:',
+                style: TextStyle(color: Colors.cyan),
+              ),
               SizedBox(height: 1),
               Expanded(
                 child: Container(
@@ -342,7 +341,8 @@ class _ScrollDemoState extends State<ScrollDemo> {
                         children: [
                           for (int i = 0; i < 100; i++)
                             Text(
-                                'Line $i: Content with visible scrollbar indicator'),
+                              'Line $i: Content with visible scrollbar indicator',
+                            ),
                         ],
                       ),
                     ),
@@ -359,8 +359,10 @@ class _ScrollDemoState extends State<ScrollDemo> {
         Expanded(
           child: Column(
             children: [
-              Text('ListView + Scrollbar:',
-                  style: TextStyle(color: Colors.green)),
+              Text(
+                'ListView + Scrollbar:',
+                style: TextStyle(color: Colors.green),
+              ),
               SizedBox(height: 1),
               Expanded(
                 child: Container(

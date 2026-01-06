@@ -4,25 +4,24 @@ import 'package:test/test.dart';
 import '../../example/gesture_demo.dart';
 
 void main() {
-  group('Gesture Demo',
-      skip:
-          'Known issue: GestureDemo uses nested constraints that need refactoring',
-      () {
-    test('visual development - initial render', () async {
-      await testNocterm(
-        'gesture demo renders correctly',
-        (tester) async {
-          await tester.pumpComponent(const GestureDemoApp());
-        },
-        debugPrintAfterPump: true,
-        size: const Size(100, 50),
-      );
-    });
+  group(
+    'Gesture Demo',
+    skip:
+        'Known issue: GestureDemo uses nested constraints that need refactoring',
+    () {
+      test('visual development - initial render', () async {
+        await testNocterm(
+          'gesture demo renders correctly',
+          (tester) async {
+            await tester.pumpComponent(const GestureDemoApp());
+          },
+          debugPrintAfterPump: true,
+          size: const Size(100, 50),
+        );
+      });
 
-    test('renders all zones and labels', () async {
-      await testNocterm(
-        'all zones visible',
-        (tester) async {
+      test('renders all zones and labels', () async {
+        await testNocterm('all zones visible', (tester) async {
           await tester.pumpComponent(const GestureDemoApp());
 
           // Verify all zone labels are present
@@ -32,15 +31,11 @@ void main() {
           expect(tester.terminalState, containsText('HOVER ME'));
           expect(tester.terminalState, containsText('COMBINED'));
           expect(tester.terminalState, containsText('Event Log'));
-        },
-        size: const Size(100, 50),
-      );
-    });
+        }, size: const Size(100, 50));
+      });
 
-    test('tap zone interaction', () async {
-      await testNocterm(
-        'tap updates state',
-        (tester) async {
+      test('tap zone interaction', () async {
+        await testNocterm('tap updates state', (tester) async {
           bool tapped = false;
 
           await tester.pumpComponent(
@@ -52,14 +47,11 @@ void main() {
 
           // Verify tap was registered
           expect(tapped, true);
-        },
-      );
-    });
+        });
+      });
 
-    test('double-tap detection', () async {
-      await testNocterm(
-        'double tap increments counter',
-        (tester) async {
+      test('double-tap detection', () async {
+        await testNocterm('double tap increments counter', (tester) async {
           int doubleTapCount = 0;
 
           await tester.pumpComponent(
@@ -75,14 +67,11 @@ void main() {
 
           // Verify double-tap was registered
           expect(doubleTapCount, 1);
-        },
-      );
-    });
+        });
+      });
 
-    test('long press detection', () async {
-      await testNocterm(
-        'long press triggers callback',
-        (tester) async {
+      test('long press detection', () async {
+        await testNocterm('long press triggers callback', (tester) async {
           bool longPressStarted = false;
           bool longPressCompleted = false;
 
@@ -101,14 +90,11 @@ void main() {
           // Verify long press was registered
           expect(longPressStarted, true);
           expect(longPressCompleted, true);
-        },
-      );
-    });
+        });
+      });
 
-    test('hover region detection', () async {
-      await testNocterm(
-        'hover changes state',
-        (tester) async {
+      test('hover region detection', () async {
+        await testNocterm('hover changes state', (tester) async {
           bool isHovering = false;
 
           await tester.pumpComponent(
@@ -123,14 +109,13 @@ void main() {
 
           // Verify hover was registered
           expect(isHovering, true);
-        },
-      );
-    });
+        });
+      });
 
-    test('combined zone - tap and hover', () async {
-      await testNocterm(
-        'combined zone handles multiple gestures',
-        (tester) async {
+      test('combined zone - tap and hover', () async {
+        await testNocterm('combined zone handles multiple gestures', (
+          tester,
+        ) async {
           bool isHovering = false;
           int tapCount = 0;
 
@@ -148,28 +133,21 @@ void main() {
           // Tap while hovering
           await tester.tap(15, 5);
           expect(tapCount, 1);
-        },
-      );
-    });
+        });
+      });
 
-    test('visual test - demo app renders', () async {
-      await testNocterm(
-        'gesture demo at default size',
-        (tester) async {
+      test('visual test - demo app renders', () async {
+        await testNocterm('gesture demo at default size', (tester) async {
           await tester.pumpComponent(const GestureDemoApp());
 
           // Should render without overflow at proper size
           expect(tester.terminalState, containsText('GESTURE DETECTOR DEMO'));
           expect(tester.terminalState, containsText('Count: 0'));
-        },
-        size: const Size(100, 50),
-      );
-    });
+        }, size: const Size(100, 50));
+      });
 
-    test('position tracking in callbacks', () async {
-      await testNocterm(
-        'tap provides position details',
-        (tester) async {
+      test('position tracking in callbacks', () async {
+        await testNocterm('tap provides position details', (tester) async {
           Offset? tapPosition;
 
           await tester.pumpComponent(
@@ -186,10 +164,10 @@ void main() {
           expect(tapPosition, isNotNull);
           expect(tapPosition!.dx, 15.0);
           expect(tapPosition!.dy, 8.0);
-        },
-      );
-    });
-  });
+        });
+      });
+    },
+  );
 }
 
 // Helper test components
@@ -221,9 +199,7 @@ class _TestTapComponentState extends State<_TestTapComponent> {
           width: 30,
           height: 10,
           decoration: BoxDecoration(border: BoxBorder.all()),
-          child: Center(
-            child: Text('Tap count: $tapCount'),
-          ),
+          child: Center(child: Text('Tap count: $tapCount')),
         ),
       ),
     );
@@ -259,9 +235,7 @@ class _TestDoubleTapComponentState extends State<_TestDoubleTapComponent> {
           width: 30,
           height: 10,
           decoration: BoxDecoration(border: BoxBorder.all()),
-          child: Center(
-            child: Text('Double taps: $doubleTapCount'),
-          ),
+          child: Center(child: Text('Double taps: $doubleTapCount')),
         ),
       ),
     );

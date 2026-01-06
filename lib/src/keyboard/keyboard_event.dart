@@ -25,12 +25,7 @@ class ModifierKeys {
   bool get hasAnyModifier => ctrl || shift || alt || meta;
 
   /// Creates a copy with specified fields overridden.
-  ModifierKeys copyWith({
-    bool? ctrl,
-    bool? shift,
-    bool? alt,
-    bool? meta,
-  }) {
+  ModifierKeys copyWith({bool? ctrl, bool? shift, bool? alt, bool? meta}) {
     return ModifierKeys(
       ctrl: ctrl ?? this.ctrl,
       shift: shift ?? this.shift,

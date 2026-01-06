@@ -81,7 +81,9 @@ void main() {
       // Navigate back up to item 8 (still visible)
       controller.ensureVisible(itemOffset: 8, itemExtent: 1);
       expect(
-          controller.offset, equals(6)); // No scroll needed, item 8 is visible
+        controller.offset,
+        equals(6),
+      ); // No scroll needed, item 8 is visible
 
       // Navigate to item 0 (way above)
       controller.ensureVisible(itemOffset: 0, itemExtent: 1);
@@ -135,52 +137,46 @@ void main() {
 
   group('ScrollController.ensureIndexVisible', () {
     test('scrolls to make index visible in fixed-height ListView', () async {
-      await testNocterm(
-        'index-based ensureVisible with fixed height',
-        (tester) async {
-          final controller = ScrollController();
-          final app = _TestListViewApp(controller: controller, itemCount: 20);
+      await testNocterm('index-based ensureVisible with fixed height', (
+        tester,
+      ) async {
+        final controller = ScrollController();
+        final app = _TestListViewApp(controller: controller, itemCount: 20);
 
-          await tester.pumpComponent(app);
+        await tester.pumpComponent(app);
 
-          // Initially at top
-          expect(controller.offset, equals(0));
+        // Initially at top
+        expect(controller.offset, equals(0));
 
-          // Navigate to item 15 (beyond visible area)
-          // Note: This will scroll to show item 15 at the bottom of the viewport
-          controller.ensureIndexVisible(index: 15);
+        // Navigate to item 15 (beyond visible area)
+        // Note: This will scroll to show item 15 at the bottom of the viewport
+        controller.ensureIndexVisible(index: 15);
 
-          // Need to pump again to see the scroll take effect
-          await tester.pump();
+        // Need to pump again to see the scroll take effect
+        await tester.pump();
 
-          // Should have scrolled to show item 15
-          // With viewport of 10, showing item 15 means we need to scroll past items 0-5
-          // So offset should be at least 6 (to show items 6-15)
-          expect(controller.offset, greaterThanOrEqualTo(6));
-        },
-        size: const Size(40, 10),
-      );
+        // Should have scrolled to show item 15
+        // With viewport of 10, showing item 15 means we need to scroll past items 0-5
+        // So offset should be at least 6 (to show items 6-15)
+        expect(controller.offset, greaterThanOrEqualTo(6));
+      }, size: const Size(40, 10));
     });
 
     test('does not scroll when index is already visible', () async {
-      await testNocterm(
-        'no scroll when already visible',
-        (tester) async {
-          final controller = ScrollController();
-          final app = _TestListViewApp(controller: controller, itemCount: 20);
+      await testNocterm('no scroll when already visible', (tester) async {
+        final controller = ScrollController();
+        final app = _TestListViewApp(controller: controller, itemCount: 20);
 
-          await tester.pumpComponent(app);
+        await tester.pumpComponent(app);
 
-          // Item 2 should be visible at the top
-          final initialOffset = controller.offset;
-          controller.ensureIndexVisible(index: 2);
-          await tester.pump();
+        // Item 2 should be visible at the top
+        final initialOffset = controller.offset;
+        controller.ensureIndexVisible(index: 2);
+        await tester.pump();
 
-          // Should not have scrolled
-          expect(controller.offset, equals(initialOffset));
-        },
-        size: const Size(40, 10),
-      );
+        // Should not have scrolled
+        expect(controller.offset, equals(initialOffset));
+      }, size: const Size(40, 10));
     });
   });
 }

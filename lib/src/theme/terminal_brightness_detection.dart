@@ -74,10 +74,11 @@ Future<Brightness?> detectMacOSDarkMode() async {
   }
 
   try {
-    final result = await Process.run(
-      'defaults',
-      ['read', '-g', 'AppleInterfaceStyle'],
-    );
+    final result = await Process.run('defaults', [
+      'read',
+      '-g',
+      'AppleInterfaceStyle',
+    ]);
 
     // Exit code 0 means the key exists (Dark Mode is on)
     // Exit code 1 means the key doesn't exist (Light Mode)

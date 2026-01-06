@@ -11,10 +11,8 @@ import '../buffer.dart' as buf;
 /// Test binding for TUI applications that provides controlled frame rendering
 /// and state inspection capabilities for testing.
 class NoctermTestBinding extends NoctermBinding with SchedulerBinding {
-  NoctermTestBinding({
-    term.Terminal? terminal,
-    this.size = const Size(80, 24),
-  }) : terminal = terminal ?? _MockTerminal(size) {
+  NoctermTestBinding({term.Terminal? terminal, this.size = const Size(80, 24)})
+    : terminal = terminal ?? _MockTerminal(size) {
     _instance = this;
     _initializePipelineOwner();
   }
@@ -71,8 +69,9 @@ class NoctermTestBinding extends NoctermBinding with SchedulerBinding {
     }
 
     // Execute a frame using the scheduler
-    final timestamp =
-        Duration(microseconds: DateTime.now().microsecondsSinceEpoch);
+    final timestamp = Duration(
+      microseconds: DateTime.now().microsecondsSinceEpoch,
+    );
     handleBeginFrame(timestamp);
     _frameCount++;
 
@@ -113,10 +112,9 @@ class NoctermTestBinding extends NoctermBinding with SchedulerBinding {
     for (int i = 0; i < text.length; i++) {
       final key = LogicalKey.fromCharacter(text[i]);
       if (key != null) {
-        _pendingKeyboardEvents.add(KeyboardEvent(
-          logicalKey: key,
-          character: text[i],
-        ));
+        _pendingKeyboardEvents.add(
+          KeyboardEvent(logicalKey: key, character: text[i]),
+        );
       }
     }
   }
@@ -163,9 +161,11 @@ class NoctermTestBinding extends NoctermBinding with SchedulerBinding {
       }
 
       // Layout phase
-      renderObject.layout(BoxConstraints.tight(
-        Size(size.width.toDouble(), size.height.toDouble()),
-      ));
+      renderObject.layout(
+        BoxConstraints.tight(
+          Size(size.width.toDouble(), size.height.toDouble()),
+        ),
+      );
 
       // Flush layout pipeline
       pipelineOwner.flushLayout();

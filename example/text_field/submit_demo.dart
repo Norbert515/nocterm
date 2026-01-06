@@ -32,19 +32,14 @@ class _SubmitDemoState extends State<SubmitDemo> {
     return Container(
       width: 60,
       height: 20,
-      decoration: BoxDecoration(
-        border: BoxBorder.all(color: Colors.blue),
-      ),
+      decoration: BoxDecoration(border: BoxBorder.all(color: Colors.blue)),
       padding: EdgeInsets.all(1),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Text Field Submit Demo',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.cyan,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyan),
           ),
           SizedBox(height: 1),
           Text('Type text and press Enter to submit:'),
@@ -83,9 +78,11 @@ class _SubmitDemoState extends State<SubmitDemo> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (int i = _submittedValues.length - 1;
-                      i >= 0 && i >= _submittedValues.length - 5;
-                      i--)
+                  for (
+                    int i = _submittedValues.length - 1;
+                    i >= 0 && i >= _submittedValues.length - 5;
+                    i--
+                  )
                     Text(
                       '${i + 1}. ${_submittedValues[i]}',
                       style: TextStyle(color: Colors.white),
@@ -95,10 +92,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
             ),
           ),
           SizedBox(height: 1),
-          Text(
-            'Press Ctrl+C to exit',
-            style: TextStyle(color: Colors.gray),
-          ),
+          Text('Press Ctrl+C to exit', style: TextStyle(color: Colors.gray)),
         ],
       ),
     );

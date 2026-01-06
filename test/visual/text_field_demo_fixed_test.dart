@@ -7,8 +7,9 @@ void main() {
       'multi-line demo',
       (tester) async {
         final controller = TextEditingController(
-            text:
-                'Hello this is a cool thing to do is typing a cool long string that can be enough');
+          text:
+              'Hello this is a cool thing to do is typing a cool long string that can be enough',
+        );
 
         await tester.pumpComponent(
           Column(
@@ -37,18 +38,21 @@ void main() {
         );
 
         // Position cursor at the end
-        controller.selection =
-            TextSelection.collapsed(offset: controller.text.length);
+        controller.selection = TextSelection.collapsed(
+          offset: controller.text.length,
+        );
         await tester.pump();
 
         print('\n=== BEFORE FIX ===');
         print('The cursor would appear beyond the border on wrapped lines.');
         print(
-            'Each wrapped line would push the cursor 1 character further out of sync.\n');
+          'Each wrapped line would push the cursor 1 character further out of sync.\n',
+        );
 
         print('=== AFTER FIX ===');
         print(
-            'The cursor now correctly stays within the text field boundaries.');
+          'The cursor now correctly stays within the text field boundaries.',
+        );
         print('Wrapped lines no longer cause position drift.\n');
       },
       debugPrintAfterPump: true,

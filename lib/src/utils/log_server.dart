@@ -28,9 +28,7 @@ import 'nocterm_paths.dart';
 /// await server.close();
 /// ```
 class LogServer {
-  LogServer({
-    this.maxBufferSize = 10000,
-  });
+  LogServer({this.maxBufferSize = 10000});
 
   /// Maximum number of log entries to keep in buffer
   final int maxBufferSize;
@@ -98,10 +96,12 @@ class LogServer {
         if (!_closed && !_clients.contains(ws)) break;
 
         try {
-          ws.add(jsonEncode({
-            'timestamp': entry.timestamp.toIso8601String(),
-            'message': entry.message,
-          }));
+          ws.add(
+            jsonEncode({
+              'timestamp': entry.timestamp.toIso8601String(),
+              'message': entry.message,
+            }),
+          );
         } catch (_) {
           // Client may have disconnected
           break;
@@ -134,10 +134,7 @@ class LogServer {
   void log(String message) {
     if (_closed) return;
 
-    final entry = LogEntry(
-      timestamp: DateTime.now(),
-      message: message,
-    );
+    final entry = LogEntry(timestamp: DateTime.now(), message: message);
 
     // Add to buffer
     _buffer.add(entry);
@@ -239,10 +236,7 @@ class LogServer {
 
 /// A log entry with timestamp and message
 class LogEntry {
-  LogEntry({
-    required this.timestamp,
-    required this.message,
-  });
+  LogEntry({required this.timestamp, required this.message});
 
   final DateTime timestamp;
   final String message;

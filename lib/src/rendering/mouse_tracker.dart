@@ -50,10 +50,7 @@ class MouseTracker {
   final Set<MouseTrackerAnnotation> _hoveredAnnotations = {};
 
   /// Update the hovered annotations based on hit test results and dispatch events.
-  void updateAnnotations(
-    MouseHitTestResult hitTestResult,
-    MouseEvent event,
-  ) {
+  void updateAnnotations(MouseHitTestResult hitTestResult, MouseEvent event) {
     // Collect all annotations from the hit test result
     final Set<MouseTrackerAnnotation> newAnnotations = {};
     for (final entry in hitTestResult.mouseEntries) {

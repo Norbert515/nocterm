@@ -54,8 +54,9 @@ void main() {
 
       // Wait for output and exit
       await outputCompleter.future.timeout(const Duration(seconds: 5));
-      final exitCode =
-          await exitCompleter.future.timeout(const Duration(seconds: 5));
+      final exitCode = await exitCompleter.future.timeout(
+        const Duration(seconds: 5),
+      );
 
       expect(output.join(), contains('test output'));
       expect(exitCode, equals(0));
@@ -182,10 +183,7 @@ void main() {
       expect(controller.isRunning, isTrue);
 
       // Should throw when trying to start again
-      expect(
-        () => controller.start(columns: 80, rows: 24),
-        throwsStateError,
-      );
+      expect(() => controller.start(columns: 80, rows: 24), throwsStateError);
 
       controller.kill();
       await controller.dispose();
@@ -194,10 +192,7 @@ void main() {
     test('throws when writing to non-running process', () {
       final controller = PtyController();
 
-      expect(
-        () => controller.write('test'),
-        throwsStateError,
-      );
+      expect(() => controller.write('test'), throwsStateError);
 
       controller.dispose();
     });

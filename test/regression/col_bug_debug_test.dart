@@ -26,9 +26,7 @@ class _ColumnBugDemoState extends State<ColumnBugDemo> {
   Component build(BuildContext context) {
     print('Building with first=$first');
     return Column(
-      children: [
-        if (first) Text('Widget 1') else Text('Widget 2'),
-      ],
+      children: [if (first) Text('Widget 1') else Text('Widget 2')],
     );
   }
 }
@@ -37,9 +35,7 @@ void main() {
   group('Column Bug Debug', () {
     test('debug column replacement', () async {
       await testNocterm('debug output', (tester) async {
-        await tester.pumpComponent(
-          const ColumnBugDemo(),
-        );
+        await tester.pumpComponent(const ColumnBugDemo());
 
         print('Initial render:');
         final output = tester.renderToString(showBorders: false);
