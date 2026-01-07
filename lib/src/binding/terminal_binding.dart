@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:nocterm/nocterm.dart';
 import 'package:nocterm/src/framework/terminal_canvas.dart';
@@ -46,6 +47,14 @@ class TerminalBinding extends NoctermBinding
   static const _bufferStaleTimeout = Duration(milliseconds: 100);
   final _mouseTracker = MouseTracker();
   final _oscEventsController = StreamController<String>.broadcast();
+
+  /// Timer for detecting standalone ESC key press.
+  /// When ESC arrives as part of an incomplete escape sequence (e.g., ESC [),
+  /// we wait briefly to see if more bytes arrive. If not, we treat it as ESC.
+  Timer? _escapeTimer;
+
+  /// Duration to wait for additional escape sequence bytes before flushing ESC.
+  static const _escapeTimeoutDuration = Duration(milliseconds: 50);
 
   // Event-driven loop support
   final _eventLoopController = StreamController<void>.broadcast();
@@ -131,6 +140,10 @@ class TerminalBinding extends NoctermBinding
 
     // Listen for input at the byte level for proper escape sequence handling
     _inputSubscription = inputStream.listen((bytes) {
+      // Cancel any pending escape timer since new bytes arrived
+      _escapeTimer?.cancel();
+      _escapeTimer = null;
+
       // Extract OSC sequences from input stream:
       // - Normal mode: Terminal emulator responses (color queries, clipboard, etc.)
       // - Shell mode: Above + custom protocol (e.g., OSC 9999 size updates)
@@ -201,6 +214,14 @@ class TerminalBinding extends NoctermBinding
         scheduleFrame();
       }
 
+      // Check for incomplete escape sequences and start timer if needed.
+      // This handles the case where ESC arrives as part of a potential escape
+      // sequence (e.g., ESC [) but no more bytes arrive. After a timeout,
+      // we flush the buffer as a standalone ESC key event.
+      if (_inputParser.hasIncompleteEscapeSequence()) {
+        _escapeTimer = Timer(_escapeTimeoutDuration, _flushEscapeSequence);
+      }
+
       // Also add raw string for backwards compatibility
       try {
         final str = utf8.decode(bytes);
@@ -209,6 +230,25 @@ class TerminalBinding extends NoctermBinding
         // Ignore decode errors for escape sequences
       }
     });
+  }
+
+  /// Flush an incomplete escape sequence as a standalone ESC key event.
+  /// Called by the escape timer when no additional bytes arrive.
+  void _flushEscapeSequence() {
+    _escapeTimer = null;
+    final escEvent = _inputParser.forceFlushEscape();
+    if (escEvent != null) {
+      // Add to keyboard event stream
+      _keyboardEventController.add(escEvent);
+
+      // Route the event through the component tree
+      _routeKeyboardEvent(escEvent);
+
+      // Schedule a frame if needed
+      if (buildOwner.hasDirtyElements) {
+        scheduleFrame();
+      }
+    }
   }
 
   /// Process bytes in shell mode to extract terminal size OSC sequences
@@ -244,8 +284,10 @@ class TerminalBinding extends NoctermBinding
 
         if (foundTerminator && end < bytes.length) {
           // Extract OSC content
-          final oscContent =
-              utf8.decode(bytes.sublist(i + 2, end), allowMalformed: true);
+          final oscContent = utf8.decode(
+            bytes.sublist(i + 2, end),
+            allowMalformed: true,
+          );
 
           // Handle OSC sequence based on command number
           _handleOscSequence(oscContent);
@@ -353,7 +395,8 @@ class TerminalBinding extends NoctermBinding
       if (event is KeyboardInputEvent) {
         final keyEvent = event.event;
         // Check if this is a simple printable character (no modifiers except shift)
-        final isPrintable = keyEvent.character != null &&
+        final isPrintable =
+            keyEvent.character != null &&
             keyEvent.character!.isNotEmpty &&
             !keyEvent.isControlPressed &&
             !keyEvent.isAltPressed &&
@@ -431,6 +474,10 @@ class TerminalBinding extends NoctermBinding
     if (_shouldExit) return;
     _shouldExit = true;
 
+    // Cancel escape timer if pending
+    _escapeTimer?.cancel();
+    _escapeTimer = null;
+
     // Cancel all subscriptions immediately
     _inputSubscription?.cancel();
     _resizeSubscription?.cancel();
@@ -502,8 +549,12 @@ class TerminalBinding extends NoctermBinding
       // Find the render object at the mouse position
       final renderObject = _findRenderObjectInTree(rootElement!);
       if (renderObject != null) {
-        _dispatchMouseWheelAtPosition(rootElement!, event,
-            Offset(event.x.toDouble(), event.y.toDouble()), Offset.zero);
+        _dispatchMouseWheelAtPosition(
+          rootElement!,
+          event,
+          Offset(event.x.toDouble(), event.y.toDouble()),
+          Offset.zero,
+        );
       }
     }
 
@@ -538,27 +589,28 @@ class TerminalBinding extends NoctermBinding
   bool _dispatchKeyToElement(Element element, KeyboardEvent event) {
     // Check if this element is a BlockFocus that's blocking
     if (element is BlockFocusElement && element.isBlocking) {
-      // Block all keyboard events from reaching children
       return false; // Event is "handled" (blocked)
-    }
-
-    // TODO: This is a hack to handle RenderTheater specially for Navigator
-    // Should be properly integrated into the render object hierarchy
-    if (element.renderObject is RenderTheater) {
-      final multiChildRenderObject = element as MultiChildRenderObjectElement;
-      if (multiChildRenderObject.children.isNotEmpty) {
-        final child = multiChildRenderObject.children.last;
-        return _dispatchKeyToElement(child, event);
-      }
     }
 
     // First, try to dispatch to children (depth-first)
     bool handled = false;
-    element.visitChildren((child) {
-      if (!handled) {
+
+    // Special handling for RenderTheater (Navigator's Overlay):
+    // Only dispatch to the topmost route (last child) for keyboard events
+    if (element.renderObject is RenderTheater) {
+      final multiChildRenderObject = element as MultiChildRenderObjectElement;
+      if (multiChildRenderObject.children.isNotEmpty) {
+        final child = multiChildRenderObject.children.last;
         handled = _dispatchKeyToElement(child, event);
       }
-    });
+    } else {
+      // Normal case: visit all children
+      element.visitChildren((child) {
+        if (!handled) {
+          handled = _dispatchKeyToElement(child, event);
+        }
+      });
+    }
 
     // If no child handled it, and this element can handle keys, try it
     if (!handled && element is FocusableElement) {
@@ -569,8 +621,12 @@ class TerminalBinding extends NoctermBinding
   }
 
   /// Dispatch a mouse wheel event to scrollable RenderObjects at a specific position
-  bool _dispatchMouseWheelAtPosition(Element element, MouseEvent event,
-      Offset mousePos, Offset currentOffset) {
+  bool _dispatchMouseWheelAtPosition(
+    Element element,
+    MouseEvent event,
+    Offset mousePos,
+    Offset currentOffset,
+  ) {
     // TODO: This is a hack to handle RenderTheater specially for Navigator
     // Should be properly integrated into the render object hierarchy
     if (element.renderObject is RenderTheater) {
@@ -578,7 +634,11 @@ class TerminalBinding extends NoctermBinding
       if (multiChildRenderObject.children.isNotEmpty) {
         final child = multiChildRenderObject.children.last;
         return _dispatchMouseWheelAtPosition(
-            child, event, mousePos, currentOffset);
+          child,
+          event,
+          mousePos,
+          currentOffset,
+        );
       }
     }
 
@@ -632,7 +692,11 @@ class TerminalBinding extends NoctermBinding
     for (final child in children.reversed) {
       if (!handled) {
         handled = _dispatchMouseWheelAtPosition(
-            child, event, mousePos, childrenOffset);
+          child,
+          event,
+          mousePos,
+          childrenOffset,
+        );
       }
     }
 
@@ -685,6 +749,11 @@ class TerminalBinding extends NoctermBinding
     if (_shouldExit) return;
 
     _shouldExit = true;
+
+    // Cancel escape timer if pending
+    _escapeTimer?.cancel();
+    _escapeTimer = null;
+
     _inputSubscription?.cancel();
     _resizeSubscription?.cancel();
 
@@ -835,7 +904,8 @@ class TerminalBinding extends NoctermBinding
         terminal.moveCursor(x, y);
 
         // Handle style
-        final hasStyle = cell.style.color != null ||
+        final hasStyle =
+            cell.style.color != null ||
             cell.style.backgroundColor != null ||
             cell.style.fontWeight == FontWeight.bold ||
             cell.style.fontWeight == FontWeight.dim ||
@@ -880,7 +950,8 @@ class TerminalBinding extends NoctermBinding
         final cell = buffer.getCell(x, y);
 
         // Handle style
-        final hasStyle = cell.style.color != null ||
+        final hasStyle =
+            cell.style.color != null ||
             cell.style.backgroundColor != null ||
             cell.style.fontWeight == FontWeight.bold ||
             cell.style.fontWeight == FontWeight.dim ||
@@ -928,8 +999,12 @@ class TerminalBinding extends NoctermBinding
     // Get current terminal size (may have been updated by resize event)
     final size = terminal.size;
     final buffer = buf.Buffer(size.width.toInt(), size.height.toInt());
-    final screenRect =
-        Rect.fromLTWH(0, 0, size.width.toDouble(), size.height.toDouble());
+    final screenRect = Rect.fromLTWH(
+      0,
+      0,
+      size.width.toDouble(),
+      size.height.toDouble(),
+    );
 
     // Find render object in tree
     RenderObject? findRenderObject(Element element) {
@@ -952,8 +1027,11 @@ class TerminalBinding extends NoctermBinding
       }
 
       // Layout phase
-      renderObject.layout(BoxConstraints.tight(
-          Size(size.width.toDouble(), size.height.toDouble())));
+      renderObject.layout(
+        BoxConstraints.tight(
+          Size(size.width.toDouble(), size.height.toDouble()),
+        ),
+      );
 
       // Flush layout pipeline
       pipelineOwner.flushLayout();

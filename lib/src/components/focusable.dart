@@ -67,8 +67,6 @@ class FocusableElement extends StatelessElement {
     if (!component.focused) {
       return false;
     }
-
-    final handled = component.onKeyEvent(event);
-    return handled;
+    return component.onKeyEvent(event);
   }
 }

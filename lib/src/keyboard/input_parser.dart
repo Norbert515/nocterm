@@ -259,8 +259,9 @@ class InputParser {
   }
 
   (KeyboardEvent, int)? _parseEscapeSequence() {
-    if (_buffer.length == 1) {
-      // Just ESC key pressed
+    final len = _buffer.length;
+
+    if (len == 1) {
       return (
         KeyboardEvent(
           logicalKey: LogicalKey.escape,
@@ -776,5 +777,40 @@ class InputParser {
   /// Clear any buffered input
   void clear() {
     _buffer.clear();
+  }
+
+  /// Check if buffer contains an incomplete escape sequence.
+  /// Returns true if buffer starts with ESC (0x1B) but parseNext would return null.
+  bool hasIncompleteEscapeSequence() {
+    if (_buffer.isEmpty || _buffer[0] != 0x1B) {
+      return false;
+    }
+    // If buffer has only ESC, it's not incomplete - it would return ESC event
+    if (_buffer.length == 1) {
+      return false;
+    }
+    // Check if current buffer would produce an event
+    // Save buffer state and try parsing
+    final savedBuffer = List<int>.from(_buffer);
+    final result = _parseBufferWithLength();
+    // Restore buffer (parsing may have modified it in some edge cases)
+    _buffer.clear();
+    _buffer.addAll(savedBuffer);
+    // If no result, we have an incomplete sequence
+    return result == null;
+  }
+
+  /// Force flush the buffer as an ESC key event.
+  /// Clears the buffer and returns an ESC KeyboardEvent.
+  /// Returns null if buffer doesn't start with ESC.
+  KeyboardEvent? forceFlushEscape() {
+    if (_buffer.isEmpty || _buffer[0] != 0x1B) {
+      return null;
+    }
+    _buffer.clear();
+    return KeyboardEvent(
+      logicalKey: LogicalKey.escape,
+      modifiers: const ModifierKeys(),
+    );
   }
 }
