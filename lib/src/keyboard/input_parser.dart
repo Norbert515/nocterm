@@ -290,6 +290,17 @@ class InputParser {
         );
       }
 
+      // Alt+Backspace (ESC followed by DEL/0x7F)
+      if (second == 0x7F) {
+        return (
+          KeyboardEvent(
+            logicalKey: LogicalKey.backspace,
+            modifiers: const ModifierKeys(alt: true),
+          ),
+          2
+        );
+      }
+
       // If it's not a complete Alt sequence, might be start of longer sequence
       if (second != 0x5B && second != 0x4F) {
         // Not a CSI or SS3 sequence, treat as ESC + char
