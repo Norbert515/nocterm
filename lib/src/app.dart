@@ -97,10 +97,14 @@ class App {
     // Unix ANSI escape sequences: ESC [ <code>
     if (data.length == 3 && data[0] == 27 && data[1] == 91) {
       switch (data[2]) {
-        case 65: return 'up';
-        case 66: return 'down';
-        case 67: return 'right';
-        case 68: return 'left';
+        case 65:
+          return 'up';
+        case 66:
+          return 'down';
+        case 67:
+          return 'right';
+        case 68:
+          return 'left';
       }
     }
 
@@ -108,10 +112,14 @@ class App {
     // or as 0x00 followed by code (extended keys)
     if (data.length == 2 && (data[0] == 0xE0 || data[0] == 0x00)) {
       switch (data[1]) {
-        case 72: return 'up';     // 0xE0 0x48
-        case 80: return 'down';   // 0xE0 0x50
-        case 75: return 'left';   // 0xE0 0x4B
-        case 77: return 'right';  // 0xE0 0x4D
+        case 72:
+          return 'up'; // 0xE0 0x48
+        case 80:
+          return 'down'; // 0xE0 0x50
+        case 75:
+          return 'left'; // 0xE0 0x4B
+        case 77:
+          return 'right'; // 0xE0 0x4D
       }
     }
 
@@ -128,14 +136,22 @@ class App {
     // Regular single-byte keys
     if (data.length == 1) {
       switch (data[0]) {
-        case 10: return 'enter';  // Unix newline
-        case 13: return 'enter';  // Windows carriage return
-        case 32: return 'space';
-        case 9:  return 'tab';
-        case 27: return 'escape';
-        case 127: return 'backspace'; // Unix backspace
-        case 8:  return 'backspace';  // Windows backspace
-        default: return input;
+        case 10:
+          return 'enter'; // Unix newline
+        case 13:
+          return 'enter'; // Windows carriage return
+        case 32:
+          return 'space';
+        case 9:
+          return 'tab';
+        case 27:
+          return 'escape';
+        case 127:
+          return 'backspace'; // Unix backspace
+        case 8:
+          return 'backspace'; // Windows backspace
+        default:
+          return input;
       }
     }
 

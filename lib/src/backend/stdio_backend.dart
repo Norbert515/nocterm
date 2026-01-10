@@ -35,7 +35,8 @@ class StdioBackend implements TerminalBackend {
 
       // Windows: Use polling for resize detection since SIGWINCH is not available
       _lastKnownSize = getSize();
-      _windowsResizeTimer = Timer.periodic(const Duration(milliseconds: 250), (_) {
+      _windowsResizeTimer =
+          Timer.periodic(const Duration(milliseconds: 250), (_) {
         if (!_disposed && stdout.hasTerminal) {
           final currentSize = getSize();
           if (_lastKnownSize != currentSize) {
