@@ -384,6 +384,12 @@ class _TextFieldState extends State<TextField> {
       component.onEditingComplete?.call();
       component.onSubmitted?.call(_controller.text);
       return true;
+    } else if (key == LogicalKey.backspace && event.isControlPressed) {
+      _deleteWordBackward();
+      return true;
+    } else if (key == LogicalKey.backspace && event.isAltPressed) {
+      _deleteWordBackward();
+      return true;
     } else if (key == LogicalKey.backspace) {
       _handleBackspace();
       return true;
@@ -400,6 +406,12 @@ class _TextFieldState extends State<TextField> {
       _moveCursorByWord(-1, false);
       return true;
     } else if (key == LogicalKey.arrowRight && event.isControlPressed) {
+      _moveCursorByWord(1, false);
+      return true;
+    } else if (key == LogicalKey.arrowLeft && event.isAltPressed) {
+      _moveCursorByWord(-1, false);
+      return true;
+    } else if (key == LogicalKey.arrowRight && event.isAltPressed) {
       _moveCursorByWord(1, false);
       return true;
     } else if (key == LogicalKey.arrowUp &&
@@ -441,9 +453,6 @@ class _TextFieldState extends State<TextField> {
       return true;
     } else if (event.matches(LogicalKey.keyV, ctrl: true)) {
       _paste();
-      return true;
-    } else if (key == LogicalKey.backspace && event.isControlPressed) {
-      _deleteWordBackward();
       return true;
     } else if (key == LogicalKey.delete && event.isControlPressed) {
       _deleteWordForward();
