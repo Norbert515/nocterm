@@ -5,6 +5,9 @@ repository: https://github.com/norbert515/nocterm
 homepage: https://nocterm.dev
 documentation: https://docs.nocterm.dev
 
+topics:
+  - tui
+  
 environment:
   sdk: ">=3.5.0 <4.0.0"
 
