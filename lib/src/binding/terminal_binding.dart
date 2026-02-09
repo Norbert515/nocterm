@@ -515,6 +515,7 @@ class TerminalBinding extends NoctermBinding
     _shouldExit = true;
 
     // Cancel all subscriptions immediately
+    pendingFrameTimer?.cancel();
     _inputSubscription?.cancel();
     _resizeSubscription?.cancel();
     _shutdownSubscription?.cancel();
