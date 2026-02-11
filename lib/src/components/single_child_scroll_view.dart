@@ -282,11 +282,8 @@ class RenderSingleChildViewport extends RenderObject
 
     child!.layout(childConstraints, parentUsesSize: true);
 
-    // Our size is constrained by our parent
-    size = constraints.constrain(Size(
-      constraints.maxWidth,
-      constraints.maxHeight,
-    ));
+    // Shrink-wrap to child size, clamped by parent constraints
+    size = constraints.constrain(child!.size);
 
     // Update scroll controller metrics
     final double viewportExtent =
