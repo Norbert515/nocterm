@@ -2,41 +2,29 @@ part of 'framework.dart';
 
 /// Base class for Elements that wrap a single child.
 ///
-/// This class provides proper lifecycle management for elements that have
-/// exactly one child, ensuring render objects are correctly attached and
-/// detached when the element tree changes.
-abstract class ProxyElement extends Element {
+/// Unlike [StatelessElement] and [StatefulElement], proxy elements do not
+/// call [build] during updates. Instead, they directly update their child
+/// via [updateChild] in [update], and provide the [updated] hook for
+/// subclasses to react to component changes.
+///
+/// This mirrors Flutter's `ProxyElement` which extends `ComponentElement`.
+abstract class ProxyElement extends BuildableElement {
   ProxyElement(super.component);
 
   @override
   ProxyComponent get component => super.component as ProxyComponent;
 
-  Element? _child;
-
-  /// The element's unique child, if it has one.
-  Element? get child => _child;
-
   @override
-  void mount(Element? parent, dynamic newSlot) {
-    super.mount(parent, newSlot);
-    // Pass through the slot so child render objects get inserted at the correct position
-    _child = updateChild(null, component.child, slot);
-  }
+  Component build() => component.child;
 
   @override
   void update(Component newComponent) {
+    final oldComponent = component;
     super.update(newComponent);
     assert(component == newComponent);
     // Pass through the slot so child render objects get inserted at the correct position
-    _child = updateChild(_child, (newComponent as ProxyComponent).child, slot);
-    updated(component);
-  }
-
-  @override
-  void performRebuild() {
-    if (_child != null) {
-      _child!.performRebuild();
-    }
+    _child = updateChild(_child, component.child, slot);
+    updated(oldComponent);
   }
 
   /// Called after the widget has been updated.
@@ -49,20 +37,6 @@ abstract class ProxyElement extends Element {
   /// Notify other objects that the widget associated with this element has changed.
   @protected
   void notifyClients(ProxyComponent oldComponent);
-
-  @override
-  void visitChildren(ElementVisitor visitor) {
-    if (_child != null) {
-      visitor(_child!);
-    }
-  }
-
-  @override
-  void forgetChild(Element child) {
-    assert(child == _child);
-    _child = null;
-    super.forgetChild(child);
-  }
 
   void insertRenderObjectChild(RenderObject child, dynamic slot) {
     final RenderObjectElement? renderObjectElement =

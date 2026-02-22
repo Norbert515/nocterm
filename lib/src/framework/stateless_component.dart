@@ -18,8 +18,6 @@ class StatelessElement extends BuildableElement {
 
   @override
   void update(Component newComponent) {
-    if (identical(component, newComponent)) return;
-
     super.update(newComponent);
     // Trigger a rebuild when the component is updated to ensure
     // child components receive state updates from parent

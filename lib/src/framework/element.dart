@@ -65,6 +65,7 @@ abstract class Element implements BuildContext {
 
   void update(Component newComponent) {
     assert(_lifecycleState == _ElementLifecycle.active);
+    assert(newComponent != component);
     assert(Component.canUpdate(component, newComponent));
     _component = newComponent;
   }
@@ -131,10 +132,10 @@ abstract class Element implements BuildContext {
 
     final Element newChild;
     if (child != null) {
-      bool hasSameSuperclass = true;
-
-      if (hasSameSuperclass &&
-          Component.canUpdate(child.component, newComponent)) {
+      if (identical(child.component, newComponent)) {
+        // Same instance — nothing to update.
+        newChild = child;
+      } else if (Component.canUpdate(child.component, newComponent)) {
         child.update(newComponent);
         newChild = child;
       } else {

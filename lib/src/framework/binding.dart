@@ -139,11 +139,9 @@ abstract class NoctermBinding {
   }
 }
 
-/// InheritedComponent provides a way to pass data down the component tree
-abstract class InheritedComponent extends Component {
-  const InheritedComponent({super.key, required this.child});
-
-  final Component child;
+/// InheritedComponent provides a way to pass data down the component tree.
+abstract class InheritedComponent extends ProxyComponent {
+  const InheritedComponent({super.key, required super.child});
 
   @override
   InheritedElement createElement() => InheritedElement(this);
@@ -153,8 +151,8 @@ abstract class InheritedComponent extends Component {
   bool updateShouldNotify(covariant InheritedComponent oldComponent);
 }
 
-/// Element for InheritedComponent
-class InheritedElement extends BuildableElement {
+/// Element for [InheritedComponent].
+class InheritedElement extends ProxyElement {
   InheritedElement(InheritedComponent super.component);
 
   @override
@@ -163,13 +161,10 @@ class InheritedElement extends BuildableElement {
   final Map<Element, Object?> _dependents = HashMap<Element, Object?>();
 
   @override
-  void update(covariant Component newComponent) {
-    final InheritedComponent oldComponent = component;
-    super.update(newComponent);
+  void updated(covariant InheritedComponent oldComponent) {
     if (component.updateShouldNotify(oldComponent)) {
-      notifyClients(oldComponent);
+      super.updated(oldComponent);
     }
-    _child = updateChild(_child, component.child, slot);
   }
 
   @override
@@ -193,7 +188,8 @@ class InheritedElement extends BuildableElement {
     setDependencies(dependent, null);
   }
 
-  void notifyClients(InheritedComponent oldComponent) {
+  @override
+  void notifyClients(covariant InheritedComponent oldComponent) {
     for (final Element dependent in _dependents.keys) {
       notifyDependent(oldComponent, dependent);
     }
@@ -210,7 +206,4 @@ class InheritedElement extends BuildableElement {
   void removeDependent(Element dependent) {
     _dependents.remove(dependent);
   }
-
-  @override
-  Component build() => component.child;
 }

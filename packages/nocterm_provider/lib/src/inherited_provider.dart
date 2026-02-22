@@ -448,7 +448,7 @@ class _InheritedProviderScopeElement<T> extends InheritedElement
   }
 
   @override
-  void update(_InheritedProviderScope<T> newComponent) {
+  void update(covariant _InheritedProviderScope<T> newComponent) {
     assert(() {
       if (component.owner._delegate.runtimeType !=
           newComponent.owner._delegate.runtimeType) {
