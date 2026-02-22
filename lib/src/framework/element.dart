@@ -132,9 +132,8 @@ abstract class Element implements BuildContext {
 
     final Element newChild;
     if (child != null) {
-      if (identical(child.component, newComponent)) {
-        // Same instance — nothing to update.
-        newChild = child;
+      if (child.component == newComponent) {
+        newChild = child; // short circuit
       } else if (Component.canUpdate(child.component, newComponent)) {
         child.update(newComponent);
         newChild = child;
