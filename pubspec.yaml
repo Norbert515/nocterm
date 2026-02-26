@@ -1,4 +1,4 @@
-﻿name: nocterm
+name: nocterm
 description: A Flutter-like framework for terminal UIs.
 version: 0.3.5
 repository: https://github.com/norbert515/nocterm

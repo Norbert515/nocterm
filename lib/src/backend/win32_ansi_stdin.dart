@@ -26,16 +26,16 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
   }
 
   Win32AnsiStdin._create()
-      : _inputHandle = _getStdHandle(_STD_INPUT_HANDLE),
-        _originalConsoleMode = _getConsoleMode() {
+      : _inputHandle = _getStdHandle(_stdInputHandle),
+        _originalConsoleMode = _readCurrentConsoleMode() {
     _configureConsoleMode();
   }
 
-  static int _getConsoleMode() {
-    final handle = _getStdHandle(_STD_INPUT_HANDLE);
+  static int _readCurrentConsoleMode() {
+    final handle = _getStdHandle(_stdInputHandle);
     final modePtr = calloc<Uint32>();
     try {
-      _GetConsoleMode(handle, modePtr);
+      _getConsoleMode(handle, modePtr);
       return modePtr.value;
     } finally {
       calloc.free(modePtr);
@@ -44,10 +44,10 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
 
   void _configureConsoleMode() {
     // Enable mouse input, extended flags, and disable quick edit mode
-    final newMode = _ENABLE_EXTENDED_FLAGS |
-        (_originalConsoleMode & ~_ENABLE_QUICK_EDIT_MODE) |
-        _ENABLE_MOUSE_INPUT;
-    _SetConsoleMode(_inputHandle, newMode);
+    final newMode = _enableExtendedFlags |
+        (_originalConsoleMode & ~_enableQuickEditMode) |
+        _enableMouseInput;
+    _setConsoleMode(_inputHandle, newMode);
   }
 
   /// Start the input event loop
@@ -58,7 +58,7 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
   }
 
   Future<void> _eventLoop() async {
-    final pInputRecord = calloc<_INPUT_RECORD>();
+    final pInputRecord = calloc<_InputRecord>();
     final pEventsRead = calloc<Uint32>();
 
     try {
@@ -70,7 +70,7 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
 
         // Read one input event
         final result =
-            _ReadConsoleInputW(_inputHandle, pInputRecord, 1, pEventsRead);
+            _readConsoleInputW(_inputHandle, pInputRecord, 1, pEventsRead);
         if (result != 0 && pEventsRead.value > 0) {
           _translateAndFire(pInputRecord.ref);
         }
@@ -81,11 +81,11 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
     }
   }
 
-  void _translateAndFire(_INPUT_RECORD event) {
-    final eventType = event.EventType;
+  void _translateAndFire(_InputRecord event) {
+    final eventType = event.eventType;
 
-    if (eventType == _KEY_EVENT) {
-      final keyEvent = event.Event.KeyEvent;
+    if (eventType == _keyEvent) {
+      final keyEvent = event.event.keyEvent;
       if (keyEvent.bKeyDown != 0) {
         // Only process key down events
         final bytes = _translateKeyEvent(keyEvent);
@@ -93,8 +93,8 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
           _controller.add(bytes);
         }
       }
-    } else if (eventType == _MOUSE_EVENT) {
-      final mouseEvent = event.Event.MouseEvent;
+    } else if (eventType == _mouseEvent) {
+      final mouseEvent = event.event.mouseEvent;
       final bytes = _translateMouseEvent(mouseEvent);
       if (bytes.isNotEmpty) {
         _controller.add(bytes);
@@ -102,16 +102,16 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
     }
   }
 
-  List<int> _translateKeyEvent(_KEY_EVENT_RECORD keyEvent) {
+  List<int> _translateKeyEvent(_KeyEventRecord keyEvent) {
     final virtualKeyCode = keyEvent.wVirtualKeyCode;
     final char = keyEvent.uChar;
     final controlKeyState = keyEvent.dwControlKeyState;
 
-    final ctrlPressed = (controlKeyState & _LEFT_CTRL_PRESSED) != 0 ||
-        (controlKeyState & _RIGHT_CTRL_PRESSED) != 0;
-    final altPressed = (controlKeyState & _LEFT_ALT_PRESSED) != 0 ||
-        (controlKeyState & _RIGHT_ALT_PRESSED) != 0;
-    final shiftPressed = (controlKeyState & _SHIFT_PRESSED) != 0;
+    final ctrlPressed = (controlKeyState & _leftCtrlPressed) != 0 ||
+        (controlKeyState & _rightCtrlPressed) != 0;
+    final altPressed = (controlKeyState & _leftAltPressed) != 0 ||
+        (controlKeyState & _rightAltPressed) != 0;
+    final shiftPressed = (controlKeyState & _shiftPressed) != 0;
 
     // Calculate modifier code for ANSI sequences
     // Format: 1 + shift(1) + alt(2) + ctrl(4)
@@ -131,7 +131,7 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
     // Special keys - translate to ANSI escape sequences
     switch (virtualKeyCode) {
       // Arrow keys
-      case _VK_UP:
+      case _vkUp:
         return modifierCode > 1
             ? [
                 0x1b,
@@ -142,7 +142,7 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
                 0x41
               ]
             : [0x1b, 0x5b, 0x41]; // ESC [ A
-      case _VK_DOWN:
+      case _vkDown:
         return modifierCode > 1
             ? [
                 0x1b,
@@ -153,7 +153,7 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
                 0x42
               ]
             : [0x1b, 0x5b, 0x42]; // ESC [ B
-      case _VK_RIGHT:
+      case _vkRight:
         return modifierCode > 1
             ? [
                 0x1b,
@@ -164,7 +164,7 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
                 0x43
               ]
             : [0x1b, 0x5b, 0x43]; // ESC [ C
-      case _VK_LEFT:
+      case _vkLeft:
         return modifierCode > 1
             ? [
                 0x1b,
@@ -177,7 +177,7 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
             : [0x1b, 0x5b, 0x44]; // ESC [ D
 
       // Navigation keys
-      case _VK_HOME:
+      case _vkHome:
         return modifierCode > 1
             ? [
                 0x1b,
@@ -188,7 +188,7 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
                 0x48
               ]
             : [0x1b, 0x5b, 0x48]; // ESC [ H
-      case _VK_END:
+      case _vkEnd:
         return modifierCode > 1
             ? [
                 0x1b,
@@ -199,49 +199,49 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
                 0x46
               ]
             : [0x1b, 0x5b, 0x46]; // ESC [ F
-      case _VK_INSERT:
+      case _vkInsert:
         return [0x1b, 0x5b, 0x32, 0x7e]; // ESC [ 2 ~
-      case _VK_DELETE:
+      case _vkDelete:
         return [0x1b, 0x5b, 0x33, 0x7e]; // ESC [ 3 ~
-      case _VK_PRIOR: // Page Up
+      case _vkPrior: // Page Up
         return [0x1b, 0x5b, 0x35, 0x7e]; // ESC [ 5 ~
-      case _VK_NEXT: // Page Down
+      case _vkNext: // Page Down
         return [0x1b, 0x5b, 0x36, 0x7e]; // ESC [ 6 ~
 
       // Function keys F1-F12
-      case _VK_F1:
+      case _vkF1:
         return [0x1b, 0x4f, 0x50]; // ESC O P
-      case _VK_F2:
+      case _vkF2:
         return [0x1b, 0x4f, 0x51]; // ESC O Q
-      case _VK_F3:
+      case _vkF3:
         return [0x1b, 0x4f, 0x52]; // ESC O R
-      case _VK_F4:
+      case _vkF4:
         return [0x1b, 0x4f, 0x53]; // ESC O S
-      case _VK_F5:
+      case _vkF5:
         return [0x1b, 0x5b, 0x31, 0x35, 0x7e]; // ESC [ 15 ~
-      case _VK_F6:
+      case _vkF6:
         return [0x1b, 0x5b, 0x31, 0x37, 0x7e]; // ESC [ 17 ~
-      case _VK_F7:
+      case _vkF7:
         return [0x1b, 0x5b, 0x31, 0x38, 0x7e]; // ESC [ 18 ~
-      case _VK_F8:
+      case _vkF8:
         return [0x1b, 0x5b, 0x31, 0x39, 0x7e]; // ESC [ 19 ~
-      case _VK_F9:
+      case _vkF9:
         return [0x1b, 0x5b, 0x32, 0x30, 0x7e]; // ESC [ 20 ~
-      case _VK_F10:
+      case _vkF10:
         return [0x1b, 0x5b, 0x32, 0x31, 0x7e]; // ESC [ 21 ~
-      case _VK_F11:
+      case _vkF11:
         return [0x1b, 0x5b, 0x32, 0x33, 0x7e]; // ESC [ 23 ~
-      case _VK_F12:
+      case _vkF12:
         return [0x1b, 0x5b, 0x32, 0x34, 0x7e]; // ESC [ 24 ~
 
       // Control characters
-      case _VK_RETURN:
+      case _vkReturn:
         return [0x0d]; // CR
-      case _VK_ESCAPE:
+      case _vkEscape:
         return [0x1b]; // ESC
-      case _VK_BACK:
+      case _vkBack:
         return [0x7f]; // DEL (Unix backspace)
-      case _VK_TAB:
+      case _vkTab:
         return shiftPressed ? [0x1b, 0x5b, 0x5a] : [0x09]; // Shift+Tab or Tab
     }
 
@@ -257,33 +257,33 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
     return [];
   }
 
-  List<int> _translateMouseEvent(_MOUSE_EVENT_RECORD mouseEvent) {
+  List<int> _translateMouseEvent(_MouseEventRecord mouseEvent) {
     final buttonState = mouseEvent.dwButtonState;
     final eventFlags = mouseEvent.dwEventFlags;
-    final x = mouseEvent.dwMousePosition_X + 1; // 1-indexed
-    final y = mouseEvent.dwMousePosition_Y + 1;
+    final x = mouseEvent.dwMousePositionX + 1; // 1-indexed
+    final y = mouseEvent.dwMousePositionY + 1;
 
     int button;
     String suffix;
 
-    if (eventFlags & _MOUSE_WHEELED != 0) {
+    if (eventFlags & _mouseWheeled != 0) {
       // Wheel event - check high word of buttonState for direction
       final wheelDelta = (buttonState >> 16) & 0xFFFF;
       button = wheelDelta > 32767 ? 65 : 64; // Down or Up
       suffix = 'M';
-    } else if (eventFlags & _MOUSE_HWHEELED != 0) {
+    } else if (eventFlags & _mouseHWheeled != 0) {
       // Horizontal wheel
       final wheelDelta = (buttonState >> 16) & 0xFFFF;
       button = wheelDelta > 32767 ? 67 : 66;
       suffix = 'M';
-    } else if (eventFlags & _MOUSE_MOVED != 0) {
+    } else if (eventFlags & _mouseMoved != 0) {
       // Motion event
       if (buttonState != 0) {
         // Motion with button down
         button = 32;
-        if (buttonState & _FROM_LEFT_1ST_BUTTON_PRESSED != 0) button += 0;
-        if (buttonState & _RIGHTMOST_BUTTON_PRESSED != 0) button += 2;
-        if (buttonState & _FROM_LEFT_2ND_BUTTON_PRESSED != 0) button += 1;
+        if (buttonState & _fromLeft1stButtonPressed != 0) button += 0;
+        if (buttonState & _rightmostButtonPressed != 0) button += 2;
+        if (buttonState & _fromLeft2ndButtonPressed != 0) button += 1;
         suffix = 'M';
       } else {
         // Motion without button - don't report
@@ -291,16 +291,16 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
       }
     } else {
       // Button event
-      if (buttonState & _FROM_LEFT_1ST_BUTTON_PRESSED != 0 &&
-          _lastButtonState & _FROM_LEFT_1ST_BUTTON_PRESSED == 0) {
+      if (buttonState & _fromLeft1stButtonPressed != 0 &&
+          _lastButtonState & _fromLeft1stButtonPressed == 0) {
         button = 0;
         suffix = 'M';
-      } else if (buttonState & _RIGHTMOST_BUTTON_PRESSED != 0 &&
-          _lastButtonState & _RIGHTMOST_BUTTON_PRESSED == 0) {
+      } else if (buttonState & _rightmostButtonPressed != 0 &&
+          _lastButtonState & _rightmostButtonPressed == 0) {
         button = 2;
         suffix = 'M';
-      } else if (buttonState & _FROM_LEFT_2ND_BUTTON_PRESSED != 0 &&
-          _lastButtonState & _FROM_LEFT_2ND_BUTTON_PRESSED == 0) {
+      } else if (buttonState & _fromLeft2ndButtonPressed != 0 &&
+          _lastButtonState & _fromLeft2ndButtonPressed == 0) {
         button = 1;
         suffix = 'M';
       } else if (_lastButtonState != 0 && buttonState == 0) {
@@ -323,7 +323,7 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
   /// Stop the event loop and restore console mode
   void close() {
     _running = false;
-    _SetConsoleMode(_inputHandle, _originalConsoleMode);
+    _setConsoleMode(_inputHandle, _originalConsoleMode);
     _controller.close();
     _instance = null;
   }
@@ -376,69 +376,62 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
 }
 
 // Windows API Constants
-const int _STD_INPUT_HANDLE = -10;
-const int _ENABLE_MOUSE_INPUT = 0x0010;
-const int _ENABLE_EXTENDED_FLAGS = 0x0080;
-const int _ENABLE_QUICK_EDIT_MODE = 0x0040;
+const int _stdInputHandle = -10;
+const int _enableMouseInput = 0x0010;
+const int _enableExtendedFlags = 0x0080;
+const int _enableQuickEditMode = 0x0040;
 
 // Event types
-const int _KEY_EVENT = 0x0001;
-const int _MOUSE_EVENT = 0x0002;
+const int _keyEvent = 0x0001;
+const int _mouseEvent = 0x0002;
 
 // Control key states
-const int _SHIFT_PRESSED = 0x0010;
-const int _LEFT_CTRL_PRESSED = 0x0008;
-const int _RIGHT_CTRL_PRESSED = 0x0004;
-const int _LEFT_ALT_PRESSED = 0x0002;
-const int _RIGHT_ALT_PRESSED = 0x0001;
+const int _shiftPressed = 0x0010;
+const int _leftCtrlPressed = 0x0008;
+const int _rightCtrlPressed = 0x0004;
+const int _leftAltPressed = 0x0002;
+const int _rightAltPressed = 0x0001;
 
 // Mouse event flags
-const int _MOUSE_MOVED = 0x0001;
-const int _MOUSE_WHEELED = 0x0004;
-const int _MOUSE_HWHEELED = 0x0008;
+const int _mouseMoved = 0x0001;
+const int _mouseWheeled = 0x0004;
+const int _mouseHWheeled = 0x0008;
 
 // Mouse button states
-const int _FROM_LEFT_1ST_BUTTON_PRESSED = 0x0001;
-const int _RIGHTMOST_BUTTON_PRESSED = 0x0002;
-const int _FROM_LEFT_2ND_BUTTON_PRESSED = 0x0004;
+const int _fromLeft1stButtonPressed = 0x0001;
+const int _rightmostButtonPressed = 0x0002;
+const int _fromLeft2ndButtonPressed = 0x0004;
 
 // Virtual key codes
-const int _VK_BACK = 0x08;
-const int _VK_TAB = 0x09;
-const int _VK_RETURN = 0x0D;
-const int _VK_ESCAPE = 0x1B;
-const int _VK_PRIOR = 0x21;
-const int _VK_NEXT = 0x22;
-const int _VK_END = 0x23;
-const int _VK_HOME = 0x24;
-const int _VK_LEFT = 0x25;
-const int _VK_UP = 0x26;
-const int _VK_RIGHT = 0x27;
-const int _VK_DOWN = 0x28;
-const int _VK_INSERT = 0x2D;
-const int _VK_DELETE = 0x2E;
-const int _VK_F1 = 0x70;
-const int _VK_F2 = 0x71;
-const int _VK_F3 = 0x72;
-const int _VK_F4 = 0x73;
-const int _VK_F5 = 0x74;
-const int _VK_F6 = 0x75;
-const int _VK_F7 = 0x76;
-const int _VK_F8 = 0x77;
-const int _VK_F9 = 0x78;
-const int _VK_F10 = 0x79;
-const int _VK_F11 = 0x7A;
-const int _VK_F12 = 0x7B;
+const int _vkBack = 0x08;
+const int _vkTab = 0x09;
+const int _vkReturn = 0x0D;
+const int _vkEscape = 0x1B;
+const int _vkPrior = 0x21;
+const int _vkNext = 0x22;
+const int _vkEnd = 0x23;
+const int _vkHome = 0x24;
+const int _vkLeft = 0x25;
+const int _vkUp = 0x26;
+const int _vkRight = 0x27;
+const int _vkDown = 0x28;
+const int _vkInsert = 0x2D;
+const int _vkDelete = 0x2E;
+const int _vkF1 = 0x70;
+const int _vkF2 = 0x71;
+const int _vkF3 = 0x72;
+const int _vkF4 = 0x73;
+const int _vkF5 = 0x74;
+const int _vkF6 = 0x75;
+const int _vkF7 = 0x76;
+const int _vkF8 = 0x77;
+const int _vkF9 = 0x78;
+const int _vkF10 = 0x79;
+const int _vkF11 = 0x7A;
+const int _vkF12 = 0x7B;
 
 // FFI Structs
-final class _COORD extends Struct {
-  @Int16()
-  external int X;
-  @Int16()
-  external int Y;
-}
-
-final class _KEY_EVENT_RECORD extends Struct {
+final class _KeyEventRecord extends Struct {
   @Int32()
   external int bKeyDown;
   @Uint16()
@@ -453,11 +446,11 @@ final class _KEY_EVENT_RECORD extends Struct {
   external int dwControlKeyState;
 }
 
-final class _MOUSE_EVENT_RECORD extends Struct {
+final class _MouseEventRecord extends Struct {
   @Int16()
-  external int dwMousePosition_X;
+  external int dwMousePositionX;
   @Int16()
-  external int dwMousePosition_Y;
+  external int dwMousePositionY;
   @Uint32()
   external int dwButtonState;
   @Uint32()
@@ -466,15 +459,15 @@ final class _MOUSE_EVENT_RECORD extends Struct {
   external int dwEventFlags;
 }
 
-final class _EVENT_UNION extends Union {
-  external _KEY_EVENT_RECORD KeyEvent;
-  external _MOUSE_EVENT_RECORD MouseEvent;
+final class _EventUnion extends Union {
+  external _KeyEventRecord keyEvent;
+  external _MouseEventRecord mouseEvent;
 }
 
-final class _INPUT_RECORD extends Struct {
+final class _InputRecord extends Struct {
   @Uint16()
-  external int EventType;
-  external _EVENT_UNION Event;
+  external int eventType;
+  external _EventUnion event;
 }
 
 // FFI Function bindings
@@ -492,12 +485,12 @@ typedef _SetConsoleModeDart = int Function(int hConsoleHandle, int dwMode);
 
 typedef _ReadConsoleInputNative = Int32 Function(
     IntPtr hConsoleInput,
-    Pointer<_INPUT_RECORD> lpBuffer,
+    Pointer<_InputRecord> lpBuffer,
     Uint32 nLength,
     Pointer<Uint32> lpNumberOfEventsRead);
 typedef _ReadConsoleInputDart = int Function(
     int hConsoleInput,
-    Pointer<_INPUT_RECORD> lpBuffer,
+    Pointer<_InputRecord> lpBuffer,
     int nLength,
     Pointer<Uint32> lpNumberOfEventsRead);
 
@@ -506,14 +499,14 @@ final _kernel32 = DynamicLibrary.open('kernel32.dll');
 final _getStdHandle = _kernel32
     .lookupFunction<_GetStdHandleNative, _GetStdHandleDart>('GetStdHandle');
 
-final _GetConsoleMode =
+final _getConsoleMode =
     _kernel32.lookupFunction<_GetConsoleModeNative, _GetConsoleModeDart>(
         'GetConsoleMode');
 
-final _SetConsoleMode =
+final _setConsoleMode =
     _kernel32.lookupFunction<_SetConsoleModeNative, _SetConsoleModeDart>(
         'SetConsoleMode');
 
-final _ReadConsoleInputW =
+final _readConsoleInputW =
     _kernel32.lookupFunction<_ReadConsoleInputNative, _ReadConsoleInputDart>(
         'ReadConsoleInputW');
