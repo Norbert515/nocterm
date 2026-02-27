@@ -424,72 +424,11 @@ class TerminalBinding extends NoctermBinding
 
   /// Batch consecutive printable character events into a single PasteInputEvent.
   ///
-  /// This handles terminals (like Warp) that don't wrap drag-drop in bracketed
-  /// paste mode. When multiple printable characters arrive in a single stdin
-  /// read, they're clearly from a paste/drag-drop rather than typing, so we
-  /// batch them together for efficient processing.
-  ///
-  /// Single characters pass through unchanged for responsive typing.
+  /// NOTE: Disabled for compatibility with IDE terminals (e.g. IntelliJ) where
+  /// keyboard input can arrive in mixed chunks that look like printable text.
+  /// Rely on explicit bracketed paste parsing instead.
   List<InputEvent> _batchCharacterEvents(List<InputEvent> events) {
-    if (events.length <= 1) {
-      // Single event or empty - no batching needed, keeps typing responsive
-      return events;
-    }
-
-    final result = <InputEvent>[];
-    final charEvents = <KeyboardInputEvent>[];
-    final charBuffer = StringBuffer();
-
-    void flushCharBuffer() {
-      if (charEvents.isEmpty) return;
-
-      if (charEvents.length == 1) {
-        // Keep single-character typing as a normal key event so app shortcuts
-        // (for example "q" to quit) still work in line-buffered environments.
-        result.add(charEvents.first);
-      } else {
-        // Convert multi-character bursts to paste for efficiency.
-        result.add(PasteInputEvent(charBuffer.toString()));
-      }
-
-      charEvents.clear();
-      charBuffer.clear();
-    }
-
-    for (final event in events) {
-      if (event is KeyboardInputEvent) {
-        final keyEvent = event.event;
-        // Check if this is a simple printable character (no modifiers except shift).
-        // Excludes control chars like '\n' and '\r' to avoid converting
-        // single-key shortcuts followed by Enter (e.g. "q\n") into paste.
-        final character = keyEvent.character;
-        final isPrintable = character != null &&
-            character.isNotEmpty &&
-            character.runes.every((codeUnit) => codeUnit >= 0x20 && codeUnit != 0x7f) &&
-            !keyEvent.isControlPressed &&
-            !keyEvent.isAltPressed &&
-            !keyEvent.isMetaPressed;
-
-        if (isPrintable) {
-          // Add to batch
-          charEvents.add(event);
-          charBuffer.write(character);
-        } else {
-          // Non-printable key (arrow, enter, ctrl+x, etc.) - flush buffer first
-          flushCharBuffer();
-          result.add(event);
-        }
-      } else {
-        // Mouse event or other - flush buffer first
-        flushCharBuffer();
-        result.add(event);
-      }
-    }
-
-    // Flush any remaining characters
-    flushCharBuffer();
-
-    return result;
+    return events;
   }
 
   void _startResizeHandling() {
