@@ -429,29 +429,43 @@ class TerminalBinding extends NoctermBinding
     }
 
     final result = <InputEvent>[];
+    final charEvents = <KeyboardInputEvent>[];
     final charBuffer = StringBuffer();
 
     void flushCharBuffer() {
-      if (charBuffer.isNotEmpty) {
-        // Convert batched characters to a PasteInputEvent
+      if (charEvents.isEmpty) return;
+
+      if (charEvents.length == 1) {
+        // Keep single-character typing as a normal key event so app shortcuts
+        // (for example "q" to quit) still work in line-buffered environments.
+        result.add(charEvents.first);
+      } else {
+        // Convert multi-character bursts to paste for efficiency.
         result.add(PasteInputEvent(charBuffer.toString()));
-        charBuffer.clear();
       }
+
+      charEvents.clear();
+      charBuffer.clear();
     }
 
     for (final event in events) {
       if (event is KeyboardInputEvent) {
         final keyEvent = event.event;
-        // Check if this is a simple printable character (no modifiers except shift)
-        final isPrintable = keyEvent.character != null &&
-            keyEvent.character!.isNotEmpty &&
+        // Check if this is a simple printable character (no modifiers except shift).
+        // Excludes control chars like '\n' and '\r' to avoid converting
+        // single-key shortcuts followed by Enter (e.g. "q\n") into paste.
+        final character = keyEvent.character;
+        final isPrintable = character != null &&
+            character.isNotEmpty &&
+            character.runes.every((codeUnit) => codeUnit >= 0x20 && codeUnit != 0x7f) &&
             !keyEvent.isControlPressed &&
             !keyEvent.isAltPressed &&
             !keyEvent.isMetaPressed;
 
         if (isPrintable) {
           // Add to batch
-          charBuffer.write(keyEvent.character);
+          charEvents.add(event);
+          charBuffer.write(character);
         } else {
           // Non-printable key (arrow, enter, ctrl+x, etc.) - flush buffer first
           flushCharBuffer();

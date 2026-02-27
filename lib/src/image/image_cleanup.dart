@@ -51,6 +51,9 @@ class ImageCleanupManager {
   /// These are processed during the next frame.
   final List<ImageRegion> _pendingCleanups = [];
 
+  /// Whether any Kitty images were registered during this app session.
+  bool _hasKittyImages = false;
+
   /// Set the terminal writer callback.
   ///
   /// This should be called by the binding during initialization.
@@ -70,6 +73,10 @@ class ImageCleanupManager {
     required ImageProtocol protocol,
     int? kittyImageId,
   }) {
+    if (protocol == ImageProtocol.kitty && kittyImageId != null) {
+      _hasKittyImages = true;
+    }
+
     return ImageRegistration._(
       manager: this,
       region: ImageRegion(x: x, y: y, width: width, height: height),
@@ -108,10 +115,11 @@ class ImageCleanupManager {
   /// on the screen when the TUI exits.
   void clearAllImages() {
     final writer = _terminalWriter;
-    if (writer != null) {
+    if (writer != null && _hasKittyImages) {
       // Delete all Kitty images (no image ID = delete all)
       writer(KittyEncoder.delete());
     }
+    _hasKittyImages = false;
     // Clear any pending cleanups since we're shutting down
     _pendingCleanups.clear();
   }
