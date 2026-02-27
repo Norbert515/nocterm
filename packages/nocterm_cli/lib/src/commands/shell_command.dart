@@ -9,10 +9,10 @@ import 'package:nocterm_cli/utils/cli_command.dart';
 /// A broadcast stream of the stdin stream.
 // ignore: unnecessary_late
 late final Stream<List<int>> _stdinStream = stdin.asBroadcastStream();
-StreamSubscription? _clientSubscription;
 
 class ShellCommand extends CliCommand {
   ShellCommand();
+  StreamSubscription<Socket>? _serverSubscription;
 
   @override
   String get description => '''
@@ -55,21 +55,28 @@ This allows running nocterm apps from IDEs with debugger support.''';
       if (stdin.lineMode) stdin.lineMode = false;
     } catch (_) {}
 
-    _cleanUpOnQuit();
+    final stopCompleter = Completer<void>();
+    final disposeSignalHandling = _cleanUpOnQuit(server, stopCompleter);
 
     try {
-      _clientSubscription = server.listen((client) async {
+      _serverSubscription = server.listen((client) async {
         await _handleClient(client);
 
         // exit alternate screen
         stdout.write(EscapeCodes.mainBuffer);
-
-        // TODO(mrgnhnt): User is required to ctrl+c twice to exit the program.. why?
+      }, onError: (Object _, StackTrace __) {
+        if (!stopCompleter.isCompleted) {
+          stopCompleter.complete();
+        }
+      }, onDone: () {
+        if (!stopCompleter.isCompleted) {
+          stopCompleter.complete();
+        }
       });
 
-      await _clientSubscription?.asFuture();
+      await stopCompleter.future;
     } finally {
-      await server.close();
+      await disposeSignalHandling();
       if (await handleFile.exists()) {
         await handleFile.delete();
       }
@@ -81,14 +88,24 @@ This allows running nocterm apps from IDEs with debugger support.''';
     return 0;
   }
 
-  void _cleanUpOnQuit() {
+  Future<void> Function() _cleanUpOnQuit(
+    ServerSocket server,
+    Completer<void> stopCompleter,
+  ) {
     StreamSubscription? sigintSubscription;
     StreamSubscription? sigtermSubscription;
+    var cleaned = false;
 
-    void clean() {
-      _clientSubscription?.cancel();
-      sigintSubscription?.cancel();
-      sigtermSubscription?.cancel();
+    Future<void> clean() async {
+      if (cleaned) return;
+      cleaned = true;
+
+      if (!stopCompleter.isCompleted) {
+        stopCompleter.complete();
+      }
+
+      await _serverSubscription?.cancel();
+      await server.close();
 
       // IMPORTANT: Disable mouse tracking and bracketed paste BEFORE leaving alternate screen
       // This ensures the terminal properly processes the disable commands
@@ -107,14 +124,20 @@ This allows running nocterm apps from IDEs with debugger support.''';
 
     // Forward signals to child process
     sigintSubscription = ProcessSignal.sigint.watch().listen((_) {
-      clean();
+      unawaited(clean());
     });
 
     if (Platform.isMacOS || Platform.isLinux) {
       sigtermSubscription = ProcessSignal.sigterm.watch().listen((_) {
-        clean();
+        unawaited(clean());
       });
     }
+
+    return () async {
+      await sigintSubscription?.cancel();
+      await sigtermSubscription?.cancel();
+      await clean();
+    };
   }
 
   Future<void> _handleClient(Socket client) async {
