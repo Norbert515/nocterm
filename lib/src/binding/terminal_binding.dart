@@ -257,11 +257,19 @@ class TerminalBinding extends NoctermBinding
             continue; // Event was handled by debug system
           }
 
-          // Route the event through the component tree
-          _routeKeyboardEvent(keyEvent);
+          // Route the event through the component tree.
+          final handled = _routeKeyboardEvent(keyEvent);
 
-          // Note: Ctrl+C (SIGINT) is routed through the event system first,
-          // allowing components to intercept it. Falls back to shutdown if unhandled.
+          // Ctrl+C should always be able to terminate the app when unhandled.
+          // Some environments deliver it as a raw ETX character instead of
+          // a modifier-aware key event.
+          final isCtrlC = keyEvent.matches(LogicalKey.keyC, ctrl: true) ||
+              keyEvent.character == '\u0003';
+          if (!handled && isCtrlC) {
+            _performImmediateShutdown();
+            terminal.backend.requestExit(130);
+            return;
+          }
         } else if (event is MouseInputEvent) {
           final mouseEvent = event.event;
 
