@@ -4,6 +4,8 @@ class EscapeCodes {
   static const disable = _Disable._();
   static const enable = _Enable._();
 
+  static const softReset = '\x1b[!p';
+  static const hardReset = '\x1bc';
   static const resetDeviceAttributes = '\x1B[c';
   static const hideCursor = '\x1b[?25l';
   static const showCursor = '\x1b[?25h';
@@ -29,6 +31,9 @@ class _Disable {
   /// Reset xterm modifyOtherKeys mode to disabled.
   String get modifyOtherKeys => '\x1B[>4;0m';
 
+  /// Disable application cursor keys mode (DECCKM).
+  String get applicationCursorKeys => '\x1b[?1l';
+
   List<String> get values => [
         motionTracking,
         sgrMouseMode,
@@ -37,6 +42,7 @@ class _Disable {
         bracketedPasteMode,
         kittyKeyboard,
         modifyOtherKeys,
+        applicationCursorKeys,
       ];
 }
 
@@ -52,10 +58,13 @@ class _Enable {
   /// Push kitty keyboard mode with flags:
   /// - Bit 0 (1): Disambiguate escape codes
   /// This is sufficient for detecting Shift+Enter, Ctrl+Enter, etc.
-  String get kittyKeyboard => '\x1B[>1u';
+  String get kittyKeyboard => '\x1B[>1;1u';
 
   /// Enable xterm modifyOtherKeys mode (level 1).
   String get modifyOtherKeys => '\x1B[>4;1m';
+
+  /// Enable application cursor keys mode (DECCKM).
+  String get applicationCursorKeys => '\x1b[?1h';
 
   List<String> get values => [
         motionTracking,
@@ -65,5 +74,6 @@ class _Enable {
         bracketedPasteMode,
         kittyKeyboard,
         modifyOtherKeys,
+        applicationCursorKeys,
       ];
 }

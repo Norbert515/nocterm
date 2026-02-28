@@ -415,121 +415,45 @@ class InputParser {
       }
     }
 
-    // Modified arrow keys and other sequences (6 bytes: ESC [ 1 ; X Y)
-    if (_buffer.length >= 6) {
-      final sequence = String.fromCharCodes(_buffer);
-
-      // Shift+Arrow: ESC [ 1 ; 2 A/B/C/D
-      if (sequence.startsWith('\x1B[1;2')) {
-        switch (_buffer[5]) {
-          case 0x41:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowUp,
-                modifiers: const ModifierKeys(shift: true),
-              ),
-              6
-            );
-          case 0x42:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowDown,
-                modifiers: const ModifierKeys(shift: true),
-              ),
-              6
-            );
-          case 0x43:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowRight,
-                modifiers: const ModifierKeys(shift: true),
-              ),
-              6
-            );
-          case 0x44:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowLeft,
-                modifiers: const ModifierKeys(shift: true),
-              ),
-              6
-            );
+    // Modified arrow keys and other sequences: ESC [ 1 ; <modifier> <letter>
+    if (_buffer.length >= 6 && _buffer[2] == 0x31 && _buffer[3] == 0x3B) {
+      // Find the terminator (A, B, C, D, H, F)
+      int terminatorIndex = -1;
+      for (int i = 4; i < _buffer.length; i++) {
+        final byte = _buffer[i];
+        if (byte >= 0x41 && byte <= 0x5A) {
+          // A-Z
+          terminatorIndex = i;
+          break;
         }
       }
 
-      // Alt+Arrow: ESC [ 1 ; 3 A/B/C/D
-      if (sequence.startsWith('\x1B[1;3')) {
-        switch (_buffer[5]) {
-          case 0x41:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowUp,
-                modifiers: const ModifierKeys(alt: true),
-              ),
-              6
-            );
-          case 0x42:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowDown,
-                modifiers: const ModifierKeys(alt: true),
-              ),
-              6
-            );
-          case 0x43:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowRight,
-                modifiers: const ModifierKeys(alt: true),
-              ),
-              6
-            );
-          case 0x44:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowLeft,
-                modifiers: const ModifierKeys(alt: true),
-              ),
-              6
-            );
-        }
-      }
+      if (terminatorIndex != -1) {
+        final modifierStr =
+            String.fromCharCodes(_buffer.sublist(4, terminatorIndex));
+        final modifierValue = int.tryParse(modifierStr);
+        if (modifierValue != null) {
+          final modifiers = _decodeModifiers(modifierValue);
+          final terminator = _buffer[terminatorIndex];
+          LogicalKey? logicalKey = switch (terminator) {
+            0x41 => LogicalKey.arrowUp,
+            0x42 => LogicalKey.arrowDown,
+            0x43 => LogicalKey.arrowRight,
+            0x44 => LogicalKey.arrowLeft,
+            0x48 => LogicalKey.home,
+            0x46 => LogicalKey.end,
+            _ => null,
+          };
 
-      // Ctrl+Arrow: ESC [ 1 ; 5 A/B/C/D
-      if (sequence.startsWith('\x1B[1;5')) {
-        switch (_buffer[5]) {
-          case 0x41:
+          if (logicalKey != null) {
             return (
               KeyboardEvent(
-                logicalKey: LogicalKey.arrowUp,
-                modifiers: const ModifierKeys(ctrl: true),
+                logicalKey: logicalKey,
+                modifiers: modifiers,
               ),
-              6
+              terminatorIndex + 1
             );
-          case 0x42:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowDown,
-                modifiers: const ModifierKeys(ctrl: true),
-              ),
-              6
-            );
-          case 0x43:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowRight,
-                modifiers: const ModifierKeys(ctrl: true),
-              ),
-              6
-            );
-          case 0x44:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowLeft,
-                modifiers: const ModifierKeys(ctrl: true),
-              ),
-              6
-            );
+          }
         }
       }
     }
@@ -694,6 +618,54 @@ class InputParser {
 
     // F1-F4 use SS3 sequences (all are 3 bytes: ESC O X)
     switch (_buffer[2]) {
+      case 0x41: // ESC O A -> Up
+        return (
+          KeyboardEvent(
+            logicalKey: LogicalKey.arrowUp,
+            modifiers: const ModifierKeys(),
+          ),
+          3
+        );
+      case 0x42: // ESC O B -> Down
+        return (
+          KeyboardEvent(
+            logicalKey: LogicalKey.arrowDown,
+            modifiers: const ModifierKeys(),
+          ),
+          3
+        );
+      case 0x43: // ESC O C -> Right
+        return (
+          KeyboardEvent(
+            logicalKey: LogicalKey.arrowRight,
+            modifiers: const ModifierKeys(),
+          ),
+          3
+        );
+      case 0x44: // ESC O D -> Left
+        return (
+          KeyboardEvent(
+            logicalKey: LogicalKey.arrowLeft,
+            modifiers: const ModifierKeys(),
+          ),
+          3
+        );
+      case 0x48: // ESC O H -> Home
+        return (
+          KeyboardEvent(
+            logicalKey: LogicalKey.home,
+            modifiers: const ModifierKeys(),
+          ),
+          3
+        );
+      case 0x46: // ESC O F -> End
+        return (
+          KeyboardEvent(
+            logicalKey: LogicalKey.end,
+            modifiers: const ModifierKeys(),
+          ),
+          3
+        );
       case 0x50:
         return (
           KeyboardEvent(

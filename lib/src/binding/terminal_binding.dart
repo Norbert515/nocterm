@@ -183,6 +183,7 @@ class TerminalBinding extends NoctermBinding
     // We also enable modifyOtherKeys as a fallback for terminals like xterm.
     terminal.write(EscapeCodes.enable.kittyKeyboard);
     terminal.write(EscapeCodes.enable.modifyOtherKeys);
+    terminal.write(EscapeCodes.enable.applicationCursorKeys);
     terminal.flush();
 
     // Store initial size
@@ -258,10 +259,21 @@ class TerminalBinding extends NoctermBinding
           }
 
           // Route the event through the component tree
-          _routeKeyboardEvent(keyEvent);
+          final handled = _routeKeyboardEvent(keyEvent);
 
           // Note: Ctrl+C (SIGINT) is routed through the event system first,
           // allowing components to intercept it. Falls back to shutdown if unhandled.
+          if (!handled) {
+            final isCtrlC = keyEvent.logicalKey == LogicalKey.keyC &&
+                keyEvent.isControlPressed;
+            final isEsc = keyEvent.logicalKey == LogicalKey.escape;
+            final isQ = keyEvent.character == 'q' || keyEvent.character == 'Q';
+
+            if (isCtrlC || isEsc || isQ) {
+              _performImmediateShutdown();
+              terminal.backend.requestExit(0);
+            }
+          }
         } else if (event is MouseInputEvent) {
           final mouseEvent = event.event;
 
@@ -564,6 +576,7 @@ class TerminalBinding extends NoctermBinding
       // Pop kitty keyboard mode and reset modifyOtherKeys
       terminal.backend.writeRaw(EscapeCodes.disable.kittyKeyboard);
       terminal.backend.writeRaw(EscapeCodes.disable.modifyOtherKeys);
+      terminal.backend.writeRaw(EscapeCodes.disable.applicationCursorKeys);
       terminal.restoreColors(); // Restore terminal colors
       terminal.flush();
 
@@ -847,6 +860,10 @@ class TerminalBinding extends NoctermBinding
       // Pop kitty keyboard mode and reset modifyOtherKeys
       terminal.backend.writeRaw(EscapeCodes.disable.kittyKeyboard);
       terminal.backend.writeRaw(EscapeCodes.disable.modifyOtherKeys);
+      terminal.backend.writeRaw(EscapeCodes.disable.applicationCursorKeys);
+
+      // Restore terminal colors to defaults
+      terminal.restoreColors();
 
       // Restore terminal (this includes leaving alternate screen)
       terminal.showCursor();
@@ -859,10 +876,10 @@ class TerminalBinding extends NoctermBinding
       terminal.backend.writeRaw(EscapeCodes.disable.buttonEventTracking);
       terminal.backend.writeRaw(EscapeCodes.disable.basicMouseTracking);
 
-      // Send a terminal reset sequence as a final safety measure
-      // This helps ensure the terminal is in a clean state
-      terminal.backend.writeRaw(EscapeCodes.resetDeviceAttributes);
+      // Send a soft terminal reset as a final safety measure
+      terminal.backend.writeRaw(EscapeCodes.softReset);
 
+      terminal.backend.writeRaw('\x1b[0m'); // Reset all SGR attributes
       terminal.clear();
 
       // Final flush to ensure all cleanup is complete

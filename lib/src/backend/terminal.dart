@@ -175,8 +175,10 @@ class Terminal {
 
   /// Restore terminal colors to defaults
   void restoreColors() {
-    backend.writeRaw('\x1b]110'); // foreground
-    backend.writeRaw('\x1b]111'); // background
+    backend.writeRaw('\x1b]10;\x07'); // foreground reset (empty spec)
+    backend.writeRaw('\x1b]11;\x07'); // background reset (empty spec)
+    backend.writeRaw('\x1b]110\x07'); // foreground reset (OSC 110)
+    backend.writeRaw('\x1b]111\x07'); // background reset (OSC 111)
   }
 
   void reset() {

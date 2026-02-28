@@ -38,6 +38,7 @@ export 'src/framework/axis.dart';
 
 export 'src/components/spacer.dart';
 export 'src/components/divider.dart';
+export 'src/components/tab.dart';
 export 'src/process/pty_controller.dart';
 export 'src/components/stack.dart';
 export 'src/components/render_stack.dart' show Stack;
