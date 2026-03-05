@@ -28,7 +28,7 @@ resources:
     description: Debug clipboard behavior
   - name: Cpu usage test
     path: ../../example/cpu_usage_test.dart
-    description: Test app to measure CPU usage from different sources:
+    description: Test app to measure CPU usage from different sources
   - name: Cursor styles
     path: ../../example/text_field/cursor_styles_demo.dart
     description: Cursor styles example.
