@@ -102,6 +102,7 @@ See the [full documentation](https://docs.nocterm.dev) for guides on components,
 | [cow](https://github.com/jolexxa/cow) | Local LLM chat client powered by llama.cpp |
 | [snake](https://github.com/mrgnhnt96/snake) | Classic Snake for the command line |
 | [minesweeper](https://github.com/mrgnhnt96/minesweeper) | Classic Minesweeper for the command line |
+| [simutil](https://github.com/dungngminh/simutil) | Quick launch iOS simulators / Android emulators and more |
 
 > Built something with Nocterm? [Open an issue](https://github.com/norbert515/nocterm/issues) to get it listed here!
 
