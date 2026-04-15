@@ -1,6 +1,7 @@
 library;
 
 import 'dart:math' as math;
+
 import 'package:characters/characters.dart';
 import 'package:nocterm/src/rectangle.dart';
 
@@ -15,6 +16,21 @@ class TerminalCanvas {
 
   final Buffer _buffer;
   final Rect area;
+
+  /// Set a cell directly at the given position without any text
+  /// layout, width measurement, or style blending.
+  ///
+  /// Use this when you already have a pre-laid-out cell grid
+  /// and want cell-perfect placement without nocterm re-interpreting
+  /// character widths.
+  ///
+  /// [x] and [y] are in local coordinates (relative to this
+  /// canvas's area). Out-of-bounds writes are silently ignored.
+  void setRaw(int x, int y, Cell cell) {
+    final cellX = area.left.round() + x;
+    final cellY = area.top.round() + y;
+    _buffer.setCell(cellX, cellY, cell);
+  }
 
   /// Blends a style with the background color from the existing cell if needed.
   ///

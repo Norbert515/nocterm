@@ -39,6 +39,9 @@ class NoctermTestBinding extends NoctermBinding with SchedulerBinding {
   /// Stream controller for simulating keyboard events
   final _testKeyboardController = StreamController<KeyboardEvent>.broadcast();
 
+  /// Queue of pending raw input byte batches to be dispatched.
+  final _pendingRawInputs = <List<int>>[];
+
   /// Queue of pending keyboard events to be processed
   final _pendingKeyboardEvents = <KeyboardEvent>[];
 
@@ -56,6 +59,12 @@ class NoctermTestBinding extends NoctermBinding with SchedulerBinding {
   Future<void> pump([Duration? duration]) async {
     if (duration != null) {
       await Future.delayed(duration);
+    }
+
+    // Process any pending raw input batches.
+    while (_pendingRawInputs.isNotEmpty) {
+      final bytes = _pendingRawInputs.removeAt(0);
+      _dispatchRawInput(bytes);
     }
 
     // Process any pending keyboard events
@@ -101,6 +110,13 @@ class NoctermTestBinding extends NoctermBinding with SchedulerBinding {
         'The component tree may be continuously scheduling frames.',
       );
     }
+  }
+
+  /// Simulate raw stdin bytes. Dispatched to [InputListenerElement]s
+  /// during [pump]. Unconsumed bytes are dropped (use
+  /// [sendKeyboardEvent] for parsed event testing).
+  void sendRawInput(List<int> bytes) {
+    _pendingRawInputs.add(bytes);
   }
 
   /// Simulate keyboard input
@@ -257,6 +273,28 @@ class NoctermTestBinding extends NoctermBinding with SchedulerBinding {
   }
 
   /// Dispatch a keyboard event to an element and its children
+  bool _dispatchRawInput(List<int> bytes) {
+    if (rootElement == null) return false;
+    return _findAndCallInputListener(rootElement!, bytes);
+  }
+
+  bool _findAndCallInputListener(Element element, List<int> bytes) {
+    if (element is BlockFocusElement && element.isBlocking) {
+      return true;
+    }
+
+    bool handled = false;
+    element.visitChildren((child) {
+      if (!handled) {
+        handled = _findAndCallInputListener(child, bytes);
+      }
+    });
+    if (!handled && element is InputListenerElement) {
+      handled = element.handleRawInput(bytes);
+    }
+    return handled;
+  }
+
   bool _dispatchKeyToElement(Element element, KeyboardEvent event) {
     // Check if this element is a BlockFocus that's blocking
     // Import BlockFocusElement dynamically to avoid circular dependencies
