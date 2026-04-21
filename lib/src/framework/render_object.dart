@@ -376,19 +376,14 @@ abstract class RenderObject {
     _lastError = null;
     _lastStackTrace = null;
 
-    // We can skip layout if:
-    // 1. This render object doesn't need layout (_needsLayout is false)
-    // 2. The constraints are IDENTICAL (same object instance, not just equal values)
-    //
-    // Note: We intentionally use `identical()` instead of `==` here.
-    // Using value equality (==) was causing layout bugs in complex component trees
-    // (e.g., vide_cli's tool renderers) where children would skip relayout when
-    // their content changed but constraints remained the same by value.
-    // The identical() check is more conservative and only skips when we're truly
-    // being called with the exact same constraints object.
-    if (!_needsLayout && identical(constraints, _constraints)) return;
+    // Skip layout when we're not dirty and constraints haven't changed.
+    // Elements that mutate layout-relevant state (LayoutBuilder's builder,
+    // ListView's itemBuilder, ParentDataElement's parentData, etc.) must
+    // call markNeedsLayout explicitly - do NOT swap this back to
+    // `identical()` to compensate for a missing mark elsewhere.
+    if (!_needsLayout && constraints == _constraints) return;
 
-    final constraintsChanged = !identical(constraints, _constraints);
+    final constraintsChanged = constraints != _constraints;
     _constraints = constraints;
     if (_needsLayout || _size == null || constraintsChanged) {
       // Set _needsLayout = false BEFORE calling performLayout so that
