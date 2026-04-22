@@ -346,10 +346,13 @@ class _ListViewportElement extends RenderObjectElement {
 
   @override
   void update(Component newComponent) {
+    final oldViewport = component;
     super.update(newComponent);
 
-    // Remove cached children that are beyond the new item count
-    final newItemCount = (newComponent as _ListViewport).itemCount;
+    final newViewport = newComponent as _ListViewport;
+
+    // Remove cached children that are beyond the new item count.
+    final newItemCount = newViewport.itemCount;
     if (newItemCount != null) {
       _children.removeWhere((index, _) => index >= 0 && index >= newItemCount);
     }
@@ -358,11 +361,13 @@ class _ListViewportElement extends RenderObjectElement {
     // This is necessary when parent state changes (e.g., selection index)
     _needsChildUpdate = true;
     _updatedThisLayout.clear();
-    // NOTE: We do NOT call markNeedsLayout() here because:
-    // 1. If layout is needed, it will be triggered by constraint changes
-    // 2. Calling it unconditionally causes infinite frame loops when parent
-    //    rebuilds frequently (e.g., due to ValueListenableBuilder)
-    // 3. The _needsChildUpdate flag ensures children get updated on next layout
+
+    final layoutAffectingChanged = oldViewport.itemCount != newItemCount ||
+        !identical(oldViewport.itemBuilder, newViewport.itemBuilder) ||
+        !identical(oldViewport.separatorBuilder, newViewport.separatorBuilder);
+    if (layoutAffectingChanged) {
+      renderObject.markNeedsLayout();
+    }
   }
 
   /// Called by RenderListViewport after layout completes to reset update flags.
