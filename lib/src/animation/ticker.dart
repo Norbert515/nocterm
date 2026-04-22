@@ -197,6 +197,10 @@ class Ticker {
   void _scheduleTick({bool rescheduling = false}) {
     assert(!muted);
     assert(shouldScheduleTick);
+    assert(
+      _animationId == null,
+      'Ticker is already scheduled (id=$_animationId); rescheduling would orphan the prior callback.',
+    );
     // Match Flutter's pattern: call scheduleFrame() first, then register
     // the callback with scheduleNewFrame: false to avoid redundant scheduling.
     SchedulerBinding.instance.scheduleFrame();
@@ -224,7 +228,11 @@ class Ticker {
 
     _onTick(timeStamp - _startTime!);
 
-    if (shouldScheduleTick) {
+    // _onTick may have stopped and restarted this ticker
+    // (fx. an AnimationController status listener calling forward()),
+    // in which case _scheduleTick has already run and `_animationId != null`.
+    // Rescheduling here would overwrite that id and orphan the registered callback.
+    if (_animationId == null && shouldScheduleTick) {
       _scheduleTick(rescheduling: true);
     }
   }
