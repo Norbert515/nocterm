@@ -98,8 +98,9 @@ class ParentDataElement<T extends ParentData> extends ProxyElement {
           }
         }
 
-        // Default: Apply parent data to the render object
+        // May impact parent layout (FlexParentData.flex, etc.)
         renderObject.parentData = newData;
+        renderObject.parent?.markNeedsLayout();
       } else {
         // Recursively apply to children if this isn't a render object element
         child.visitChildren(applyParentDataToChild);
