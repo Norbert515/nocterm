@@ -300,8 +300,11 @@ abstract class RenderObject {
     _size = value;
   }
 
-  bool _needsLayout = true;
-  bool _needsPaint = true;
+  // Flags start false so the first mark still apply in markNeedsLayout / markNeedsPaint.
+  // Initial layout/paint is still guaranteed because `layout()` falls through when `_size == null`,
+  // and `paintWithContext` forces a paint when `_cachedBuffer == null`.
+  bool _needsLayout = false;
+  bool _needsPaint = false;
   bool _hasLayoutError = false;
 
   /// Whether this render object needs layout.
@@ -323,11 +326,15 @@ abstract class RenderObject {
   /// Mark this render object as needing layout.
   ///
   /// This will cause [performLayout] to be called during the next layout pass.
-  /// The layout mark is propagated up the tree to ensure ancestors also re-layout.
+  /// The mark propagates up the tree the first time it's set; subsequent calls short-circuit.
+  //
+  /// Frame-skip in the scheduler can retire `_hasScheduledFrame` between calls,
+  /// so we always need to prod the owner.
   void markNeedsLayout() {
-    // Always set the flag and call markNeedsPaint() to ensure requestVisualUpdate()
-    // is called, even if the flag was already set. This prevents rendering from
-    // permanently stopping when the frame-skip optimization is active.
+    if (_needsLayout) {
+      owner?.requestVisualUpdate();
+      return;
+    }
     _needsLayout = true;
     markNeedsPaint();
     parent?.markNeedsLayout();
@@ -336,11 +343,14 @@ abstract class RenderObject {
   /// Mark this render object as needing to be repainted.
   ///
   /// This will cause [paint] to be called during the next paint pass.
-  /// The paint request will propagate up to the root, which will trigger
-  /// a frame to be scheduled.
+  /// The paint request will propagate up to the nearest repaint boundary on first mark.
+  /// Subsequent calls while already dirty short-circuit after re-requesting a visual update
+  /// (same frame-skip concern as [markNeedsLayout]).
   void markNeedsPaint() {
-    // Always set the flag (don't early return if already dirty)
-    // We still need to propagate to ensure requestVisualUpdate() is called
+    if (_needsPaint) {
+      owner?.requestVisualUpdate();
+      return;
+    }
     _needsPaint = true;
 
     if (parent != null) {
