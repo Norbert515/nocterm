@@ -544,6 +544,10 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
         _selectionRangeFor = selectionRangeFor {
     _controller.addListener(_handleScrollUpdate);
     _controller.attach(this);
+    // Selection drag state is a global, so we subscribe explicitly -
+    // changes there affect whether performLayout force-builds the selection
+    // range but wouldn't otherwise propagate through the normal dirty path.
+    SelectionDragState.addListener(markNeedsLayout);
   }
 
   _ListViewportElement? _element;
@@ -703,6 +707,7 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
   void dispose() {
     _controller.removeListener(_handleScrollUpdate);
     _controller.detach(this);
+    SelectionDragState.removeListener(markNeedsLayout);
     super.dispose();
   }
 
