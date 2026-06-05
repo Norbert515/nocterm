@@ -60,24 +60,55 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
   Future<void> _eventLoop() async {
     final pInputRecord = calloc<_InputRecord>();
     final pEventsRead = calloc<Uint32>();
+    final pEventCount = calloc<Uint32>();
+    final stopwatch = Stopwatch()..start();
+    // Game-loop pacing: the "frame" is the drain pass below. We sleep
+    // only for the time remaining in the 16ms budget, not a fixed wait
+    // on top of the work. A slow pass (e.g. a big framework redraw, or
+    // a burst of console events to translate) just skips the sleep and
+    // runs the next pass immediately, so we never double-charge the
+    // wait and the input loop stays responsive even when work outpaces
+    // the frame budget.
+    const frameBudget = Duration(milliseconds: 16);
 
     try {
       while (_running) {
-        // Yield to Dart event loop
-        await Future.delayed(Duration.zero);
+        final deadlineUs =
+            stopwatch.elapsedMicroseconds + frameBudget.inMicroseconds;
+
+        // Drain the console input queue. GetNumberOfConsoleInputEvents
+        // is non-blocking, so the subsequent ReadConsoleInputW returns
+        // immediately and the isolate is never blocked waiting for
+        // input.
+        while (_running &&
+            _getNumberOfConsoleInputEvents(_inputHandle, pEventCount) != 0 &&
+            pEventCount.value > 0) {
+          final result =
+              _readConsoleInputW(_inputHandle, pInputRecord, 1, pEventsRead);
+          if (result != 0 && pEventsRead.value > 0) {
+            _translateAndFire(pInputRecord.ref);
+          } else {
+            break;
+          }
+        }
 
         if (!_running) break;
 
-        // Read one input event
-        final result =
-            _readConsoleInputW(_inputHandle, pInputRecord, 1, pEventsRead);
-        if (result != 0 && pEventsRead.value > 0) {
-          _translateAndFire(pInputRecord.ref);
+        // Sleep until the deadline. If the drain already blew past it,
+        // just yield once (a microtask hop) so we don't burn CPU
+        // catching up - the next pass runs as fast as the workload
+        // allows.
+        final remainingUs = deadlineUs - stopwatch.elapsedMicroseconds;
+        if (remainingUs > 0) {
+          await Future.delayed(Duration(microseconds: remainingUs));
+        } else {
+          await Future<void>.delayed(Duration.zero);
         }
       }
     } finally {
       calloc.free(pInputRecord);
       calloc.free(pEventsRead);
+      calloc.free(pEventCount);
     }
   }
 
@@ -510,3 +541,12 @@ final _setConsoleMode =
 final _readConsoleInputW =
     _kernel32.lookupFunction<_ReadConsoleInputNative, _ReadConsoleInputDart>(
         'ReadConsoleInputW');
+
+typedef _GetNumberOfConsoleInputEventsNative = Int32 Function(
+    IntPtr hConsoleInput, Pointer<Uint32> lpNumberOfEvents);
+typedef _GetNumberOfConsoleInputEventsDart = int Function(
+    int hConsoleInput, Pointer<Uint32> lpNumberOfEvents);
+
+final _getNumberOfConsoleInputEvents = _kernel32.lookupFunction<
+    _GetNumberOfConsoleInputEventsNative,
+    _GetNumberOfConsoleInputEventsDart>('GetNumberOfConsoleInputEvents');
