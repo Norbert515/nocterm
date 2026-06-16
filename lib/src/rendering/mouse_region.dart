@@ -97,7 +97,7 @@ class RenderMouseRegion extends RenderObject
   @override
   void performLayout() {
     if (child != null) {
-      child!.layout(constraints, parentUsesSize: true);
+      child!.layout(constraints, parentUsesSize: !constraints.isTight);
       size = child!.size;
     } else {
       size = constraints.constrain(Size.zero);

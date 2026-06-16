@@ -210,7 +210,10 @@ class RenderStack extends RenderObject
 
       if (!childParentData.isPositioned) {
         hasNonPositionedChildren = true;
-        child.layout(nonPositionedConstraints, parentUsesSize: true);
+        child.layout(
+          nonPositionedConstraints,
+          parentUsesSize: fit != stack_lib.StackFit.expand,
+        );
 
         final Size childSize = child.size;
         width = math.max(width, childSize.width);

@@ -425,8 +425,15 @@ class RenderDecoratedBox extends RenderObject
   BoxDecoration get decoration => _decoration;
   set decoration(BoxDecoration value) {
     if (_decoration != value) {
+      final oldInset = _borderInsetFor(_decoration);
+      final newInset = _borderInsetFor(value);
+      final affectsLayout = oldInset != newInset;
       _decoration = value;
-      markNeedsLayout();
+      if (affectsLayout) {
+        markNeedsLayout();
+      } else {
+        markNeedsPaint();
+      }
     }
   }
 
@@ -448,13 +455,7 @@ class RenderDecoratedBox extends RenderObject
 
   @override
   void performLayout() {
-    // Calculate border insets
-    double borderInset = 0;
-    if (_decoration.border != null && !_decoration.border!.hasNoBorder) {
-      // In terminal, we can only draw 1-character wide borders
-      // So we treat any border as taking up 1 unit of space
-      borderInset = 1;
-    }
+    final borderInset = _borderInsetFor(_decoration);
 
     if (child != null) {
       // Deflate constraints by border width
@@ -478,6 +479,15 @@ class RenderDecoratedBox extends RenderObject
       // No child, just be the size of the border
       size = constraints.constrain(Size(2 * borderInset, 2 * borderInset));
     }
+  }
+
+  double _borderInsetFor(BoxDecoration decoration) {
+    if (decoration.border != null && !decoration.border!.hasNoBorder) {
+      // In terminal, we can only draw 1-character wide borders, so any
+      // visible border reserves one cell regardless of color or style.
+      return 1;
+    }
+    return 0;
   }
 
   void _paintDecoration(TerminalCanvas canvas, Offset offset) {

@@ -26,7 +26,24 @@ class RenderText extends RenderObject with Selectable {
   String get text => _text;
   set text(String value) {
     if (_text == value) return;
+    final oldSize = hasSize ? size : null;
+    final oldConstraints = hasSize ? constraints : null;
+    final hadLayout = _layoutResult != null;
     _text = value;
+
+    if (hadLayout && oldSize != null && oldConstraints != null) {
+      final newLayout = _layoutText(oldConstraints);
+      final newSize = oldConstraints.constrain(Size(
+        newLayout.actualWidth.toDouble(),
+        newLayout.actualHeight.toDouble(),
+      ));
+      if (newSize == oldSize) {
+        _layoutResult = newLayout;
+        markNeedsPaint();
+        return;
+      }
+    }
+
     markNeedsLayout();
   }
 
@@ -81,26 +98,26 @@ class RenderText extends RenderObject with Selectable {
   @override
   bool hitTestSelf(Offset position) => true;
 
-  @override
-  void performLayout() {
-    // For text alignment to work properly, we need to use the actual constraint width
-    // When in a Column without stretch, we get infinite width, so we use intrinsic width
+  TextLayoutConfig _layoutConfigFor(BoxConstraints constraints) {
     final maxWidth = constraints.maxWidth.isFinite
         ? constraints.maxWidth.toInt()
         : double.maxFinite.toInt();
 
-    // Debug: print constraint info
-    // print('RenderText layout: text="$_text", constraints=$constraints, maxWidth=$maxWidth');
-
-    final config = TextLayoutConfig(
+    return TextLayoutConfig(
       softWrap: _softWrap,
       overflow: _overflow,
       textAlign: _textAlign,
       maxLines: _maxLines,
       maxWidth: maxWidth,
     );
+  }
 
-    _layoutResult = TextLayoutEngine.layout(_text, config);
+  TextLayoutResult _layoutText(BoxConstraints constraints) =>
+      TextLayoutEngine.layout(_text, _layoutConfigFor(constraints));
+
+  @override
+  void performLayout() {
+    _layoutResult = _layoutText(constraints);
 
     size = constraints.constrain(Size(
       _layoutResult!.actualWidth.toDouble(),

@@ -225,7 +225,7 @@ class RenderScrollbar extends RenderObject
       maxHeight: constraints.maxHeight,
     );
 
-    child!.layout(childConstraints, parentUsesSize: true);
+    child!.layout(childConstraints, parentUsesSize: !constraints.isTight);
 
     // Our size includes the scrollbar
     size = constraints.constrain(Size(

@@ -185,7 +185,7 @@ class RenderLayoutBuilder extends RenderObject
     }
 
     if (child != null) {
-      child!.layout(constraints, parentUsesSize: true);
+      child!.layout(constraints, parentUsesSize: !constraints.isTight);
       final childParentData = child!.parentData as BoxParentData;
       childParentData.offset = Offset.zero;
       size = constraints.constrain(child!.size);

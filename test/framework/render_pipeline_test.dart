@@ -1362,7 +1362,7 @@ class _TrackingRenderBox extends RenderObject
   void performLayout() {
     onPerformLayout?.call();
     if (child != null) {
-      child!.layout(constraints);
+      child!.layout(constraints, parentUsesSize: true);
       size = child!.size;
     } else {
       size = constraints.constrain(const Size(10, 1));
