@@ -1,5 +1,6 @@
 import 'package:nocterm/nocterm.dart' hide TextAlign;
 import 'package:nocterm/src/components/decorated_box.dart';
+import 'package:nocterm/src/components/render_paragraph.dart';
 import 'package:nocterm/src/components/render_text.dart';
 import 'package:test/test.dart';
 
