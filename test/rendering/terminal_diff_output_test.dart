@@ -104,9 +104,6 @@ class _CapturingBackend implements TerminalBackend {
   Stream<void>? get shutdownStream => null;
 
   @override
-  Stream<void>? get resumeStream => null;
-
-  @override
   void enableRawMode() {}
 
   @override

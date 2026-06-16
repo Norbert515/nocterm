@@ -880,33 +880,7 @@ class TerminalBinding extends NoctermBinding
   @override
   void scheduleFrameImpl() {
     // Override scheduler's frame implementation to also wake the event loop.
-    // Uses pendingFrameTimer from SchedulerBinding for rate limiting.
-
-    // Don't schedule if a timer is already pending
-    if (pendingFrameTimer != null && pendingFrameTimer!.isActive) {
-      return;
-    }
-
-    if (enableFrameRateLimiting && lastFrameTime != null) {
-      final now = DateTime.now();
-      final elapsed = now.difference(lastFrameTime!);
-
-      if (elapsed < targetFrameDuration) {
-        // Too soon, delay the frame
-        final delay = targetFrameDuration - elapsed;
-        pendingFrameTimer = Timer(delay, () {
-          pendingFrameTimer = null;
-          _executeFrameAndWakeEventLoop();
-        });
-        return;
-      }
-    }
-
-    // Execute frame immediately (but still async to allow event loop to process)
-    pendingFrameTimer = Timer(Duration.zero, () {
-      pendingFrameTimer = null;
-      _executeFrameAndWakeEventLoop();
-    });
+    scheduleFrameTimer(_executeFrameAndWakeEventLoop);
   }
 
   /// Executes frame and wakes the event loop.
