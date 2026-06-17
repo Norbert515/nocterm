@@ -1,5 +1,6 @@
 import 'package:nocterm/nocterm.dart';
 import 'package:nocterm/src/components/render_text.dart';
+import 'package:nocterm/src/rendering/mouse_region.dart';
 import 'package:test/test.dart';
 
 /// Tests for the layout invalidation optimization introduced in 2450c6d
@@ -20,7 +21,9 @@ import 'package:test/test.dart';
 /// streaming ContextBar and MetricsDisplay) keeps working correctly.
 void main() {
   group('relayout boundaries', () {
-    test('child with parentUsesSize=false relayouts alone, parent is not relaid out', () {
+    test(
+        'child with parentUsesSize=false relayouts alone, parent is not relaid out',
+        () {
       final owner = PipelineOwner();
       final parent = _SizeIgnoringParent();
       final child = _CountingBox();
@@ -37,8 +40,7 @@ void main() {
       child.markNeedsLayout();
       owner.flushLayout();
 
-      expect(child.layoutCount, 1,
-          reason: 'child should re-layout by itself');
+      expect(child.layoutCount, 1, reason: 'child should re-layout by itself');
       expect(parent.layoutCount, 0,
           reason: 'parent that ignores child size must NOT be '
               're-laid out — it is a relayout boundary');
@@ -168,7 +170,8 @@ void main() {
           reason: 'style change must trigger repaint');
     });
 
-    test('text change propagates paint to root even across relayout boundary', () {
+    test('text change propagates paint to root even across relayout boundary',
+        () {
       // Even when text is inside a relayout boundary
       // (parentUsesSize=false), paint invalidation must reach the root,
       // otherwise the change is invisible. The streaming ContextBar
@@ -271,7 +274,9 @@ void main() {
               'streaming widgets (ContextBar, MetricsDisplay) tick');
     });
 
-    test('RenderLayoutBuilder child dirty marks propagate up under TIGHT constraints', () {
+    test(
+        'RenderLayoutBuilder child dirty marks propagate up under TIGHT constraints',
+        () {
       // This is the regression test for the exact bug we hit in the
       // chat toolbar: under tight constraints (which is what the chat
       // panel Column passes when the screen is fully sized), the
@@ -296,6 +301,30 @@ void main() {
           reason: 'LayoutBuilder must cascade dirty marks from its '
               'child under tight constraints — otherwise the chat '
               'toolbar\'s streaming widgets go stale');
+    });
+  });
+
+  group('mouse hit-test wrappers', () {
+    test('RenderMouseRegion cascades child dirty marks under tight constraints',
+        () {
+      // RenderMouseRegion uses child.size as its own size. If its child
+      // changes layout after a terminal resize, the mouse region must relayout
+      // too so hover/click hit-test bounds stay in sync.
+      final owner = PipelineOwner();
+      final mouseRegion = RenderMouseRegion(onHover: (_) {});
+      final child = _CountingBox();
+      mouseRegion.child = child;
+      mouseRegion.attach(owner);
+
+      mouseRegion.layout(BoxConstraints.tight(const Size(20, 3)));
+      expect(mouseRegion.needsLayout, isFalse);
+
+      child.markNeedsLayout();
+
+      expect(mouseRegion.needsLayout, isTrue,
+          reason: 'MouseRegion size and hit-test bounds come from child.size, '
+              'so child layout dirtiness must cascade even when constraints '
+              'are tight.');
     });
   });
 

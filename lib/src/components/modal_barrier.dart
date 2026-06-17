@@ -86,7 +86,7 @@ class RenderTint extends RenderObject
   @override
   void performLayout() {
     if (child != null) {
-      child!.layout(constraints, parentUsesSize: !constraints.isTight);
+      child!.layout(constraints, parentUsesSize: true);
       final BoxParentData childParentData = child!.parentData as BoxParentData;
       childParentData.offset = Offset.zero;
       size = child!.size;
@@ -426,7 +426,7 @@ class RenderColoredBox extends RenderObject
   @override
   void performLayout() {
     if (child != null) {
-      child!.layout(constraints, parentUsesSize: !constraints.isTight);
+      child!.layout(constraints, parentUsesSize: true);
       final BoxParentData childParentData = child!.parentData as BoxParentData;
       childParentData.offset = Offset.zero;
       size = child!.size;
