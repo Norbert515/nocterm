@@ -53,12 +53,10 @@ class MouseTracker {
   final Set<MouseButton> _pressedButtons = {};
 
   /// Update the hovered annotations based on hit test results and dispatch events.
-  void updateAnnotations(
-    MouseHitTestResult hitTestResult,
-    MouseEvent event,
-  ) {
+  void updateAnnotations(MouseHitTestResult hitTestResult, MouseEvent event) {
     _updatePressedButtons(event);
     final effectiveEvent = _eventWithButtons(event);
+    _hoveredAnnotations.removeWhere((a) => !a.validForMouseTracker);
 
     // Collect all annotations from the hit test result
     final Set<MouseTrackerAnnotation> newAnnotations = {};
@@ -97,7 +95,9 @@ class MouseTracker {
 
     // Update the set of hovered annotations
     _hoveredAnnotations.clear();
-    _hoveredAnnotations.addAll(newAnnotations);
+    _hoveredAnnotations.addAll(
+      newAnnotations.where((a) => a.validForMouseTracker),
+    );
   }
 
   /// Clear all hovered annotations (e.g., when mouse leaves the terminal).
@@ -109,14 +109,13 @@ class MouseTracker {
     _pressedButtons.clear();
   }
 
-  /// Track pressed buttons from non-motion press/release events.
+  /// Track pressed buttons from press/release events.
   void _updatePressedButtons(MouseEvent event) {
-    // Ignore wheel and motion-only events
+    // Ignore wheel events; they do not change button state.
     if (event.button == MouseButton.wheelUp ||
         event.button == MouseButton.wheelDown) {
       return;
     }
-    if (event.isMotion) return;
 
     if (event.pressed) {
       _pressedButtons.add(event.button);
