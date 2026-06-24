@@ -5,7 +5,8 @@ import 'render_text.dart' show TextAlign;
 
 // Re-export for convenience
 export 'ascii_font.dart' show AsciiFont, AsciiGlyph;
-export 'render_ascii_text.dart' show AsciiLayoutConfig, AsciiLayoutResult;
+export 'render_ascii_text.dart'
+    show AsciiLayoutConfig, AsciiLayoutResult, AsciiLayoutEngine;
 
 /// A component that displays text as ASCII art using customizable fonts.
 ///

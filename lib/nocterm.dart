@@ -35,6 +35,7 @@ export 'src/components/terminal_xterm.dart';
 export 'nocterm_test.dart';
 export 'src/framework/framework.dart';
 export 'src/framework/axis.dart';
+export 'src/framework/terminal_canvas.dart' show TerminalCanvas, BorderStyle;
 
 export 'src/components/spacer.dart';
 export 'src/components/divider.dart';
