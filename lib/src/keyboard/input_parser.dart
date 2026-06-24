@@ -795,41 +795,36 @@ class InputParser {
   /// Parse kitty keyboard protocol sequence: CSI codepoint ; modifier u
   /// Supports `:` sub-parameters per the kitty spec (e.g. \x1b[13:10;2u).
   /// Example: \x1b[13;2u = Enter with Shift
+  ///
+  /// Also supports the 4-part form `CSI codepoint ; modifier ;
+  /// base_layout ; associated_text u` used by terminals to surface
+  /// IME-committed text. The associated text is percent-encoded
+  /// UTF-8 (so "你好" arrives as "%E4%BD%A0%E5%A5%BD").
   (KeyboardEvent, int)? _parseKittySequence() {
-    // Find 'u' terminator (0x75)
-    // Valid parameter bytes: digits (0x30-0x39), ';' (0x3B), ':' (0x3A)
-    int uIndex = -1;
-    for (int i = 2; i < _buffer.length; i++) {
-      if (_buffer[i] == 0x75) {
-        // 'u'
-        uIndex = i;
+    // Scan backward for the 'u' terminator and pick the last one
+    // that yields a well-formed 1–4 part sequence. The backward
+    // scan is needed because the associated text can contain a
+    // raw 'u' (it's unreserved in URL percent-encoding, so
+    // terminals don't encode it).
+    int? terminatorIndex;
+    for (int i = _buffer.length - 1; i >= 2; i--) {
+      if (_buffer[i] != 0x75) continue;
+      final parts =
+          String.fromCharCodes(_buffer.sublist(2, i)).split(';');
+      if (_isValidKittyParts(parts)) {
+        terminatorIndex = i;
         break;
       }
-      // If we hit a non-parameter byte that isn't 'u', this isn't a kitty sequence
-      if (_buffer[i] != 0x3B && // ';'
-          _buffer[i] != 0x3A && // ':' (sub-parameter separator)
-          !(_buffer[i] >= 0x30 && _buffer[i] <= 0x39)) {
-        // not a digit
-        return null;
-      }
     }
+    if (terminatorIndex == null) return null;
 
-    if (uIndex == -1) return null; // No 'u' terminator found yet
+    final parts =
+        String.fromCharCodes(_buffer.sublist(2, terminatorIndex)).split(';');
 
-    // Extract the parameter string between '[' and 'u'
-    final paramStr = String.fromCharCodes(_buffer.sublist(2, uIndex));
-    final parts = paramStr.split(';');
-
-    if (parts.isEmpty || parts.length > 3) return null;
-
-    // The codepoint field may contain `:` sub-parameters (e.g. "13:10").
-    // Per the kitty spec, the first value is the Unicode codepoint.
     final codepointStr = parts[0].split(':').first;
     final codepoint = int.tryParse(codepointStr);
     if (codepoint == null) return null;
 
-    // The modifier field may also contain `:` sub-parameters (e.g. "2:1").
-    // The first value is the modifier bitmask.
     final modifierStr = parts.length >= 2 ? parts[1].split(':').first : null;
     final modifierValue =
         modifierStr != null ? int.tryParse(modifierStr) : null;
@@ -837,10 +832,93 @@ class InputParser {
         ? _decodeModifiers(modifierValue)
         : const ModifierKeys();
 
-    final totalBytes = uIndex + 1; // Include the 'u' terminator
-    final keyEvent = _codepointToKeyEvent(codepoint, modifiers);
+    final totalBytes = terminatorIndex + 1;
 
-    return (keyEvent, totalBytes);
+    // 4-part form: associated text becomes the character;
+    // the codepoint still drives the logical key.
+    if (parts.length == 4) {
+      var rawText = parts[3];
+      if (rawText.endsWith(' ')) {
+        rawText = rawText.substring(0, rawText.length - 1);
+      }
+      final associatedText = _decodePercentEncoded(rawText);
+      if (associatedText.isNotEmpty) {
+        return (
+          KeyboardEvent(
+            logicalKey: _logicalKeyForCodepoint(codepoint),
+            character: associatedText,
+            modifiers: modifiers,
+          ),
+          totalBytes,
+        );
+      }
+      // Empty associated text: treat as 3-part, fall through.
+    }
+
+    return (_codepointToKeyEvent(codepoint, modifiers), totalBytes);
+  }
+
+  /// True if [parts] is a structurally well-formed kitty sequence
+  /// (1–4 parts, all-digits/':' in the numeric fields, valid
+  /// percent-encoded text in the 4th part if present).
+  bool _isValidKittyParts(List<String> parts) {
+    if (parts.isEmpty || parts.length > 4) return false;
+    for (var i = 0; i < parts.length && i <= 2; i++) {
+      if (!_isDigitsAndColons(parts[i])) return false;
+    }
+    if (parts.length == 4 && !_isValidAssociatedText(parts[3])) {
+      return false;
+    }
+    return true;
+  }
+
+  bool _isDigitsAndColons(String s) {
+    for (var i = 0; i < s.length; i++) {
+      final c = s.codeUnitAt(i);
+      if (c != 0x3A && (c < 0x30 || c > 0x39)) return false;
+    }
+    return true;
+  }
+
+  bool _isValidAssociatedText(String s) {
+    var i = 0;
+    while (i < s.length) {
+      final c = s.codeUnitAt(i);
+      if (c == 0x25) {
+        // '%' must be followed by exactly two hex digits.
+        if (i + 2 >= s.length) return false;
+        if (int.tryParse(s.substring(i + 1, i + 3), radix: 16) == null) {
+          return false;
+        }
+        i += 3;
+        continue;
+      }
+      if (c == 0x3B) return false; // ';' would clash with the part separator
+      if (c < 0x20 || c > 0x7E) return false;
+      i++;
+    }
+    return true;
+  }
+
+  /// Decode percent-encoded UTF-8 to a Dart String. Non-ASCII
+  /// bytes must be encoded; ASCII printable chars are sent as-is.
+  String _decodePercentEncoded(String s) {
+    final bytes = <int>[];
+    var i = 0;
+    while (i < s.length) {
+      final ch = s[i];
+      if (ch == '%' && i + 2 < s.length) {
+        final byte = int.tryParse(s.substring(i + 1, i + 3), radix: 16);
+        if (byte != null) {
+          bytes.add(byte);
+          i += 3;
+          continue;
+        }
+      }
+      bytes.add(ch.codeUnitAt(0));
+      i++;
+    }
+    return utf8.decode(bytes, allowMalformed: true);
   }
 
   /// Parse xterm modifyOtherKeys sequence: CSI 27 ; modifier ; charcode ~
@@ -899,7 +977,11 @@ class InputParser {
 
   /// Convert a Unicode codepoint to a KeyboardEvent with the given modifiers.
   KeyboardEvent _codepointToKeyEvent(int codepoint, ModifierKeys modifiers) {
-    // Map well-known codepoints to LogicalKeys
+    // Map well-known codepoints to LogicalKeys. The full table
+    // lives in [_logicalKeyForCodepoint] (shared with the 4-part
+    // kitty handler); here we only need the subset whose
+    // KeyboardEvent also carries a `character` (Enter/Tab) or
+    // carries no character (Escape/Backspace).
     switch (codepoint) {
       case 13: // Enter/Return
         return KeyboardEvent(
@@ -933,6 +1015,38 @@ class InputParser {
           character: char,
           modifiers: modifiers,
         );
+    }
+  }
+
+  /// Map a codepoint to its [LogicalKey]. Shared by
+  /// [_codepointToKeyEvent] and the 4-part kitty handler (where
+  /// the character comes from the associated text).
+  LogicalKey _logicalKeyForCodepoint(int codepoint) {
+    switch (codepoint) {
+      case 13: // Enter/Return
+        return LogicalKey.enter;
+      case 9: // Tab
+        return LogicalKey.tab;
+      case 27: // Escape
+        return LogicalKey.escape;
+      case 127: // Backspace
+        return LogicalKey.backspace;
+      case 1: // modifyOtherKeys: Home
+        return LogicalKey.home;
+      case 2: // modifyOtherKeys: Insert
+        return LogicalKey.insert;
+      case 3: // modifyOtherKeys: Delete
+        return LogicalKey.delete;
+      case 4: // modifyOtherKeys: End
+        return LogicalKey.end;
+      case 5: // modifyOtherKeys: PageUp
+        return LogicalKey.pageUp;
+      case 6: // modifyOtherKeys: PageDown
+        return LogicalKey.pageDown;
+      default:
+        final char = String.fromCharCode(codepoint);
+        return LogicalKey.fromCharacter(char) ??
+            LogicalKey(codepoint, 'codepoint($codepoint)');
     }
   }
 

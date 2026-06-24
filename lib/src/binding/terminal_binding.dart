@@ -271,16 +271,26 @@ class TerminalBinding extends NoctermBinding
           // Route the mouse event through the component tree
           _routeMouseEvent(mouseEvent);
         } else if (event is PasteInputEvent) {
-          // Handle bracketed paste (or batched characters): copy to clipboard then send Ctrl+V
-          ClipboardManager.copy(event.text);
+          // Stash the text on the binding and route a synthetic
+          // Ctrl+V. We deliberately don't call ClipboardManager.copy
+          // here: on macOS the IME wraps committed text in
+          // bracketed-paste markers, so a real copy would clobber
+          // the user's clipboard every time they confirm a
+          // candidate. The focused widget picks up the text via
+          // NoctermBinding.instance.consumePendingPasteText in
+          // its paste path.
+          setPendingPasteText(event.text);
 
-          // Generate a Ctrl+V keyboard event to trigger the paste
           final pasteEvent = KeyboardEvent(
             logicalKey: LogicalKey.keyV,
             modifiers: const ModifierKeys(ctrl: true),
           );
           _keyboardEventController.add(pasteEvent);
           _routeKeyboardEvent(pasteEvent);
+          // Drop the text if no widget consumed it (e.g. focus on a
+          // non-pasteable widget), so a subsequent real Ctrl+V
+          // doesn't pick up stale IME text. Idempotent.
+          consumePendingPasteText();
         }
       }
 
