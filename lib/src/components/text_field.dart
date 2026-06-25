@@ -444,17 +444,25 @@ class _TextFieldState extends State<TextField> {
     } else if (key == LogicalKey.end) {
       _moveCursorToEnd();
       return true;
-    } else if (event.matches(LogicalKey.keyA, ctrl: true)) {
+    } else if (event.matches(LogicalKey.keyA, ctrl: true) ||
+        event.matches(LogicalKey.keyA, meta: true)) {
       _selectAll();
       return true;
-    } else if (event.matches(LogicalKey.keyC, ctrl: true)) {
+    } else if (event.matches(LogicalKey.keyC, ctrl: true) ||
+        event.matches(LogicalKey.keyC, meta: true)) {
       _copy();
       return true;
-    } else if (event.matches(LogicalKey.keyX, ctrl: true)) {
+    } else if (event.matches(LogicalKey.keyX, ctrl: true) ||
+        event.matches(LogicalKey.keyX, meta: true)) {
       _cut();
       return true;
-    } else if (event.matches(LogicalKey.keyV, ctrl: true)) {
+    } else if (event.matches(LogicalKey.keyV, ctrl: true) ||
+        event.matches(LogicalKey.keyV, meta: true)) {
       _paste();
+      return true;
+    } else if (event.matches(LogicalKey.keyW, ctrl: true)) {
+      // Cmd+W is "close window" on macOS — keep this ctrl-only.
+      _deleteWordBackward();
       return true;
     } else if (key == LogicalKey.backspace && event.isControlPressed) {
       _deleteWordBackward();
@@ -463,6 +471,7 @@ class _TextFieldState extends State<TextField> {
       _deleteWordForward();
       return true;
     } else if (event.matches(LogicalKey.keyT, ctrl: true)) {
+      // Cmd+T is "new tab" on macOS — keep this ctrl-only.
       _transposeCharacters();
       return true;
     } else {
