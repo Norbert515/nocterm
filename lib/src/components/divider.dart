@@ -10,6 +10,14 @@ enum DividerStyle {
   ascii,
 }
 
+/// A horizontal rule.
+///
+/// The divider merges with box-drawing characters it overlaps, forming
+/// junctions instead of overwriting them. With a negative [indent] or
+/// [endIndent] it reaches outside its own bounds; those cells paint half-arm
+/// characters (`╶`/`╴`), so an end landing on a box border becomes a tee
+/// (`├`/`┤`). An end landing on a cell that is not a box-drawing character
+/// keeps the half-arm stub, so only reach into cells known to hold borders.
 class Divider extends SingleChildRenderObjectComponent {
   const Divider({
     super.key,
@@ -58,6 +66,14 @@ class Divider extends SingleChildRenderObjectComponent {
   }
 }
 
+/// A vertical rule.
+///
+/// The divider merges with box-drawing characters it overlaps, forming
+/// junctions instead of overwriting them. With a negative [indent] or
+/// [endIndent] it reaches outside its own bounds; those cells paint half-arm
+/// characters (`╷`/`╵`), so an end landing on a box border becomes a tee
+/// (`┬`/`┴`). An end landing on a cell that is not a box-drawing character
+/// keeps the half-arm stub, so only reach into cells known to hold borders.
 class VerticalDivider extends SingleChildRenderObjectComponent {
   const VerticalDivider({
     super.key,
@@ -104,6 +120,28 @@ class VerticalDivider extends SingleChildRenderObjectComponent {
       ..endIndent = endIndent
       ..color = color ?? theme.outline
       ..style = style;
+  }
+}
+
+/// The half-arm characters painted at a blended divider's end cells, so an
+/// end landing on a border merges into a tee instead of a cross.
+///
+/// Returns null for styles without half-arm characters (no blending caps).
+String? _capForStyle(
+  DividerStyle style, {
+  required bool horizontal,
+  required bool start,
+}) {
+  switch (style) {
+    case DividerStyle.single:
+    case DividerStyle.dashed:
+    case DividerStyle.dotted:
+      return horizontal ? (start ? '╶' : '╴') : (start ? '╷' : '╵');
+    case DividerStyle.bold:
+      return horizontal ? (start ? '╺' : '╸') : (start ? '╻' : '╹');
+    case DividerStyle.double:
+    case DividerStyle.ascii:
+      return null;
   }
 }
 
@@ -185,19 +223,44 @@ class RenderDivider extends RenderObject {
   void paint(TerminalCanvas canvas, Offset offset) {
     super.paint(canvas, offset);
 
-    final startX = offset.dx + indent;
-    final endX = offset.dx + size.width - endIndent;
+    // Work in whole cells: layout can produce fractional offsets, and the
+    // end caps must land on exactly the cells the characters are drawn to.
+    final startX = (offset.dx + indent).round();
+    final endX = (offset.dx + size.width - endIndent).round();
     final y = offset.dy + (size.height / 2).floor();
 
     if (startX >= endX) return;
 
-    String char = _getCharacterForStyle(style, horizontal: true);
+    final char = _getCharacterForStyle(style, horizontal: true);
+    // Box-line merging has no effect for the ascii style (its characters
+    // are not box-drawing characters).
+    final blendLines = style != DividerStyle.ascii;
+    // Cells reached via a negative indent lie outside the divider's own
+    // bounds, on top of foreign content such as a border. They contribute
+    // only the arm pointing into the segment, so a border cell forms a tee
+    // (├/┤) rather than a cross. Cells within bounds keep the full line
+    // character.
+    final useCaps = blendLines && endX - startX > 1;
+    final startCap =
+        indent < 0 ? _capForStyle(style, horizontal: true, start: true) : null;
+    final endCap = endIndent < 0
+        ? _capForStyle(style, horizontal: true, start: false)
+        : null;
 
-    for (double x = startX; x < endX; x += 1) {
+    for (var x = startX; x < endX; x++) {
+      var cellChar = char;
+      if (useCaps) {
+        if (x == startX) {
+          cellChar = startCap ?? char;
+        } else if (x == endX - 1) {
+          cellChar = endCap ?? char;
+        }
+      }
       canvas.drawText(
-        Offset(x, y),
-        char,
+        Offset(x.toDouble(), y),
+        cellChar,
         style: TextStyle(color: color),
+        blendBoxLines: blendLines,
       );
     }
   }
@@ -298,19 +361,44 @@ class RenderVerticalDivider extends RenderObject {
   void paint(TerminalCanvas canvas, Offset offset) {
     super.paint(canvas, offset);
 
+    // Work in whole cells: layout can produce fractional offsets, and the
+    // end caps must land on exactly the cells the characters are drawn to.
     final x = offset.dx + (size.width / 2).floor();
-    final startY = offset.dy + indent;
-    final endY = offset.dy + size.height - endIndent;
+    final startY = (offset.dy + indent).round();
+    final endY = (offset.dy + size.height - endIndent).round();
 
     if (startY >= endY) return;
 
-    String char = _getCharacterForStyle(style, horizontal: false);
+    final char = _getCharacterForStyle(style, horizontal: false);
+    // Box-line merging has no effect for the ascii style (its characters
+    // are not box-drawing characters).
+    final blendLines = style != DividerStyle.ascii;
+    // Cells reached via a negative indent lie outside the divider's own
+    // bounds, on top of foreign content such as a border. They contribute
+    // only the arm pointing into the segment, so a border cell forms a tee
+    // (┬/┴) rather than a cross. Cells within bounds keep the full line
+    // character.
+    final useCaps = blendLines && endY - startY > 1;
+    final startCap =
+        indent < 0 ? _capForStyle(style, horizontal: false, start: true) : null;
+    final endCap = endIndent < 0
+        ? _capForStyle(style, horizontal: false, start: false)
+        : null;
 
-    for (double y = startY; y < endY; y += 1) {
+    for (var y = startY; y < endY; y++) {
+      var cellChar = char;
+      if (useCaps) {
+        if (y == startY) {
+          cellChar = startCap ?? char;
+        } else if (y == endY - 1) {
+          cellChar = endCap ?? char;
+        }
+      }
       canvas.drawText(
-        Offset(x, y),
-        char,
+        Offset(x, y.toDouble()),
+        cellChar,
         style: TextStyle(color: color),
+        blendBoxLines: blendLines,
       );
     }
   }

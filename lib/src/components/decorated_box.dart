@@ -110,7 +110,14 @@ enum BoxBorderStyle {
   rounded,
 }
 
-/// Box border configuration
+/// Box border configuration.
+///
+/// The border's corner cells merge with box-drawing characters already
+/// painted underneath them, forming junctions instead of overwriting them -
+/// e.g. an overlaid panel's corners landing on another box's border tee into
+/// it (`┬`/`┴`). Edge runs and title text always paint over what is
+/// underneath, so an overlaid panel still occludes unrelated content it
+/// covers.
 class BoxBorder {
   const BoxBorder({
     this.top = BorderSide.none,
@@ -490,7 +497,21 @@ class RenderDecoratedBox extends RenderObject
 
     // Paint background color
     if (_decoration.color != null) {
-      _paintBackground(canvas, absoluteRect, _decoration.color!);
+      var backgroundRect = absoluteRect;
+      final border = _decoration.border;
+      if (border != null && !border.hasNoBorder) {
+        // The border's corner cells merge with whatever is painted
+        // underneath them, so the background fill must not erase those
+        // cells first. The border pass paints the ring itself, using this
+        // background color.
+        backgroundRect = Rect.fromLTRB(
+          absoluteRect.left + (border.left.isNone ? 0 : 1),
+          absoluteRect.top + (border.top.isNone ? 0 : 1),
+          absoluteRect.right - (border.right.isNone ? 0 : 1),
+          absoluteRect.bottom - (border.bottom.isNone ? 0 : 1),
+        );
+      }
+      _paintBackground(canvas, backgroundRect, _decoration.color!);
     }
 
     // Paint border - pass the offset for absolute positioning
@@ -506,12 +527,14 @@ class RenderDecoratedBox extends RenderObject
   }
 
   void _setCell(
-      TerminalCanvas canvas, int x, int y, String char, TextStyle style) {
+      TerminalCanvas canvas, int x, int y, String char, TextStyle style,
+      {bool blend = false}) {
     // Use drawText with a single character at the given position
     canvas.drawText(
       Offset(x.toDouble(), y.toDouble()),
       char,
       style: style,
+      blendBoxLines: blend,
     );
   }
 
@@ -547,12 +570,12 @@ class RenderDecoratedBox extends RenderObject
         } else {
           charToUse = chars.horizontal;
         }
-        _setCell(canvas, left, top, charToUse, borderStyle);
+        _setCell(canvas, left, top, charToUse, borderStyle, blend: true);
       } else {
         // Use corner only if left border connects, otherwise use horizontal
         final leftTopChar =
             !border.left.isNone ? chars.topLeft : chars.horizontal;
-        _setCell(canvas, left, top, leftTopChar, borderStyle);
+        _setCell(canvas, left, top, leftTopChar, borderStyle, blend: true);
 
         // Check if we have a title to render
         final title = _decoration.title;
@@ -670,7 +693,7 @@ class RenderDecoratedBox extends RenderObject
         // Use corner only if right border connects, otherwise use horizontal
         final rightTopChar =
             !border.right.isNone ? chars.topRight : chars.horizontal;
-        _setCell(canvas, right, top, rightTopChar, borderStyle);
+        _setCell(canvas, right, top, rightTopChar, borderStyle, blend: true);
       }
     }
 
@@ -693,19 +716,19 @@ class RenderDecoratedBox extends RenderObject
         } else {
           charToUse = chars.horizontal;
         }
-        _setCell(canvas, left, bottom, charToUse, style);
+        _setCell(canvas, left, bottom, charToUse, style, blend: true);
       } else {
         // Use corner only if left border connects, otherwise use horizontal
         final leftBottomChar =
             !border.left.isNone ? chars.bottomLeft : chars.horizontal;
-        _setCell(canvas, left, bottom, leftBottomChar, style);
+        _setCell(canvas, left, bottom, leftBottomChar, style, blend: true);
         for (int x = left + 1; x < right; x++) {
           _setCell(canvas, x, bottom, chars.horizontal, style);
         }
         // Use corner only if right border connects, otherwise use horizontal
         final rightBottomChar =
             !border.right.isNone ? chars.bottomRight : chars.horizontal;
-        _setCell(canvas, right, bottom, rightBottomChar, style);
+        _setCell(canvas, right, bottom, rightBottomChar, style, blend: true);
       }
     }
 

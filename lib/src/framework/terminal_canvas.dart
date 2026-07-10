@@ -6,6 +6,7 @@ import 'package:nocterm/src/rectangle.dart';
 
 import '../buffer.dart';
 import '../style.dart';
+import '../utils/box_line_merging.dart';
 import '../utils/unicode_width.dart';
 import 'framework.dart';
 
@@ -61,7 +62,13 @@ class TerminalCanvas {
   }
 
   /// Draw text at the given position
-  void drawText(Offset position, String text, {TextStyle? style}) {
+  ///
+  /// When [blendBoxLines] is true, box-drawing characters (U+2500–U+257F)
+  /// merge with box-drawing characters already in the buffer instead of
+  /// overwriting them, forming junctions: a `│` drawn onto a `─` border
+  /// becomes `┬`. Non box-drawing characters are unaffected.
+  void drawText(Offset position, String text,
+      {TextStyle? style, bool blendBoxLines = false}) {
     final x = position.dx.round();
     final y = position.dy.round();
 
@@ -99,11 +106,16 @@ class TerminalCanvas {
       final effectiveStyle = style ?? const TextStyle();
       final finalStyle = _blendStyle(effectiveStyle, existingCell);
 
+      var char = grapheme;
+      if (blendBoxLines) {
+        char = mergeBoxCharacters(grapheme, existingCell.char) ?? grapheme;
+      }
+
       _buffer.setCell(
         cellX,
         cellY,
         Cell(
-          char: grapheme, // Use the full grapheme cluster, not individual runes
+          char: char, // Use the full grapheme cluster, not individual runes
           style: finalStyle,
         ),
       );

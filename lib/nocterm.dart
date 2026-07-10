@@ -74,6 +74,7 @@ export 'src/utils/log_server.dart';
 export 'src/utils/logger.dart';
 export 'src/utils/nocterm_paths.dart';
 export 'src/utils/escape_codes.dart';
+export 'src/utils/box_line_merging.dart';
 
 // Performance and Debugging
 export 'src/foundation/performance.dart';
