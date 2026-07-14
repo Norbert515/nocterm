@@ -1,0 +1,220 @@
+resources:
+  - name: Alpha
+    path: ../../example/alpha_demo.dart
+    description: Demonstrates alpha/transparency support in nocterm.
+  - name: Ascii text
+    path: ../../example/ascii_text_demo.dart
+    description: Demo showcasing the AsciiText component with various fonts and styles.
+  - name: Auto theme
+    path: ../../example/auto_theme_demo.dart
+    description: Auto Theme Detection Demo
+  - name: Border title
+    path: ../../example/border_title_demo.dart
+    description: Border title example.
+  - name: Center in column
+    path: ../../example/center_in_column.dart
+    description: Center in column example.
+  - name: Chat
+    path: ../../example/chat_demo.dart
+    description: Chat example.
+  - name: Chat reverse
+    path: ../../example/chat_demo_reverse.dart
+    description: Demo showing AutoScrollController working correctly with reverse ListView
+  - name: Clipboard
+    path: ../../example/clipboard_demo.dart
+    description: Clipboard example.
+  - name: Clipboard debug
+    path: ../../example/clipboard_debug.dart
+    description: Debug clipboard behavior
+  - name: Cpu usage test
+    path: ../../example/cpu_usage_test.dart
+    description: Test app to measure CPU usage from different sources
+  - name: Cursor styles
+    path: ../../example/text_field/cursor_styles_demo.dart
+    description: Cursor styles example.
+  - name: Debug overlay
+    path: ../../example/debug_overlay_demo.dart
+    description: Demonstrates the debug overlay feature in nocterm.
+  - name: Deep route text field
+    path: ../../example/deep_route_text_field.dart
+    description: Deep route text field example.
+  - name: Dev dashboard
+    path: ../../example/dev_dashboard_demo.dart
+    description: Example dev dashboard - optimized for screenshots.
+  - name: Dialog textfield test
+    path: ../../example/dialog_textfield_test.dart
+    description: Dialog textfield test example.
+  - name: Ensure visible
+    path: ../../example/ensure_visible_demo.dart
+    description: Demonstrates using ScrollController.ensureVisible for keyboard navigation.
+  - name: Ensure visible variable height
+    path: ../../example/ensure_visible_variable_height.dart
+    description: Demonstrates ensureVisible with variable-height items.
+  - name: Error handling
+    path: ../../example/error_handling_demo.dart
+    description: NoctermError Demo
+  - name: Example
+    path: ../../example/example.dart
+    description: Example example.
+  - name: Focus
+    path: ../../example/focus_demo.dart
+    description: Demo application showing focus handling with nested components
+  - name: Gesture
+    path: ../../example/gesture_demo.dart
+    description: Gesture example.
+  - name: Home automation
+    path: ../../example/home_automation_demo.dart
+    description: Home automation example.
+  - name: Hot reload simple
+    path: ../../example/hot_reload_simple.dart
+    description: Hot reload simple example.
+  - name: Hoverable widgets
+    path: ../../example/hoverable_widgets_demo.dart
+    description: Hoverable widgets example.
+  - name: Image
+    path: ../../example/image_demo.dart
+    description: Interactive TUI demo for displaying images with different protocols.
+  - name: Image listview
+    path: ../../example/image_listview_demo.dart
+    description: Interactive TUI demo for displaying images in a scrollable ListView.
+  - name: Infinite hoverable list
+    path: ../../example/infinite_hoverable_list_demo.dart
+    description: Infinite hoverable list example.
+  - name: Keyboard modifiers
+    path: ../../example/keyboard_modifiers_demo.dart
+    description: Demo application showing the new keyboard modifier handling
+  - name: Keyboard test comprehensive
+    path: ../../example/keyboard_test_comprehensive.dart
+    description: Comprehensive keyboard test application
+  - name: Listview performance test
+    path: ../../example/listview_performance_test.dart
+    description: Performance test for lazy ListView with very large item counts
+  - name: Listview rebuild test
+    path: ../../example/listview_rebuild_test.dart
+    description: Test to verify ListView items rebuild when state changes (e.g., selection)
+  - name: Logger
+    path: ../../example/logger_demo.dart
+    description: Logger example.
+  - name: Markdown
+    path: ../../example/markdown_demo.dart
+    description: Markdown example.
+  - name: Markdown emoji
+    path: ../../example/markdown_emoji_demo.dart
+    description: Markdown emoji example.
+  - name: Markdown simple
+    path: ../../example/markdown_simple.dart
+    description: Markdown simple example.
+  - name: Mouse
+    path: ../../example/mouse_demo.dart
+    description: Mouse example.
+  - name: Mouse scroll test
+    path: ../../example/mouse_scroll_test.dart
+    description: Mouse scroll test example.
+  - name: Multiple scrollables
+    path: ../../example/multiple_scrollables.dart
+    description: Multiple scrollables example.
+  - name: Navigation
+    path: ../../example/navigation_demo.dart
+    description: Navigation example.
+  - name: Navigation simple
+    path: ../../example/navigation_demo_simple.dart
+    description: Navigation simple example.
+  - name: Nocterm app
+    path: ../../example/nocterm_app_demo.dart
+    description: Demo showcasing the NoctermApp widget and its ability to set terminal window titles
+  - name: Nocterm app navigation
+    path: ../../example/nocterm_app_navigation_demo.dart
+    description: Demo showcasing NoctermApp with Navigator support
+  - name: Overlay
+    path: ../../example/overlay_demo.dart
+    description: Overlay example.
+  - name: Paste test
+    path: ../../example/paste_test.dart
+    description: Paste test example.
+  - name: Paste verification
+    path: ../../example/paste_verification.dart
+    description: This test verifies that terminal paste (Cmd+V) works correctly
+  - name: Profile rendering
+    path: ../../example/profile_rendering.dart
+    description: Profiling app to measure where CPU time goes during active rendering.
+  - name: Progress bar
+    path: ../../example/progress_bar_demo.dart
+    description: Progress bar example.
+  - name: Pty controller
+    path: ../../example/pty_controller_demo.dart
+    description: Example demonstrating the PTY controller/component pattern.
+  - name: Readme
+    path: ../../example/readme_demo.dart
+    description: Readme example.
+  - name: Readme bento full
+    path: ../../example/readme_bento_full.dart
+    description: Full-screen bento grid with shader effects
+  - name: Scroll
+    path: ../../example/scroll_demo.dart
+    description: Scroll example.
+  - name: Scroll selection
+    path: ../../example/scroll_selection_demo.dart
+    description: Scroll selection example.
+  - name: Showcase
+    path: ../../example/showcase_demo.dart
+    description: Showcase example.
+  - name: Sigint
+    path: ../../example/sigint_demo.dart
+    description: Demo application showing custom Ctrl+C handling with "press twice to quit" pattern.
+  - name: Simple scroll test
+    path: ../../example/simple_scroll_test.dart
+    description: Simple scroll test example.
+  - name: Stack
+    path: ../../example/stack_demo.dart
+    description: Stack example.
+  - name: Stack interactive
+    path: ../../example/stack_interactive_demo.dart
+    description: Stack interactive example.
+  - name: Stack simple stateful
+    path: ../../example/stack_simple_stateful_demo.dart
+    description: Stack simple stateful example.
+  - name: Submit
+    path: ../../example/text_field/submit_demo.dart
+    description: Submit example.
+  - name: Task manager
+    path: ../../example/task_manager_demo.dart
+    description: Task manager example.
+  - name: Test resize
+    path: ../../example/test_resize.dart
+    description: Test resize example.
+  - name: Test resize
+    path: ../../example/test_resize_demo.dart
+    description: Terminal Resize Event Demo
+  - name: Test resize improved
+    path: ../../example/test_resize_improved.dart
+    description: Test resize improved example.
+  - name: Test simple scroll
+    path: ../../example/test_simple_scroll.dart
+    description: Test simple scroll example.
+  - name: Test sparkles width
+    path: ../../example/test_sparkles_width.dart
+    description: Test sparkles width example.
+  - name: Test tui colors
+    path: ../../example/test_tui_colors.dart
+    description: Test tui colors example.
+  - name: Test visual centering
+    path: ../../example/test_visual_centering.dart
+    description: Test visual centering example.
+  - name: Test widget replacement
+    path: ../../example/test_widget_replacement.dart
+    description: Test widget replacement example.
+  - name: Text field simple refactored
+    path: ../../example/text_field/text_field_simple_refactored.dart
+    description: Text field simple refactored example.
+  - name: Text tabs
+    path: ../../example/text_tabs_demo.dart
+    description: Text tabs example.
+  - name: Text wrapping
+    path: ../../example/text_wrapping_demo.dart
+    description: Text wrapping example.
+  - name: Textfield
+    path: ../../example/textfield_demo.dart
+    description: Textfield example.
+  - name: Theme showcase
+    path: ../../example/theme_showcase.dart
+    description: Theme showcase example demonstrating all built-in themes.
