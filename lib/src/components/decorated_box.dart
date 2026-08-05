@@ -586,7 +586,10 @@ class RenderDecoratedBox extends RenderObject
           // Minimum width: space + 1 char title + space + some border chars
           // Format: ─ Title ─────
           final titleText = title.plainText;
-          final titleStyle = title.style ?? borderStyle;
+          // The fill stops short of the border row, so a title style with
+          // no background of its own would show what was underneath.
+          final titleStyle = (title.style ?? borderStyle)
+              .copyWith(backgroundColor: borderBackground);
 
           // Calculate title display with " Title " format (space padding)
           // We need at least 2 horizontal chars for aesthetics
