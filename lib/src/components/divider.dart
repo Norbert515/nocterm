@@ -210,16 +210,17 @@ void _paintRun(
   final char = _characterForStyle(style, horizontal: horizontal);
   // The ascii style has no box-drawing characters to merge.
   final blendLines = style != DividerStyle.ascii;
-  // Cells reached via a negative indent lie outside the divider's own
-  // bounds, on top of foreign content such as a border. They contribute
-  // only the arm pointing into the segment, so a border cell forms a tee
-  // (├/┤) rather than a cross. Cells within bounds keep the full line
-  // character.
+  // Cells outside the divider's own bounds contribute only the arm pointing
+  // back into it, so a border cell forms a tee (├/┤) rather than a cross.
+  // Which cells those are comes from the run's rounded bounds, not the sign
+  // of the indent: -0.5 rounds back onto the divider's own first cell.
+  final ownStart = mainOrigin.round();
+  final ownEnd = (mainOrigin + mainExtent).round();
   final useCaps = blendLines && end - start > 1;
-  final startCap = indent < 0
+  final startCap = start < ownStart
       ? _capForStyle(style, horizontal: horizontal, start: true)
       : null;
-  final endCap = endIndent < 0
+  final endCap = end > ownEnd
       ? _capForStyle(style, horizontal: horizontal, start: false)
       : null;
 
