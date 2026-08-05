@@ -39,4 +39,34 @@ void main() {
       size: const Size(12, 5),
     );
   });
+
+  test(
+      'Given an opaque box with only a left border '
+      'when drawn over content then nothing shows through', () {
+    return testNocterm(
+      'left-only border is opaque',
+      (tester) async {
+        await tester.pumpComponent(
+          Stack(
+            children: [
+              const Text('XXXXXXXXXXXX\nXXXXXXXXXXXX\nXXXXXXXXXXXX'),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  border: const BoxBorder(left: BorderSide()),
+                ),
+                child: const SizedBox(width: 6, height: 3),
+              ),
+            ],
+          ),
+        );
+
+        final state = tester.terminalState;
+        // Top and bottom cells of the left border column.
+        expect(state.getCellAt(0, 0)?.style.backgroundColor, Colors.blue);
+        expect(state.getCellAt(0, 2)?.style.backgroundColor, Colors.blue);
+      },
+      size: const Size(12, 5),
+    );
+  });
 }
