@@ -70,4 +70,33 @@ void main() {
       size: const Size(12, 7),
     );
   });
+
+  test(
+      'Given a divider with a fractional negative indent '
+      'when rendered then its own first cell keeps the full line', () {
+    // Whether an end reaches outside is decided by the cells it covers,
+    // not by the sign of the indent: an indent in (-0.5, 0) rounds back
+    // onto the divider's own first cell, which is not a cap.
+    return testNocterm(
+      'fractional indent',
+      (tester) async {
+        await tester.pumpComponent(
+          Container(
+            decoration: BoxDecoration(border: BoxBorder.all()),
+            child: Column(
+              children: [
+                const SizedBox(height: 2),
+                const Divider(indent: -0.5),
+                Expanded(child: const SizedBox.shrink()),
+              ],
+            ),
+          ),
+        );
+
+        final state = tester.terminalState;
+        expect(state.getTextAt(1, 3, length: 1), '─');
+      },
+      size: const Size(12, 7),
+    );
+  });
 }
