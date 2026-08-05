@@ -248,8 +248,6 @@ String? mergeArmsIntoCharacter(BoxCharArms newArms, String existingChar) {
   return _armsToChar[merged];
 }
 
-/// Whether [char] participates in box-line merging.
-bool isMergeableBoxCharacter(String char) => _charToArms.containsKey(char);
 /// Combines two arm sets, the new character winning wherever it has a line.
 BoxCharArms _combine(BoxCharArms newArms, BoxCharArms existingArms) {
   LineArm pick(LineArm a, LineArm b) => a == LineArm.none ? b : a;

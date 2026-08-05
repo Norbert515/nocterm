@@ -266,20 +266,4 @@ void main() {
     // Diagonals are deliberately not mergeable.
     expect(mergeBoxCharacters('╱', '─'), isNull);
   });
-
-  test(
-      'Given box-drawing line characters '
-      'when checked for mergeability then they are mergeable', () {
-    for (final char in ['─', '│', '━', '║', '┼', '╋', '╬', '╴', '╭']) {
-      expect(isMergeableBoxCharacter(char), isTrue, reason: char);
-    }
-  });
-
-  test(
-      'Given non-line characters '
-      'when checked for mergeability then they are not mergeable', () {
-    for (final char in [' ', 'a', '╳', '█', '▸']) {
-      expect(isMergeableBoxCharacter(char), isFalse, reason: char);
-    }
-  });
 }
