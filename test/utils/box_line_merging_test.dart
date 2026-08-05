@@ -176,6 +176,22 @@ void main() {
   });
 
   test(
+      'Given an arm set with aliases '
+      'when resolved through the reverse lookup '
+      'then the canonical character wins', () {
+    // _armsToChar keeps the first entry per arm set, so the canonical
+    // solid/square character must precede its aliases in _charToArms.
+    // These merges go through that lookup rather than an early return, so
+    // they are what actually pins the ordering down: reorder the map so
+    // '╭' precedes '┌' and only these fail.
+    expect(mergeBoxCharacters('╶', '╷'), '┌');
+    expect(mergeBoxCharacters('╴', '╷'), '┐');
+    expect(mergeBoxCharacters('╶', '╵'), '└');
+    expect(mergeBoxCharacters('╶', '╴'), '─');
+    expect(mergeBoxCharacters('╵', '╷'), '│');
+  });
+
+  test(
       'Given a double line and a light line '
       'when merged then a double-single junction is formed', () {
     expect(mergeBoxCharacters('═', '│'), '╪');
