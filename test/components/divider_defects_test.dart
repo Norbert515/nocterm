@@ -37,4 +37,37 @@ void main() {
       );
     });
   });
+
+  test(
+      'Given a divider with no cells of its own '
+      'when it reaches into a border then nothing is painted', () {
+    // There is no rule for an end to join the border to, so an arm left on
+    // the border would promise a line that does not exist.
+    return testNocterm(
+      'one-cell divider span',
+      (tester) async {
+        await tester.pumpComponent(
+          Container(
+            decoration: BoxDecoration(border: BoxBorder.all()),
+            child: Column(
+              children: [
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    const SizedBox(width: 0, child: Divider(indent: -1)),
+                    Expanded(child: const SizedBox.shrink()),
+                  ],
+                ),
+                Expanded(child: const SizedBox.shrink()),
+              ],
+            ),
+          ),
+        );
+
+        final state = tester.terminalState;
+        expect(state.getTextAt(0, 3, length: 1), '│');
+      },
+      size: const Size(12, 7),
+    );
+  });
 }
