@@ -168,11 +168,24 @@ void main() {
 
   test(
       'Given two aliases with identical arms '
-      'when merged then the existing character is kept', () {
-    // Both orders leave the arms unchanged, so each keeps whichever style
-    // was already on the canvas.
-    expect(mergeBoxCharacters('╭', '┌'), '┌');
+      'when merged then the newly drawn style wins', () {
+    // Nothing about the junction changes, so this is purely a question of
+    // which style is on top - and the character being drawn is on top.
+    expect(mergeBoxCharacters('╭', '┌'), '╭');
     expect(mergeBoxCharacters('┌', '╭'), '╭');
+    expect(mergeBoxCharacters('╌', '─'), '╌');
+  });
+
+  test(
+      'Given a character whose arms are a strict subset of the existing one '
+      'when merged then the existing character is kept', () {
+    // The counterpart to the test above, and the case the early return is
+    // there for: a stub landing on a rounded corner must not square it.
+    // Distinguishing the two is what makes both work - keep the existing
+    // character only when the new one contributes strictly less.
+    expect(mergeBoxCharacters('╶', '╭'), '╭');
+    expect(mergeBoxCharacters('╷', '╭'), '╭');
+    expect(mergeBoxCharacters('╶', '┬'), '┬');
   });
 
   test(
