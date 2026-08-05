@@ -67,8 +67,14 @@ class TerminalCanvas {
   /// merge with box-drawing characters already in the buffer instead of
   /// overwriting them, forming junctions: a `│` drawn onto a `─` border
   /// becomes `┬`. Non box-drawing characters are unaffected.
+  ///
+  /// [blendArms] overrides the arms each grapheme contributes, for arm sets
+  /// Unicode cannot name. Applies to every grapheme in [text], so pass a
+  /// single character. Ignored unless [blendBoxLines] is true.
   void drawText(Offset position, String text,
-      {TextStyle? style, bool blendBoxLines = false}) {
+      {TextStyle? style,
+      bool blendBoxLines = false,
+      BoxCharArms? blendArms}) {
     final x = position.dx.round();
     final y = position.dy.round();
 
@@ -108,7 +114,10 @@ class TerminalCanvas {
 
       var char = grapheme;
       if (blendBoxLines) {
-        char = mergeBoxCharacters(grapheme, existingCell.char) ?? grapheme;
+        char = (blendArms != null
+                ? mergeArmsIntoCharacter(blendArms, existingCell.char)
+                : mergeBoxCharacters(grapheme, existingCell.char)) ??
+            grapheme;
       }
 
       _buffer.setCell(

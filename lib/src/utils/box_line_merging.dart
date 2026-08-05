@@ -220,18 +220,45 @@ String? mergeBoxCharacters(String newChar, String existingChar) {
   final existingArms = _charToArms[existingChar];
   if (newArms == null || existingArms == null) return null;
 
-  LineArm pick(LineArm a, LineArm b) => a == LineArm.none ? b : a;
-  final merged = (
-    pick(newArms.$1, existingArms.$1),
-    pick(newArms.$2, existingArms.$2),
-    pick(newArms.$3, existingArms.$3),
-    pick(newArms.$4, existingArms.$4),
-  );
-
+  final merged = _combine(newArms, existingArms);
   if (merged == existingArms) return existingChar;
   if (merged == newArms) return newChar;
   return _armsToChar[merged] ?? newChar;
 }
 
+/// Merges the arms [newArms] drawn on top of [existingChar].
+///
+/// The arms-level counterpart of [mergeBoxCharacters], for arm sets Unicode
+/// cannot name: half lines exist at light (`╴╵╶╷`) and heavy (`╸╹╺╻`) weight
+/// only, so a lone double arm has no character - though every junction it
+/// forms does.
+///
+/// Merges per arm as [mergeBoxCharacters] does. Returns null when
+/// [existingChar] is not mergeable, or the combination has no Unicode
+/// representation.
+String? mergeArmsIntoCharacter(BoxCharArms newArms, String existingChar) {
+  final existingArms = _charToArms[existingChar];
+  if (existingArms == null) return null;
+
+  final merged = _combine(newArms, existingArms);
+  if (merged == existingArms) return existingChar;
+  return _armsToChar[merged];
+}
+
+/// The canonical box-drawing character for [arms], or null when Unicode
+/// has none - as for a lone double-weight arm.
+String? boxCharacterForArms(BoxCharArms arms) => _armsToChar[arms];
+
 /// Whether [char] participates in box-line merging.
 bool isMergeableBoxCharacter(String char) => _charToArms.containsKey(char);
+
+/// Combines two arm sets, the new character winning wherever it has a line.
+BoxCharArms _combine(BoxCharArms newArms, BoxCharArms existingArms) {
+  LineArm pick(LineArm a, LineArm b) => a == LineArm.none ? b : a;
+  return (
+    pick(newArms.$1, existingArms.$1),
+    pick(newArms.$2, existingArms.$2),
+    pick(newArms.$3, existingArms.$3),
+    pick(newArms.$4, existingArms.$4),
+  );
+}

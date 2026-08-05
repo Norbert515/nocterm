@@ -123,27 +123,46 @@ class VerticalDivider extends SingleChildRenderObjectComponent {
   }
 }
 
-/// The half-arm characters painted at a blended divider's end cells, so an
-/// end landing on a border merges into a tee instead of a cross.
+/// The arms a blended divider's end cell contributes: just the one arm
+/// pointing back into the segment, so an end landing on a border merges
+/// into a tee instead of a cross.
 ///
-/// Returns null for styles without half-arm characters (no blending caps).
-String? _capForStyle(
+/// Arms rather than a character: a lone double arm has no glyph, though
+/// the junctions it forms do. See [mergeArmsIntoCharacter].
+///
+/// Returns null for the ascii style, which never merges.
+BoxCharArms? _capForStyle(
   DividerStyle style, {
   required bool horizontal,
   required bool start,
 }) {
+  final LineArm weight;
   switch (style) {
     case DividerStyle.single:
     case DividerStyle.dashed:
     case DividerStyle.dotted:
-      return horizontal ? (start ? '╶' : '╴') : (start ? '╷' : '╵');
+      weight = LineArm.light;
     case DividerStyle.bold:
-      return horizontal ? (start ? '╺' : '╸') : (start ? '╻' : '╹');
+      weight = LineArm.heavy;
     case DividerStyle.double:
+      weight = LineArm.double;
     case DividerStyle.ascii:
       return null;
   }
+  const none = LineArm.none;
+  // (up, right, down, left)
+  if (horizontal) {
+    return start ? (none, weight, none, none) : (none, none, none, weight);
+  }
+  return start ? (none, none, weight, none) : (weight, none, none, none);
 }
+
+/// The character to paint for a cap, used when the cell underneath holds
+/// nothing to merge with. Falls back to the divider's own line character
+/// for caps Unicode cannot name, so a double end cell landing on empty
+/// space keeps drawing `═`/`║` as it always has.
+String _capCharacter(BoxCharArms cap, String lineChar) =>
+    boxCharacterForArms(cap) ?? lineChar;
 
 class RenderDivider extends RenderObject {
   RenderDivider({
@@ -248,19 +267,20 @@ class RenderDivider extends RenderObject {
         : null;
 
     for (var x = startX; x < endX; x++) {
-      var cellChar = char;
+      BoxCharArms? cap;
       if (useCaps) {
         if (x == startX) {
-          cellChar = startCap ?? char;
+          cap = startCap;
         } else if (x == endX - 1) {
-          cellChar = endCap ?? char;
+          cap = endCap;
         }
       }
       canvas.drawText(
         Offset(x.toDouble(), y),
-        cellChar,
+        cap == null ? char : _capCharacter(cap, char),
         style: TextStyle(color: color),
         blendBoxLines: blendLines,
+        blendArms: cap,
       );
     }
   }
@@ -386,19 +406,20 @@ class RenderVerticalDivider extends RenderObject {
         : null;
 
     for (var y = startY; y < endY; y++) {
-      var cellChar = char;
+      BoxCharArms? cap;
       if (useCaps) {
         if (y == startY) {
-          cellChar = startCap ?? char;
+          cap = startCap;
         } else if (y == endY - 1) {
-          cellChar = endCap ?? char;
+          cap = endCap;
         }
       }
       canvas.drawText(
         Offset(x, y.toDouble()),
-        cellChar,
+        cap == null ? char : _capCharacter(cap, char),
         style: TextStyle(color: color),
         blendBoxLines: blendLines,
+        blendArms: cap,
       );
     }
   }
