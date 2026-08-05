@@ -99,4 +99,39 @@ void main() {
       size: const Size(12, 7),
     );
   });
+
+  test(
+      'Given a heavy divider reaching into a double border '
+      'when rendered then the border survives', () {
+    // Heavy meeting double has no Unicode junction, so the wall keeps its
+    // own character.
+    return testNocterm(
+      'heavy divider into double border',
+      (tester) async {
+        await tester.pumpComponent(
+          Container(
+            decoration: BoxDecoration(
+              border: BoxBorder.all(style: BoxBorderStyle.double),
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 2),
+                const Divider(
+                  indent: -1,
+                  endIndent: -1,
+                  style: DividerStyle.bold,
+                ),
+                Expanded(child: const SizedBox.shrink()),
+              ],
+            ),
+          ),
+        );
+
+        final state = tester.terminalState;
+        expect(state.getTextAt(0, 3, length: 1), '║');
+        expect(state.getTextAt(11, 3, length: 1), '║');
+      },
+      size: const Size(12, 7),
+    );
+  });
 }
