@@ -114,10 +114,19 @@ class TerminalCanvas {
 
       var char = grapheme;
       if (blendBoxLines) {
-        char = (blendArms != null
-                ? mergeArmsIntoCharacter(blendArms, existingCell.char)
-                : mergeBoxCharacters(grapheme, existingCell.char)) ??
-            grapheme;
+        if (blendArms != null) {
+          var merged = mergeArmsIntoCharacter(blendArms, existingCell.char);
+          if (merged == null) {
+            // Nothing to join, so the cell is not ours to write - a space
+            // is as opaque as any other character, the border run being
+            // already absent under a title's padding.
+            currentColumn += width;
+            continue;
+          }
+          char = merged;
+        } else {
+          char = mergeBoxCharacters(grapheme, existingCell.char) ?? grapheme;
+        }
 
         // The merge kept what was there and it is not what we asked to
         // draw, so the cell is not ours to change - style included. Drawing

@@ -14,10 +14,10 @@ enum DividerStyle {
 ///
 /// The divider merges with box-drawing characters it overlaps, forming
 /// junctions instead of overwriting them. With a negative [indent] or
-/// [endIndent] it reaches outside its own bounds; those cells paint half-arm
-/// characters (`╶`/`╴`), so an end landing on a box border becomes a tee
-/// (`├`/`┤`). An end landing on a cell that is not a box-drawing character
-/// keeps the half-arm stub, so only reach into cells known to hold borders.
+/// [endIndent] it reaches outside its own bounds; those cells contribute
+/// only the arm pointing back into the rule, so an end landing on a box
+/// border becomes a tee (`├`/`┤`). An end with nothing to join is left
+/// unpainted, so reaching out is safe even where no border turns up.
 class Divider extends SingleChildRenderObjectComponent {
   const Divider({
     super.key,
@@ -70,10 +70,10 @@ class Divider extends SingleChildRenderObjectComponent {
 ///
 /// The divider merges with box-drawing characters it overlaps, forming
 /// junctions instead of overwriting them. With a negative [indent] or
-/// [endIndent] it reaches outside its own bounds; those cells paint half-arm
-/// characters (`╷`/`╵`), so an end landing on a box border becomes a tee
-/// (`┬`/`┴`). An end landing on a cell that is not a box-drawing character
-/// keeps the half-arm stub, so only reach into cells known to hold borders.
+/// [endIndent] it reaches outside its own bounds; those cells contribute
+/// only the arm pointing back into the rule, so an end landing on a box
+/// border becomes a tee (`┬`/`┴`). An end with nothing to join is left
+/// unpainted, so reaching out is safe even where no border turns up.
 class VerticalDivider extends SingleChildRenderObjectComponent {
   const VerticalDivider({
     super.key,
@@ -156,14 +156,6 @@ BoxCharArms? _capForStyle(
   }
   return start ? (none, none, weight, none) : (weight, none, none, none);
 }
-
-/// The character to paint for a cap, used when the cell underneath holds
-/// nothing to merge with. Falls back to the divider's own line character
-/// for caps Unicode cannot name, so a double end cell landing on empty
-/// space keeps drawing `═`/`║` as it always has.
-String _capCharacter(BoxCharArms cap, String lineChar) =>
-    boxCharacterForArms(cap) ?? lineChar;
-
 /// The line character for [style] along the given axis.
 String _characterForStyle(DividerStyle style, {required bool horizontal}) {
   switch (style) {
@@ -236,7 +228,8 @@ void _paintRun(
     }
     canvas.drawText(
       horizontal ? Offset(i.toDouble(), cross) : Offset(cross, i.toDouble()),
-      cap == null ? char : _capCharacter(cap, char),
+      // A capped cell is drawn from its arms; the character is unused.
+      char,
       style: TextStyle(color: color),
       blendBoxLines: blendLines,
       blendArms: cap,

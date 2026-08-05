@@ -243,11 +243,6 @@ void main() {
       expect(mergeArmsIntoCharacter(doubleDown, '═'), '╦');
     });
 
-    test('when looked up as a character then there is none', () {
-      expect(boxCharacterForArms(doubleRight), isNull);
-      expect(boxCharacterForArms(doubleDown), isNull);
-    });
-
     test('when the arms are already present then the character is unchanged',
         () {
       expect(mergeArmsIntoCharacter(doubleRight, '╠'), '╠');
@@ -259,20 +254,6 @@ void main() {
       expect(mergeArmsIntoCharacter(doubleRight, 'a'), isNull);
       expect(mergeArmsIntoCharacter(doubleRight, ' '), isNull);
     });
-  });
-
-  test(
-      'Given arms that do have a glyph '
-      'when looked up then the canonical character is returned', () {
-    const none = LineArm.none;
-    expect(boxCharacterForArms((none, LineArm.light, none, none)), '╶');
-    expect(boxCharacterForArms((none, LineArm.heavy, none, none)), '╺');
-    expect(
-      boxCharacterForArms(
-        (LineArm.light, LineArm.light, LineArm.light, LineArm.light),
-      ),
-      '┼',
-    );
   });
 
   test(

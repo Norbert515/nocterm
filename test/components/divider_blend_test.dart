@@ -267,9 +267,51 @@ void main() {
     });
   });
 
+  test(
+      'Given a divider reaching into a border title '
+      'when rendered then the title is untouched', () {
+    // A title's letters are not lines, and its padding spaces are holes in
+    // the border run rather than empty canvas - the run is simply absent
+    // there. Neither is the divider's to write, so an end landing on one
+    // contributes nothing. Columns 5 and 8 are the 't' of 'Title' and the
+    // space closing it.
+    return testNocterm(
+      'divider end on a border title',
+      (tester) async {
+        await tester.pumpComponent(
+          Container(
+            decoration: BoxDecoration(
+              border: BoxBorder.all(),
+              title: const BorderTitle(text: 'Title'),
+            ),
+            child: Row(
+              children: [
+                const SizedBox(width: 4),
+                const VerticalDivider(indent: -1),
+                const SizedBox(width: 2),
+                const VerticalDivider(indent: -1),
+                Expanded(child: const SizedBox.shrink()),
+              ],
+            ),
+          ),
+        );
+
+        final state = tester.terminalState;
+        expect(state.getTextAt(0, 0, length: 16), '┌─ Title ──────┐');
+        // The dividers themselves still paint inside the box.
+        expect(state.getTextAt(5, 1, length: 1), '│');
+        expect(state.getTextAt(8, 1, length: 1), '│');
+      },
+      size: const Size(16, 5),
+    );
+  });
+
   group('Given a divider reaching into empty space', () {
-    // Caps are expressed as arms now, but a cap landing on a cell with
-    // nothing to merge into must still paint what it always did.
+    // An end reaches outside the rule's own bounds to form a junction.
+    // With nothing there to join, the cell is not the rule's to write - a
+    // space is as opaque as any other character. Leaving a half-arm on
+    // spec would put stray marks wherever a cell happened to be blank,
+    // including the padding spaces inside a border title.
     // Inset by one cell so the negative indents reach cells that are on
     // screen but hold nothing.
     Future<void> pumpDivider(NoctermTester tester, DividerStyle style) {
@@ -287,30 +329,95 @@ void main() {
       );
     }
 
-    test('when light then the half-arm stub is kept', () {
+    test('when light then the end cells are left alone', () {
       return testNocterm(
-        'light stub on empty space',
+        'light end on empty space',
         (tester) async {
           await pumpDivider(tester, DividerStyle.single);
           final state = tester.terminalState;
-          expect(state.getTextAt(0, 1, length: 1), '╶');
-          expect(state.getTextAt(11, 1, length: 1), '╴');
+          expect(state.getTextAt(0, 1, length: 1), ' ');
+          expect(state.getTextAt(11, 1, length: 1), ' ');
+          // The rule's own cells are unaffected.
+          expect(state.getTextAt(1, 1, length: 1), '─');
+          expect(state.getTextAt(10, 1, length: 1), '─');
         },
         size: const Size(12, 5),
       );
     });
 
-    test('when double then the line character is kept', () {
+    test('when double then the end cells are left alone', () {
       return testNocterm(
-        'double fallback on empty space',
+        'double end on empty space',
         (tester) async {
           await pumpDivider(tester, DividerStyle.double);
           final state = tester.terminalState;
-          // No double half-arm exists, so the end cells stay ═.
-          expect(state.getTextAt(0, 1, length: 1), '═');
-          expect(state.getTextAt(11, 1, length: 1), '═');
+          expect(state.getTextAt(0, 1, length: 1), ' ');
+          expect(state.getTextAt(11, 1, length: 1), ' ');
+          expect(state.getTextAt(1, 1, length: 1), '═');
         },
         size: const Size(12, 5),
+      );
+    });
+  });
+
+  group('Given a rule ending against a divider', () {
+    // Blending only ever sees what is already in the buffer, so a junction
+    // needs the surface drawn first - the same reason a box's border is
+    // drawn before the dividers that tee into it. Order is expressed with a
+    // Stack because Row siblings paint in child order.
+    Component scene({required bool dividerFirst}) {
+      final rule = Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: Column(
+              children: [
+                const SizedBox(height: 1),
+                const Divider(endIndent: -1, style: DividerStyle.dashed),
+                Expanded(child: const SizedBox.shrink()),
+              ],
+            ),
+          ),
+          const SizedBox(width: 1),
+          Expanded(child: const SizedBox.shrink()),
+        ],
+      );
+      final divider = Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(child: const SizedBox.shrink()),
+          const VerticalDivider(style: DividerStyle.double),
+          Expanded(child: const SizedBox.shrink()),
+        ],
+      );
+      return Stack(children: dividerFirst ? [divider, rule] : [rule, divider]);
+    }
+
+    test('when the divider is painted first then the junction forms', () {
+      return testNocterm(
+        'divider first',
+        (tester) async {
+          await tester.pumpComponent(scene(dividerFirst: true));
+          final state = tester.terminalState;
+          expect(state.getTextAt(6, 1, length: 1), '╢');
+          expect(state.getTextAt(6, 0, length: 1), '║');
+        },
+        size: const Size(13, 5),
+      );
+    });
+
+    test('when the rule is painted first then it stops against it', () {
+      // The rule's end lands on a cell that is still empty, and an empty
+      // cell is not the rule's to write, so there is nothing for the
+      // divider to merge with when it arrives.
+      return testNocterm(
+        'rule first',
+        (tester) async {
+          await tester.pumpComponent(scene(dividerFirst: false));
+          final state = tester.terminalState;
+          expect(state.getTextAt(6, 1, length: 1), '║');
+        },
+        size: const Size(13, 5),
       );
     });
   });
