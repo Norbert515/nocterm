@@ -134,4 +134,49 @@ void main() {
       size: const Size(12, 7),
     );
   });
+
+  test(
+      'Given a divider whose cap lands on a cell it does not change '
+      'when rendered then that cell keeps its own colour', () {
+    // A cell the merge declines to change is not the divider's to restyle
+    // either - keeping the glyph means keeping the cell.
+    return testNocterm(
+      'kept glyph keeps its colour',
+      (tester) async {
+        await tester.pumpComponent(
+          Container(
+            decoration: BoxDecoration(
+              border: BoxBorder.all(color: Colors.green),
+            ),
+            child: Stack(
+              children: [
+                Row(
+                  children: [
+                    const SizedBox(width: 3),
+                    const VerticalDivider(indent: -1, color: Colors.green),
+                    Expanded(child: const SizedBox.shrink()),
+                  ],
+                ),
+                Row(
+                  children: [
+                    const SizedBox(width: 3),
+                    const VerticalDivider(indent: -1, color: Colors.red),
+                    Expanded(child: const SizedBox.shrink()),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+
+        final state = tester.terminalState;
+        // The first divider already formed the tee; the second contributes
+        // an arm that is already there, so the glyph is kept.
+        expect(state.getTextAt(4, 0, length: 1), '┬');
+        // Keeping the glyph should mean keeping the cell, colour included.
+        expect(state.getCellAt(4, 0)?.style.color, Colors.green);
+      },
+      size: const Size(12, 5),
+    );
+  });
 }
