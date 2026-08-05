@@ -203,6 +203,12 @@ void _paintRun(
 
   // Whole cells: layout offsets can be fractional, and an end has to land
   // on exactly the cell it is drawn to.
+  final ownStart = mainOrigin.round();
+  final ownEnd = (mainOrigin + mainExtent).round();
+  // A rule with no cells of its own has nothing for an end to join it to,
+  // so it draws nothing at all.
+  if (ownStart >= ownEnd) return;
+
   final start = (mainOrigin + indent).round();
   final end = (mainOrigin + mainExtent - endIndent).round();
   if (start >= end) return;
@@ -212,26 +218,21 @@ void _paintRun(
   final blendLines = style != DividerStyle.ascii;
   // Cells outside the divider's own bounds contribute only the arm pointing
   // back into it, so a border cell forms a tee (├/┤) rather than a cross.
-  // Which cells those are comes from the run's rounded bounds, not the sign
-  // of the indent: -0.5 rounds back onto the divider's own first cell.
-  final ownStart = mainOrigin.round();
-  final ownEnd = (mainOrigin + mainExtent).round();
-  final useCaps = blendLines && end - start > 1;
-  final startCap = start < ownStart
+  // Which cells those are comes from the run's rounded bounds: an indent of
+  // -0.5 rounds back onto the divider's own first cell, so it is not an end.
+  final startCap = blendLines && start < ownStart
       ? _capForStyle(style, horizontal: horizontal, start: true)
       : null;
-  final endCap = end > ownEnd
+  final endCap = blendLines && end > ownEnd
       ? _capForStyle(style, horizontal: horizontal, start: false)
       : null;
 
   for (var i = start; i < end; i++) {
     BoxCharArms? cap;
-    if (useCaps) {
-      if (i == start) {
-        cap = startCap;
-      } else if (i == end - 1) {
-        cap = endCap;
-      }
+    if (i == start) {
+      cap = startCap;
+    } else if (i == end - 1) {
+      cap = endCap;
     }
     canvas.drawText(
       horizontal ? Offset(i.toDouble(), cross) : Offset(cross, i.toDouble()),
