@@ -109,4 +109,35 @@ void main() {
       size: const Size(12, 5),
     );
   });
+
+  test(
+      'Given a dotted border with a light divider '
+      'when they meet then the junction matches the border weight', () {
+    // A dotted border's edges and corners carry the same weight, so a light
+    // divider meets them at that weight rather than a heavier one.
+    return testNocterm(
+      'dotted border junction weight',
+      (tester) async {
+        await tester.pumpComponent(
+          Container(
+            decoration: BoxDecoration(
+              border: BoxBorder.all(style: BoxBorderStyle.dotted),
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 1),
+                const Divider(indent: -1, endIndent: -1),
+                Expanded(child: const SizedBox.shrink()),
+              ],
+            ),
+          ),
+        );
+
+        final state = tester.terminalState;
+        expect(state.getTextAt(0, 2, length: 1), '├');
+        expect(state.getTextAt(11, 2, length: 1), '┤');
+      },
+      size: const Size(12, 5),
+    );
+  });
 }
