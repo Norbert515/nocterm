@@ -869,8 +869,8 @@ class _BorderCharacters {
   );
 
   static const dotted = _BorderCharacters(
-    horizontal: '┅',
-    vertical: '┇',
+    horizontal: '┄',
+    vertical: '┆',
     topLeft: '┌',
     topRight: '┐',
     bottomLeft: '└',

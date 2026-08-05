@@ -90,19 +90,17 @@ void main() {
   });
 
   test('A light divider tees into a dotted border', () {
-    // The dotted style's edges are heavy while its corners are light, so
-    // the junctions currently render ┠ ┨ - bolder than the box itself.
     return expectBox(
       boxWith(
         const Divider(indent: -1, endIndent: -1),
         style: BoxBorderStyle.dotted,
       ),
       [
-        '┌┅┅┅┅┅┅┅┅┅┅┅┅┐',
-        '┇············┇',
+        '┌┄┄┄┄┄┄┄┄┄┄┄┄┐',
+        '┆············┆',
         '├────────────┤',
-        '┇············┇',
-        '└┅┅┅┅┅┅┅┅┅┅┅┅┘',
+        '┆············┆',
+        '└┄┄┄┄┄┄┄┄┄┄┄┄┘',
       ],
     );
   });
