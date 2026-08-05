@@ -69,4 +69,44 @@ void main() {
       size: const Size(12, 5),
     );
   });
+
+  test(
+      'Given a titled bordered box with a background '
+      'when the title has its own style then it keeps the background', () {
+    // The title paints on the border row, which the inset fill does not
+    // cover, so a title style with no backgroundColor of its own takes
+    // whatever is underneath the panel.
+    return testNocterm(
+      'title keeps panel background',
+      (tester) async {
+        await tester.pumpComponent(
+          Stack(
+            children: [
+              Container(
+                decoration: const BoxDecoration(color: Colors.red),
+                child: const SizedBox(width: 12, height: 5),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  border: BoxBorder.all(),
+                  title: const BorderTitle(
+                    text: 'Hi',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                child: const SizedBox(width: 10, height: 3),
+              ),
+            ],
+          ),
+        );
+
+        final state = tester.terminalState;
+        final titleX = state.getText().split('\n').first.indexOf('H');
+        expect(titleX, greaterThan(0), reason: 'title should be rendered');
+        expect(state.getCellAt(titleX, 0)?.style.backgroundColor, Colors.blue);
+      },
+      size: const Size(12, 5),
+    );
+  });
 }
