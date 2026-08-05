@@ -735,15 +735,18 @@ class RenderDecoratedBox extends RenderObject
       }
     }
 
+    // A vertical side stops short of the corners only where the top or
+    // bottom pass actually paints them. Without those borders it has to
+    // reach the end cell, which the inset fill does not cover either.
+    final verticalTop = top + (border.top.isNone ? 0 : 1);
+    final verticalBottom = bottom - (border.bottom.isNone ? 0 : 1);
+
     // Paint left border
     if (!border.left.isNone) {
       final style = TextStyle(
           color: border.left.color, backgroundColor: borderBackground);
-      // Only paint vertical lines if there's space between top and bottom
-      if (bottom > top) {
-        for (int y = top + 1; y < bottom; y++) {
-          _setCell(canvas, left, y, chars.vertical, style);
-        }
+      for (int y = verticalTop; y <= verticalBottom; y++) {
+        _setCell(canvas, left, y, chars.vertical, style);
       }
     }
 
@@ -751,11 +754,8 @@ class RenderDecoratedBox extends RenderObject
     if (!border.right.isNone && right > left) {
       final style = TextStyle(
           color: border.right.color, backgroundColor: borderBackground);
-      // Only paint vertical lines if there's space between top and bottom
-      if (bottom > top) {
-        for (int y = top + 1; y < bottom; y++) {
-          _setCell(canvas, right, y, chars.vertical, style);
-        }
+      for (int y = verticalTop; y <= verticalBottom; y++) {
+        _setCell(canvas, right, y, chars.vertical, style);
       }
     }
   }
