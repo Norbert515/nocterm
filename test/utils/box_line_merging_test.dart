@@ -197,6 +197,54 @@ void main() {
     expect(mergeBoxCharacters('═', '┃'), '═');
   });
 
+  group('Given an arm combination with no standalone glyph', () {
+    const none = LineArm.none;
+    const dbl = LineArm.double;
+    // (up, right, down, left)
+    const doubleRight = (none, dbl, none, none);
+    const doubleDown = (none, none, dbl, none);
+
+    test('when merged into a line then the junction is still formed', () {
+      // Unicode has no double half-line, so these arms cannot be routed
+      // through mergeBoxCharacters at all - but every junction exists.
+      expect(mergeArmsIntoCharacter(doubleRight, '│'), '╞');
+      expect(mergeArmsIntoCharacter(doubleDown, '─'), '╥');
+      expect(mergeArmsIntoCharacter(doubleRight, '║'), '╠');
+      expect(mergeArmsIntoCharacter(doubleDown, '═'), '╦');
+    });
+
+    test('when looked up as a character then there is none', () {
+      expect(boxCharacterForArms(doubleRight), isNull);
+      expect(boxCharacterForArms(doubleDown), isNull);
+    });
+
+    test('when the arms are already present then the character is unchanged',
+        () {
+      expect(mergeArmsIntoCharacter(doubleRight, '╠'), '╠');
+      expect(mergeArmsIntoCharacter(doubleRight, '╬'), '╬');
+    });
+
+    test('when merged into a non box-drawing character then no merge happens',
+        () {
+      expect(mergeArmsIntoCharacter(doubleRight, 'a'), isNull);
+      expect(mergeArmsIntoCharacter(doubleRight, ' '), isNull);
+    });
+  });
+
+  test(
+      'Given arms that do have a glyph '
+      'when looked up then the canonical character is returned', () {
+    const none = LineArm.none;
+    expect(boxCharacterForArms((none, LineArm.light, none, none)), '╶');
+    expect(boxCharacterForArms((none, LineArm.heavy, none, none)), '╺');
+    expect(
+      boxCharacterForArms(
+        (LineArm.light, LineArm.light, LineArm.light, LineArm.light),
+      ),
+      '┼',
+    );
+  });
+
   test(
       'Given a non box-drawing character '
       'when merged then no merge is performed', () {

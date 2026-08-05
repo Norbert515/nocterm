@@ -267,6 +267,54 @@ void main() {
     });
   });
 
+  group('Given a divider reaching into empty space', () {
+    // Caps are expressed as arms now, but a cap landing on a cell with
+    // nothing to merge into must still paint what it always did.
+    // Inset by one cell so the negative indents reach cells that are on
+    // screen but hold nothing.
+    Future<void> pumpDivider(NoctermTester tester, DividerStyle style) {
+      return tester.pumpComponent(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 1),
+          child: Column(
+            children: [
+              const SizedBox(height: 1),
+              Divider(indent: -1, endIndent: -1, style: style),
+              Expanded(child: const SizedBox.shrink()),
+            ],
+          ),
+        ),
+      );
+    }
+
+    test('when light then the half-arm stub is kept', () {
+      return testNocterm(
+        'light stub on empty space',
+        (tester) async {
+          await pumpDivider(tester, DividerStyle.single);
+          final state = tester.terminalState;
+          expect(state.getTextAt(0, 1, length: 1), '╶');
+          expect(state.getTextAt(11, 1, length: 1), '╴');
+        },
+        size: const Size(12, 5),
+      );
+    });
+
+    test('when double then the line character is kept', () {
+      return testNocterm(
+        'double fallback on empty space',
+        (tester) async {
+          await pumpDivider(tester, DividerStyle.double);
+          final state = tester.terminalState;
+          // No double half-arm exists, so the end cells stay ═.
+          expect(state.getTextAt(0, 1, length: 1), '═');
+          expect(state.getTextAt(11, 1, length: 1), '═');
+        },
+        size: const Size(12, 5),
+      );
+    });
+  });
+
   test(
       'Given a light divider reaching into a double border '
       'when rendered then it tees into both columns', () {
