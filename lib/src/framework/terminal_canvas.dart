@@ -118,6 +118,15 @@ class TerminalCanvas {
                 ? mergeArmsIntoCharacter(blendArms, existingCell.char)
                 : mergeBoxCharacters(grapheme, existingCell.char)) ??
             grapheme;
+
+        // The merge kept what was there and it is not what we asked to
+        // draw, so the cell is not ours to change - style included. Drawing
+        // a glyph onto its twin is not this case: the result equals the
+        // grapheme.
+        if (char == existingCell.char && char != grapheme) {
+          currentColumn += width;
+          continue;
+        }
       }
 
       _buffer.setCell(
