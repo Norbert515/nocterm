@@ -5,6 +5,50 @@ import 'package:test/test.dart';
 /// own geometry: infinite sizes, no extent at all, fractional indents, and
 /// weights with no junction between them.
 void main() {
+  /// Which colour each cell was painted in: `G` green, `R` red, `·` other.
+  ///
+  /// Snapshots carry characters only, so a cell painted the wrong colour is
+  /// invisible in one. This draws the colours instead.
+  List<String> colourMap(TerminalState state, int width, int height) {
+    return [
+      for (var y = 0; y < height; y++)
+        [
+          for (var x = 0; x < width; x++)
+            switch (state.getCellAt(x, y)?.style.color) {
+              Colors.green => 'G',
+              Colors.red => 'R',
+              _ => '·',
+            },
+        ].join(),
+    ];
+  }
+
+  /// The two overlapping dividers used by the recolour tests: a green one
+  /// forms the tee, then a red one contributes an arm already present.
+  Component overlappingDividers() {
+    return Container(
+      decoration: BoxDecoration(border: BoxBorder.all(color: Colors.green)),
+      child: Stack(
+        children: [
+          Row(
+            children: [
+              const SizedBox(width: 3),
+              const VerticalDivider(indent: -1, color: Colors.green),
+              Expanded(child: const SizedBox.shrink()),
+            ],
+          ),
+          Row(
+            children: [
+              const SizedBox(width: 3),
+              const VerticalDivider(indent: -1, color: Colors.red),
+              Expanded(child: const SizedBox.shrink()),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   group('Given a divider under unbounded main-axis constraints', () {
     // performLayout constrains to Size(double.infinity, height), so an
     // unbounded parent leaves the size infinite, and rounding a non-finite
@@ -145,31 +189,7 @@ void main() {
     return testNocterm(
       'kept glyph keeps its colour',
       (tester) async {
-        await tester.pumpComponent(
-          Container(
-            decoration: BoxDecoration(
-              border: BoxBorder.all(color: Colors.green),
-            ),
-            child: Stack(
-              children: [
-                Row(
-                  children: [
-                    const SizedBox(width: 3),
-                    const VerticalDivider(indent: -1, color: Colors.green),
-                    Expanded(child: const SizedBox.shrink()),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const SizedBox(width: 3),
-                    const VerticalDivider(indent: -1, color: Colors.red),
-                    Expanded(child: const SizedBox.shrink()),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
+        await tester.pumpComponent(overlappingDividers());
 
         final state = tester.terminalState;
         // The first divider already formed the tee; the second contributes
@@ -177,6 +197,29 @@ void main() {
         expect(state.getTextAt(4, 0, length: 1), '┬');
         // Keeping the glyph should mean keeping the cell, colour included.
         expect(state.getCellAt(4, 0)?.style.color, Colors.green);
+      },
+      size: const Size(12, 5),
+    );
+  });
+
+  test(
+      'Given a divider whose cap lands on a cell it does not change '
+      'when rendered then only its own cells are red', () {
+    return testNocterm(
+      'kept glyph colour picture',
+      (tester) async {
+        await tester.pumpComponent(overlappingDividers());
+
+        // The red divider owns the three interior cells of its column. The
+        // border row above it merely receives an arm the tee already has,
+        // so it stays part of the green border.
+        expect(colourMap(tester.terminalState, 12, 5), [
+          'GGGGGGGGGGGG',
+          'G···R······G',
+          'G···R······G',
+          'G···R······G',
+          'GGGGGGGGGGGG',
+        ]);
       },
       size: const Size(12, 5),
     );
