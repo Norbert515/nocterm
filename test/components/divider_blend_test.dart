@@ -166,4 +166,136 @@ void main() {
       size: const Size(12, 7),
     );
   });
+
+  group('Given a double-style divider reaching into a border', () {
+    // Unicode has half lines at light (╴╵╶╷) and heavy (╸╹╺╻) weight only,
+    // so a lone double arm cannot be named by a character - but every
+    // junction it forms can. The end contributes its arm regardless of
+    // whether a glyph exists for the arm alone.
+
+    test('when horizontal into a light border then it tees into both columns',
+        () {
+      return testNocterm(
+        'double horizontal divider tees',
+        (tester) async {
+          await tester.pumpComponent(
+            Container(
+              decoration: BoxDecoration(border: BoxBorder.all()),
+              child: Column(
+                children: [
+                  const SizedBox(height: 2),
+                  const Divider(
+                    indent: -1,
+                    endIndent: -1,
+                    style: DividerStyle.double,
+                  ),
+                  Expanded(child: const SizedBox.shrink()),
+                ],
+              ),
+            ),
+          );
+
+          final state = tester.terminalState;
+          expect(state.getTextAt(0, 3, length: 1), '╞');
+          expect(state.getTextAt(11, 3, length: 1), '╡');
+          expect(state.getTextAt(5, 3, length: 1), '═');
+        },
+        size: const Size(12, 7),
+      );
+    });
+
+    test('when vertical into a light border then it tees into both rows', () {
+      return testNocterm(
+        'double vertical divider tees',
+        (tester) async {
+          await tester.pumpComponent(
+            Container(
+              decoration: BoxDecoration(border: BoxBorder.all()),
+              child: Row(
+                children: [
+                  const SizedBox(width: 3),
+                  const VerticalDivider(
+                    indent: -1,
+                    endIndent: -1,
+                    style: DividerStyle.double,
+                  ),
+                  Expanded(child: const SizedBox.shrink()),
+                ],
+              ),
+            ),
+          );
+
+          final state = tester.terminalState;
+          expect(state.getTextAt(4, 0, length: 1), '╥');
+          expect(state.getTextAt(4, 4, length: 1), '╨');
+          expect(state.getTextAt(4, 2, length: 1), '║');
+        },
+        size: const Size(12, 5),
+      );
+    });
+
+    test('when horizontal into a double border then it tees into both columns',
+        () {
+      return testNocterm(
+        'double divider into double border',
+        (tester) async {
+          await tester.pumpComponent(
+            Container(
+              decoration: BoxDecoration(
+                border: BoxBorder.all(style: BoxBorderStyle.double),
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 2),
+                  const Divider(
+                    indent: -1,
+                    endIndent: -1,
+                    style: DividerStyle.double,
+                  ),
+                  Expanded(child: const SizedBox.shrink()),
+                ],
+              ),
+            ),
+          );
+
+          final state = tester.terminalState;
+          expect(state.getTextAt(0, 3, length: 1), '╠');
+          expect(state.getTextAt(11, 3, length: 1), '╣');
+        },
+        size: const Size(12, 7),
+      );
+    });
+  });
+
+  test(
+      'Given a light divider reaching into a double border '
+      'when rendered then it tees into both columns', () {
+    // The mirror of the cases above, and it already works: the light cap
+    // glyph ╶ exists, so the arm lands correctly on a double border. This
+    // pins down that the gap is specific to double-weight caps.
+    return testNocterm(
+      'light divider into double border',
+      (tester) async {
+        await tester.pumpComponent(
+          Container(
+            decoration: BoxDecoration(
+              border: BoxBorder.all(style: BoxBorderStyle.double),
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 2),
+                const Divider(indent: -1, endIndent: -1),
+                Expanded(child: const SizedBox.shrink()),
+              ],
+            ),
+          ),
+        );
+
+        final state = tester.terminalState;
+        expect(state.getTextAt(0, 3, length: 1), '╟');
+        expect(state.getTextAt(11, 3, length: 1), '╢');
+      },
+      size: const Size(12, 7),
+    );
+  });
 }
