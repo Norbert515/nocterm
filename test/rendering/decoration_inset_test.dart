@@ -5,6 +5,21 @@ import 'package:test/test.dart';
 /// so it cannot erase a border it should be merging with. Every cell of the
 /// box still has to be painted by one pass or the other.
 void main() {
+  /// Where the decoration painted a background: `#` filled, `·` bare.
+  ///
+  /// Snapshots carry characters only, so an unpainted cell is invisible in
+  /// one - it holds a space either way. This draws the coverage itself, so
+  /// a hole in the fill shows up as a hole in the picture.
+  List<String> backgroundMap(TerminalState state, int width, int height) {
+    return [
+      for (var y = 0; y < height; y++)
+        [
+          for (var x = 0; x < width; x++)
+            state.getCellAt(x, y)?.style.backgroundColor == null ? '·' : '#',
+        ].join(),
+    ];
+  }
+
   test(
       'Given a box with vertical borders but no top or bottom '
       'when rendered then the whole column keeps the background', () {
@@ -41,6 +56,38 @@ void main() {
   });
 
   test(
+      'Given a box with vertical borders but no top or bottom '
+      'when rendered then its background covers every cell', () {
+    return testNocterm(
+      'vertical-only border background picture',
+      (tester) async {
+        await tester.pumpComponent(
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              border: const BoxBorder(
+                left: BorderSide(),
+                right: BorderSide(),
+                top: BorderSide(),
+              ),
+            ),
+            child: const SizedBox.shrink(),
+          ),
+        );
+
+        expect(backgroundMap(tester.terminalState, 12, 5), [
+          '############',
+          '############',
+          '############',
+          '############',
+          '############',
+        ]);
+      },
+      size: const Size(12, 5),
+    );
+  });
+
+  test(
       'Given an opaque box with only a left border '
       'when drawn over content then nothing shows through', () {
     return testNocterm(
@@ -65,6 +112,40 @@ void main() {
         // Top and bottom cells of the left border column.
         expect(state.getCellAt(0, 0)?.style.backgroundColor, Colors.blue);
         expect(state.getCellAt(0, 2)?.style.backgroundColor, Colors.blue);
+      },
+      size: const Size(12, 5),
+    );
+  });
+
+  test(
+      'Given an opaque box with only a left border '
+      'when drawn over content then its background covers every cell', () {
+    return testNocterm(
+      'left-only border background picture',
+      (tester) async {
+        await tester.pumpComponent(
+          Stack(
+            children: [
+              const Text('XXXXXXXXXXXX\nXXXXXXXXXXXX\nXXXXXXXXXXXX'),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  border: const BoxBorder(left: BorderSide()),
+                ),
+                child: const SizedBox(width: 6, height: 3),
+              ),
+            ],
+          ),
+        );
+
+        // The box is 8 wide; the four columns beyond it stay bare.
+        expect(backgroundMap(tester.terminalState, 12, 5), [
+          '########····',
+          '########····',
+          '########····',
+          '########····',
+          '########····',
+        ]);
       },
       size: const Size(12, 5),
     );
