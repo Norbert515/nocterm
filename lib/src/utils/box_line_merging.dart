@@ -221,7 +221,10 @@ String? mergeBoxCharacters(String newChar, String existingChar) {
   if (newArms == null || existingArms == null) return null;
 
   final merged = _combine(newArms, existingArms);
-  if (merged == existingArms) return existingChar;
+  // Keep the existing character only when the new one adds nothing: a stub
+  // must not square a rounded corner. Equal arms are a style choice, and
+  // the character being drawn is on top.
+  if (merged == existingArms && newArms != existingArms) return existingChar;
   if (merged == newArms) return newChar;
   return _armsToChar[merged] ?? newChar;
 }

@@ -172,8 +172,9 @@ void main() {
     // Nothing about the junction changes, so this is purely a question of
     // which style is on top - and the character being drawn is on top.
     expect(mergeBoxCharacters('╭', '┌'), '╭');
-    expect(mergeBoxCharacters('┌', '╭'), '╭');
+    expect(mergeBoxCharacters('┌', '╭'), '┌');
     expect(mergeBoxCharacters('╌', '─'), '╌');
+    expect(mergeBoxCharacters('─', '╌'), '─');
   });
 
   test(
