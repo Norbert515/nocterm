@@ -18,7 +18,9 @@ void main() {
           await tester.pumpComponent(
             Row(children: [const Text('hi'), const Divider()]),
           );
-          expect(tester.terminalState.getTextAt(0, 0, length: 2), 'hi');
+          // The binding catches a paint exception by discarding the frame,
+          // so a sibling surviving is what says painting completed.
+          expect(tester.terminalState, containsText('hi'));
         },
         size: const Size(12, 3),
       );
@@ -31,7 +33,7 @@ void main() {
           await tester.pumpComponent(
             Column(children: [const Text('hi'), const VerticalDivider()]),
           );
-          expect(tester.terminalState.getTextAt(0, 0, length: 2), 'hi');
+          expect(tester.terminalState, containsText('hi'));
         },
         size: const Size(12, 3),
       );

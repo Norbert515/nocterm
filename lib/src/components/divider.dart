@@ -197,6 +197,10 @@ void _paintRun(
   required Color color,
   required bool horizontal,
 }) {
+  // An unbounded parent leaves the extent infinite, and rounding a
+  // non-finite value throws.
+  if (!mainExtent.isFinite) return;
+
   // Whole cells: layout offsets can be fractional, and an end has to land
   // on exactly the cell it is drawn to.
   final start = (mainOrigin + indent).round();
