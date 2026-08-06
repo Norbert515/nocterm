@@ -178,7 +178,43 @@ class _DemoPane extends StatelessComponent {
           ),
         ),
         SizedBox(height: 1),
-        // Scenario 3: a floating panel overlaid on the box.
+        // Scenario 3: dividers reaching into the border row where the title
+        // sits. The title is fixed-length, so these columns are exact at
+        // any terminal width.
+        //
+        // A cap landing on a letter finds nothing it can join and leaves
+        // the cell alone, so the title survives. A cap landing on one of
+        // the title's spaces is a different matter: an empty cell takes the
+        // arm, because a line crossing it later has to find the arm waiting
+        // for it - and a space inside a title is empty as far as the buffer
+        // knows. So the two `╷` below, one in the gap after 'Divider' and
+        // one in the space closing the title, are the cost of the junction
+        // that the same rule buys elsewhere.
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              border: BoxBorder.all(style: BoxBorderStyle.rounded),
+              title: BorderTitle(text: 'Divider on a title'),
+            ),
+            child: Row(
+              children: [
+                // Column 5: the 'v' of 'Divider'. Left intact.
+                SizedBox(width: 4),
+                VerticalDivider(indent: indent, endIndent: indent),
+                // Column 10: the space between 'Divider' and 'on'.
+                SizedBox(width: 4),
+                VerticalDivider(indent: indent, endIndent: indent),
+                // Column 21: the space closing the title, just before the
+                // border run picks up again.
+                SizedBox(width: 10),
+                VerticalDivider(indent: indent, endIndent: indent),
+                Expanded(child: SizedBox.shrink()),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: 1),
+        // Scenario 4: a floating panel overlaid on the box.
         //
         // The panel carries a background, so it hides the text running
         // underneath it - but its corners still tee into the border rather
