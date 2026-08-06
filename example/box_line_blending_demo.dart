@@ -107,27 +107,62 @@ class _DemoPane extends StatelessComponent {
         ),
         SizedBox(height: 1),
         // Scenario 1: split panes - a vertical divider and a horizontal
-        // header rule inside one bordered box.
+        // header rule inside one bordered box, in two different styles.
+        //
+        // The dashed rule tees into the light border as a solid `├`: dashed
+        // and dotted variants carry the same arms as their solid
+        // counterparts, so a junction never comes out dashed. Where it runs
+        // into the double divider it forms `╢`, and the double divider tees
+        // into the light border above and below as `╥` and `╨`.
+        //
+        // The divider is a layer of its own, painted before the content, so
+        // that the horizontal rule has something to join when it arrives.
+        // Blending only sees what is already in the buffer: a junction
+        // needs the surface drawn first, exactly as the box's own border is
+        // drawn before the dividers that tee into it. As Row siblings the
+        // vertical divider would paint second and the rule would simply
+        // stop against it.
         Expanded(
           child: Container(
             decoration: BoxDecoration(
               border: BoxBorder.all(style: BoxBorderStyle.rounded),
               title: BorderTitle(text: 'Split panes'),
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            child: Stack(
               children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      Center(child: Text('Server')),
-                      Divider(indent: indent, endIndent: indent),
-                      Expanded(child: Center(child: Text('logs'))),
-                    ],
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: SizedBox.shrink()),
+                    VerticalDivider(
+                      indent: indent,
+                      endIndent: indent,
+                      style: DividerStyle.double,
+                    ),
+                    Expanded(child: SizedBox.shrink()),
+                  ],
                 ),
-                VerticalDivider(indent: indent, endIndent: indent),
-                Expanded(child: Center(child: Text('Apps'))),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Center(child: Text('Server')),
+                          Divider(
+                            indent: indent,
+                            endIndent: indent,
+                            style: DividerStyle.dashed,
+                          ),
+                          Expanded(child: Center(child: Text('logs'))),
+                        ],
+                      ),
+                    ),
+                    // Where the divider already is.
+                    SizedBox(width: 1),
+                    Expanded(child: Center(child: Text('Apps'))),
+                  ],
+                ),
               ],
             ),
           ),
@@ -135,10 +170,15 @@ class _DemoPane extends StatelessComponent {
         SizedBox(height: 1),
         // Scenario 2: crossing dividers meeting in a cross junction, plus
         // a heavy divider showing mixed-weight tees.
+        //
+        // The border is heavy here, so the light dividers reaching into it
+        // tee as `┠`/`┨` and `┰`/`┸` - the wall stays heavy and the arm
+        // stays light rather than either weight winning. The heavy divider
+        // meets it as `┣`/`┫`, all of one weight.
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              border: BoxBorder.all(style: BoxBorderStyle.rounded),
+              border: BoxBorder.all(style: BoxBorderStyle.bold),
               title: BorderTitle(text: 'Crossing + heavy'),
             ),
             child: Stack(
