@@ -108,6 +108,7 @@ enum BoxBorderStyle {
   dotted,
   double,
   rounded,
+  bold,
 }
 
 /// Box border configuration.
@@ -779,6 +780,8 @@ class RenderDecoratedBox extends RenderObject
         return _BorderCharacters.dashed;
       case BoxBorderStyle.dotted:
         return _BorderCharacters.dotted;
+      case BoxBorderStyle.bold:
+        return _BorderCharacters.bold;
       case BoxBorderStyle.solid:
       case BoxBorderStyle.none:
       case null:
@@ -842,6 +845,15 @@ class _BorderCharacters {
     topRight: '┐',
     bottomLeft: '└',
     bottomRight: '┘',
+  );
+
+  static const bold = _BorderCharacters(
+    horizontal: '━',
+    vertical: '┃',
+    topLeft: '┏',
+    topRight: '┓',
+    bottomLeft: '┗',
+    bottomRight: '┛',
   );
 
   static const double = _BorderCharacters(

@@ -192,6 +192,42 @@ void main() {
   });
 
   test(
+      'Given a bold border with a light divider '
+      'when they meet then the junction keeps both weights', () {
+    // The one direction the other styles cannot produce: a light arm
+    // landing on a heavy wall, which keeps the wall heavy and the arm
+    // light rather than picking one.
+    return testNocterm(
+      'bold border junctions',
+      (tester) async {
+        await tester.pumpComponent(
+          Container(
+            decoration: BoxDecoration(
+              border: BoxBorder.all(style: BoxBorderStyle.bold),
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 1),
+                const Divider(indent: -1, endIndent: -1),
+                Expanded(child: const SizedBox.shrink()),
+              ],
+            ),
+          ),
+        );
+
+        final state = tester.terminalState;
+        expect(state.getTextAt(0, 2, length: 1), '┠');
+        expect(state.getTextAt(11, 2, length: 1), '┨');
+        // The border itself is heavy throughout.
+        expect(state.getTextAt(0, 0, length: 1), '┏');
+        expect(state.getTextAt(11, 4, length: 1), '┛');
+        expect(state.getTextAt(5, 0, length: 1), '━');
+      },
+      size: const Size(12, 5),
+    );
+  });
+
+  test(
       'Given a dotted border with a light divider '
       'when they meet then the junction matches the border weight', () {
     // A dotted border's edges and corners carry the same weight, so a light
