@@ -42,40 +42,6 @@ class BoxLineBlendingDemo extends StatelessComponent {
             ),
           ),
           SizedBox(height: 1),
-          // The overlaid-panel case needs no indents at all: the panel's
-          // border corners always merge with the border they land on.
-          SizedBox(
-            height: 7,
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: BoxBorder.all(style: BoxBorderStyle.rounded),
-                      title: BorderTitle(
-                        text: 'Overlaid panel - corners tee into the border',
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: SizedBox(
-                    width: 20,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: BoxBorder.all(style: BoxBorderStyle.rounded),
-                      ),
-                      child: Center(child: Text('Apps')),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 1),
           Text(
             'Press Ctrl+C to exit',
             style: TextStyle(color: Colors.grey),
@@ -209,6 +175,56 @@ class _DemoPane extends StatelessComponent {
                 ),
               ],
             ),
+          ),
+        ),
+        SizedBox(height: 1),
+        // Scenario 3: a floating panel overlaid on the box.
+        //
+        // The panel carries a background, so it hides the text running
+        // underneath it - but its corners still tee into the border rather
+        // than staying `╭`/`╰`. Occlusion and blending are decided
+        // separately: the background fill stops short of the border ring so
+        // it cannot erase a border it is meant to merge with, and that ring
+        // is exactly where the corners fuse. Neither depends on the indent,
+        // so both columns render alike.
+        Expanded(
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: BoxBorder.all(style: BoxBorderStyle.rounded),
+                    title: BorderTitle(text: 'Overlaid panel'),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 1),
+                    child: Text(
+                      'This text sits behind the floating panel. Where the '
+                      'panel covers it, it simply disappears.',
+                      // Capped so a narrow terminal clips it rather than
+                      // letting it spill over the box's own bottom border.
+                      maxLines: 3,
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 0,
+                right: 0,
+                bottom: 0,
+                child: SizedBox(
+                  width: 12,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      border: BoxBorder.all(style: BoxBorderStyle.rounded),
+                    ),
+                    child: Center(child: Text('Apps')),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
