@@ -3,30 +3,30 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:nocterm/src/utils/log_server.dart';
 import 'package:nocterm/src/utils/logger.dart';
-import 'package:nocterm/src/utils/nocterm_paths.dart';
+import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 void main() {
   group('LogServer', () {
     late LogServer logServer;
+    late Directory tempDir;
 
+    // Every server gets a port file of its own. The default path is keyed
+    // by process id, so servers started concurrently in one process - which
+    // is every test in this file - would otherwise overwrite and delete
+    // each other's, and each test would read whichever port won the race.
     setUp(() async {
-      logServer = LogServer(maxBufferSize: 100);
+      tempDir = Directory.systemTemp.createTempSync('nocterm_log_test_');
+      logServer = LogServer(
+        maxBufferSize: 100,
+        portFilePath: p.join(tempDir.path, 'log_port'),
+      );
       await logServer.start();
     });
 
     tearDown(() async {
       await logServer.close();
-
-      // Clean up the global nocterm directory after tests
-      try {
-        final noctermDir = Directory(getNoctermDirectory());
-        if (await noctermDir.exists()) {
-          await noctermDir.delete(recursive: true);
-        }
-      } catch (_) {
-        // Ignore cleanup errors
-      }
+      if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
     });
 
     test('starts server and assigns port', () {
@@ -104,8 +104,8 @@ void main() {
       await ws.close();
     });
 
-    test('creates log_port file in global directory', () async {
-      final portFile = File(getLogPortPath());
+    test('creates log_port file', () async {
+      final portFile = File(logServer.portFilePath);
       expect(await portFile.exists(), isTrue);
 
       final portString = await portFile.readAsString();
@@ -113,7 +113,7 @@ void main() {
     });
 
     test('cleans up log_port file on close', () async {
-      final portFile = File(getLogPortPath());
+      final portFile = File(logServer.portFilePath);
       expect(await portFile.exists(), isTrue);
 
       await logServer.close();
@@ -125,9 +125,14 @@ void main() {
   group('Logger', () {
     late LogServer logServer;
     late Logger logger;
+    late Directory tempDir;
 
     setUp(() async {
-      logServer = LogServer(maxBufferSize: 100);
+      tempDir = Directory.systemTemp.createTempSync('nocterm_log_test_');
+      logServer = LogServer(
+        maxBufferSize: 100,
+        portFilePath: p.join(tempDir.path, 'log_port'),
+      );
       await logServer.start();
       logger = Logger(logServer: logServer);
     });
@@ -135,6 +140,7 @@ void main() {
     tearDown(() async {
       await logger.close();
       await logServer.close();
+      if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
     });
 
     test('sends logs to server', () {
