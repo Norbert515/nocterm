@@ -67,14 +67,8 @@ class TerminalCanvas {
   /// merge with box-drawing characters already in the buffer instead of
   /// overwriting them, forming junctions: a `│` drawn onto a `─` border
   /// becomes `┬`. Non box-drawing characters are unaffected.
-  ///
-  /// [blendArms] overrides the arms each grapheme contributes, for arm sets
-  /// Unicode cannot name. Applies to every grapheme in [text], so pass a
-  /// single character. Ignored unless [blendBoxLines] is true.
   void drawText(Offset position, String text,
-      {TextStyle? style,
-      bool blendBoxLines = false,
-      BoxCharArms? blendArms}) {
+      {TextStyle? style, bool blendBoxLines = false}) {
     final x = position.dx.round();
     final y = position.dy.round();
 
@@ -114,19 +108,7 @@ class TerminalCanvas {
 
       var char = grapheme;
       if (blendBoxLines) {
-        if (blendArms != null) {
-          var merged = mergeArmsIntoCharacter(blendArms, existingCell.char);
-          if (merged == null) {
-            // Nothing to join, so the cell is not ours to write - a space
-            // is as opaque as any other character, the border run being
-            // already absent under a title's padding.
-            currentColumn += width;
-            continue;
-          }
-          char = merged;
-        } else {
-          char = mergeBoxCharacters(grapheme, existingCell.char) ?? grapheme;
-        }
+        char = mergeBoxCharacters(grapheme, existingCell.char) ?? grapheme;
 
         // The merge kept what was there and it is not what we asked to
         // draw, so the cell is not ours to change - style included. Drawing
@@ -173,6 +155,36 @@ class TerminalCanvas {
 
       currentColumn += width;
     }
+  }
+
+  /// Merges [arms] into the single cell at [position].
+  ///
+  /// The cell is left untouched when there is nothing there to join, so a
+  /// space, a letter of a border title, or a wall this arm has no junction with
+  /// (fx bold on double) all survive.
+  void drawJunction(Offset position, BoxCharArms arms, {TextStyle? style}) {
+    final x = position.dx.round();
+    final y = position.dy.round();
+
+    if (x < 0 || y < 0 || x >= area.width || y >= area.height) {
+      return;
+    }
+
+    final cellX = area.left.round() + x;
+    final cellY = area.top.round() + y;
+    final existingCell = _buffer.getCell(cellX, cellY);
+
+    final merged = mergeArmsIntoCharacter(arms, existingCell.char);
+    if (merged == null || merged == existingCell.char) return;
+
+    _buffer.setCell(
+      cellX,
+      cellY,
+      Cell(
+        char: merged,
+        style: _blendStyle(style ?? const TextStyle(), existingCell),
+      ),
+    );
   }
 
   /// Fill a rectangle with a character

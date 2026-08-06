@@ -156,6 +156,7 @@ BoxCharArms? _capForStyle(
   }
   return start ? (none, none, weight, none) : (weight, none, none, none);
 }
+
 /// The line character for [style] along the given axis.
 String _characterForStyle(DividerStyle style, {required bool horizontal}) {
   switch (style) {
@@ -226,14 +227,18 @@ void _paintRun(
     } else if (i == end - 1) {
       cap = endCap;
     }
-    canvas.drawText(
-      horizontal ? Offset(i.toDouble(), cross) : Offset(cross, i.toDouble()),
-      // A capped cell is drawn from its arms; the character is unused.
-      char,
-      style: TextStyle(color: color),
-      blendBoxLines: blendLines,
-      blendArms: cap,
-    );
+    final at =
+        horizontal ? Offset(i.toDouble(), cross) : Offset(cross, i.toDouble());
+    if (cap != null) {
+      canvas.drawJunction(at, cap, style: TextStyle(color: color));
+    } else {
+      canvas.drawText(
+        at,
+        char,
+        style: TextStyle(color: color),
+        blendBoxLines: blendLines,
+      );
+    }
   }
 }
 
