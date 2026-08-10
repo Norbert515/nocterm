@@ -1,3 +1,26 @@
+# 0.9.0
+
+## Features
+- **Box-line blending**: Dividers and borders now merge with box-drawing characters they overlap, forming junctions (`├ ┤ ┬ ┴ ┼`) instead of leaving gaps. Every line character is modeled as four arms (up/right/down/left) with light/heavy/double weights; drawing one on another combines the arms and emits the matching glyph. New `mergeBoxCharacters`/`mergeArmsIntoCharacter` utilities, `TerminalCanvas.drawText(blendBoxLines:)`, and `TerminalCanvas.drawJunction`
+- **Divider**: A negative `indent`/`endIndent` reaches the divider outside its own bounds; those cells contribute only the arm pointing back into the rule, so an end landing on a border forms a tee (`├`), not a cross. An end with nothing to join paints nothing
+- **BoxBorder**: An overlaid panel's border corners merge with box characters beneath them, so a docked panel tees into the border it lands on
+- **BoxBorderStyle.bold**: New heavy border style (`┏ ━ ┓`)
+- Demo: `example/box_line_blending_demo.dart` shows dividers, crossings, all weights, and an overlaid panel
+
+## Behavior Changes
+- **Blending is always on** for `Divider`, `VerticalDivider`, and border corners (the `ascii` divider style never merges). When both characters carry an arm in the same direction, the newly drawn character wins (z-order), so drawing `╭` over `┌` rounds the corner and vice versa
+- **Dotted borders**: Edges now use light triple-dash (`┄ ┆`) instead of heavy (`┅ ┇`) to match their light corners
+
+## Bug Fixes
+- **Divider**: No longer throws (discarding the whole frame) when laid out under unbounded constraints
+- **Divider**: A cell the merge leaves unchanged keeps its original style instead of being recolored
+- **BoxBorder**: Vertical sides run the full height of the box when no top/bottom border paints the end cells, so backgrounds no longer show holes
+- **BorderTitle**: A styled title keeps the panel background instead of showing what was underneath
+- **LogServer**: Each server can publish its port to its own file (`portFilePath`), so multiple servers in one process no longer race on the pid-keyed global file
+- **getProjectDirectory**: Accepts an explicit starting directory to avoid racing on process-wide `Directory.current`
+
+---
+
 # 0.8.0
 
 ## Bug Fixes

@@ -1,6 +1,6 @@
 name: nocterm
 description: A Flutter-like framework for building rich terminal user interfaces with components, state management, animations, and more.
-version: 0.8.0
+version: 0.9.0
 repository: https://github.com/Norbert515/nocterm
 homepage: https://docs.nocterm.dev
 documentation: https://docs.nocterm.dev
