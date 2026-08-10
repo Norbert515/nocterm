@@ -6,6 +6,7 @@ import 'package:nocterm/src/rectangle.dart';
 
 import '../buffer.dart';
 import '../style.dart';
+import '../utils/box_line_merging.dart';
 import '../utils/unicode_width.dart';
 import 'framework.dart';
 
@@ -61,7 +62,13 @@ class TerminalCanvas {
   }
 
   /// Draw text at the given position
-  void drawText(Offset position, String text, {TextStyle? style}) {
+  ///
+  /// When [blendBoxLines] is true, box-drawing characters (U+2500–U+257F)
+  /// merge with box-drawing characters already in the buffer instead of
+  /// overwriting them, forming junctions: a `│` drawn onto a `─` border
+  /// becomes `┬`. Non box-drawing characters are unaffected.
+  void drawText(Offset position, String text,
+      {TextStyle? style, bool blendBoxLines = false}) {
     final x = position.dx.round();
     final y = position.dy.round();
 
@@ -99,11 +106,25 @@ class TerminalCanvas {
       final effectiveStyle = style ?? const TextStyle();
       final finalStyle = _blendStyle(effectiveStyle, existingCell);
 
+      var char = grapheme;
+      if (blendBoxLines) {
+        char = mergeBoxCharacters(grapheme, existingCell.char) ?? grapheme;
+
+        // The merge kept what was there and it is not what we asked to
+        // draw, so the cell is not ours to change - style included. Drawing
+        // a glyph onto its twin is not this case: the result equals the
+        // grapheme.
+        if (char == existingCell.char && char != grapheme) {
+          currentColumn += width;
+          continue;
+        }
+      }
+
       _buffer.setCell(
         cellX,
         cellY,
         Cell(
-          char: grapheme, // Use the full grapheme cluster, not individual runes
+          char: char, // Use the full grapheme cluster, not individual runes
           style: finalStyle,
         ),
       );
@@ -134,6 +155,36 @@ class TerminalCanvas {
 
       currentColumn += width;
     }
+  }
+
+  /// Merges [arms] into the single cell at [position].
+  ///
+  /// The cell is left untouched when there is nothing there to join, so a
+  /// space, a letter of a border title, or a wall this arm has no junction with
+  /// (fx bold on double) all survive.
+  void drawJunction(Offset position, BoxCharArms arms, {TextStyle? style}) {
+    final x = position.dx.round();
+    final y = position.dy.round();
+
+    if (x < 0 || y < 0 || x >= area.width || y >= area.height) {
+      return;
+    }
+
+    final cellX = area.left.round() + x;
+    final cellY = area.top.round() + y;
+    final existingCell = _buffer.getCell(cellX, cellY);
+
+    final merged = mergeArmsIntoCharacter(arms, existingCell.char);
+    if (merged == null || merged == existingCell.char) return;
+
+    _buffer.setCell(
+      cellX,
+      cellY,
+      Cell(
+        char: merged,
+        style: _blendStyle(style ?? const TextStyle(), existingCell),
+      ),
+    );
   }
 
   /// Fill a rectangle with a character

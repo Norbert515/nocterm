@@ -1,0 +1,269 @@
+import 'package:nocterm/nocterm.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('Given a half-arm segment end and a perpendicular full line', () {
+    test('when merged then a tee junction is formed', () {
+      // A divider endpoint contributes only the arm pointing into the
+      // segment, so an endpoint on a border forms a tee, not a cross.
+      expect(mergeBoxCharacters('╷', '─'), '┬');
+      expect(mergeBoxCharacters('╵', '─'), '┴');
+      expect(mergeBoxCharacters('╶', '│'), '├');
+      expect(mergeBoxCharacters('╴', '│'), '┤');
+    });
+
+    test('when merged in either order then the result is the same', () {
+      expect(mergeBoxCharacters('╴', '│'), mergeBoxCharacters('│', '╴'));
+      expect(mergeBoxCharacters('╷', '─'), mergeBoxCharacters('─', '╷'));
+    });
+  });
+
+  test(
+      'Given two perpendicular full lines '
+      'when merged then a cross junction is formed', () {
+    expect(mergeBoxCharacters('│', '─'), '┼');
+    expect(mergeBoxCharacters('─', '│'), '┼');
+  });
+
+  group('Given an existing tee junction', () {
+    test('when a half-arm it already contains is merged then it is unchanged',
+        () {
+      expect(mergeBoxCharacters('╷', '┬'), '┬');
+    });
+
+    test('when a perpendicular full line is merged then it becomes a cross',
+        () {
+      expect(mergeBoxCharacters('│', '┬'), '┼');
+      expect(mergeBoxCharacters('─', '├'), '┼');
+    });
+  });
+
+  group('Given a rounded corner', () {
+    test('when overdrawn with a subset of its arms then it stays rounded', () {
+      expect(mergeBoxCharacters('╶', '╭'), '╭');
+      expect(mergeBoxCharacters('╷', '╭'), '╭');
+      expect(mergeBoxCharacters('╭', '╭'), '╭');
+      expect(mergeBoxCharacters('╴', '╮'), '╮');
+      expect(mergeBoxCharacters('╵', '╰'), '╰');
+    });
+
+    test('when a new arm is added then it becomes a square junction', () {
+      expect(mergeBoxCharacters('╴', '╭'), '┬');
+      expect(mergeBoxCharacters('╵', '╭'), '├');
+    });
+  });
+
+  test(
+      'Given a corner and a full line '
+      'when merged then a tee junction is formed', () {
+    // The overlaid-panel case: a panel corner landing on a border run.
+    expect(mergeBoxCharacters('╭', '─'), '┬');
+    expect(mergeBoxCharacters('╰', '─'), '┴');
+    expect(mergeBoxCharacters('╭', '│'), '├');
+    expect(mergeBoxCharacters('┐', '│'), '┤');
+  });
+
+  test(
+      'Given a heavy line and a light line '
+      'when merged then a mixed-weight junction is formed', () {
+    expect(mergeBoxCharacters('━', '│'), '┿');
+    expect(mergeBoxCharacters('┃', '─'), '╂');
+    expect(mergeBoxCharacters('╺', '│'), '┝');
+    expect(mergeBoxCharacters('╹', '─'), '┸');
+  });
+
+  group('Given two characters of the same weight', () {
+    // Same weight means overlapping arms agree, so `pick` returns the same
+    // arm set either way round.
+    const light = [
+      '─', '│', '┌', '┐', '└', '┘', '├', '┤', '┬', '┴', '┼', //
+      '╴', '╵', '╶', '╷',
+    ];
+    const heavy = [
+      '━', '┃', '┏', '┓', '┗', '┛', '┣', '┫', '┳', '┻', '╋', //
+      '╸', '╹', '╺', '╻',
+    ];
+    const double = ['═', '║', '╔', '╗', '╚', '╝', '╠', '╣', '╦', '╩', '╬'];
+
+    for (final (name, chars) in [
+      ('light', light),
+      ('heavy', heavy),
+      ('double', double),
+    ]) {
+      test(
+          'when any two $name characters are merged '
+          'then the order does not matter', () {
+        for (final a in chars) {
+          for (final b in chars) {
+            expect(
+              mergeBoxCharacters(a, b),
+              mergeBoxCharacters(b, a),
+              reason: 'merging $a and $b is order dependent',
+            );
+          }
+        }
+      });
+    }
+  });
+
+  group('Given characters of different weights', () {
+    test(
+        'when their arms point in different directions '
+        'then the order does not matter', () {
+      // The common junction case: a heavy line crossing or landing on a
+      // light one. Neither character has an arm the other also has, so
+      // both weights survive regardless of who is drawn first.
+      for (final (a, b) in [
+        ('┃', '─'),
+        ('━', '│'),
+        ('╻', '─'),
+        ('╹', '─'),
+        ('╺', '│'),
+        ('╷', '━'),
+        ('╶', '┃'),
+        ('║', '─'),
+        ('═', '│'),
+      ]) {
+        expect(
+          mergeBoxCharacters(a, b),
+          mergeBoxCharacters(b, a),
+          reason: 'merging $a and $b is order dependent',
+        );
+      }
+    });
+
+    test(
+        'when they share an arm direction '
+        'then the newly drawn weight wins', () {
+      // Overlapping arms are the one place drawing order is visible: the
+      // new character's weight replaces the existing one on the shared
+      // arm, so heavy-on-light and light-on-heavy differ.
+      expect(mergeBoxCharacters('━', '─'), '━');
+      expect(mergeBoxCharacters('─', '━'), '─');
+      expect(mergeBoxCharacters('┃', '│'), '┃');
+      expect(mergeBoxCharacters('│', '┃'), '│');
+      expect(mergeBoxCharacters('═', '─'), '═');
+      expect(mergeBoxCharacters('─', '═'), '─');
+
+      // The same rule downgrades individual arms of a junction. A light
+      // divider running through a heavy tee thins the arms it overlaps
+      // while leaving the others heavy.
+      expect(mergeBoxCharacters('┝', '─'), '┾');
+      expect(mergeBoxCharacters('─', '┝'), '┼');
+      expect(mergeBoxCharacters('┗', '─'), '┺');
+      expect(mergeBoxCharacters('─', '┗'), '┸');
+      expect(mergeBoxCharacters('┳', '│'), '╈');
+      expect(mergeBoxCharacters('│', '┳'), '┿');
+    });
+
+    test(
+        'when the combination has no Unicode junction '
+        'then each order keeps its own new character', () {
+      // Double never combines with heavy, so the fallback to `newChar`
+      // makes the result depend on which was drawn last.
+      expect(mergeBoxCharacters('═', '┃'), '═');
+      expect(mergeBoxCharacters('┃', '═'), '┃');
+    });
+  });
+
+  test(
+      'Given two aliases with identical arms '
+      'when merged then the newly drawn style wins', () {
+    // Nothing about the junction changes, so this is purely a question of
+    // which style is on top - and the character being drawn is on top.
+    expect(mergeBoxCharacters('╭', '┌'), '╭');
+    expect(mergeBoxCharacters('┌', '╭'), '┌');
+    expect(mergeBoxCharacters('╌', '─'), '╌');
+    expect(mergeBoxCharacters('─', '╌'), '─');
+  });
+
+  test(
+      'Given a character whose arms are a strict subset of the existing one '
+      'when merged then the existing character is kept', () {
+    // The counterpart to the test above, and the case the early return is
+    // there for: a stub landing on a rounded corner must not square it.
+    // Distinguishing the two is what makes both work - keep the existing
+    // character only when the new one contributes strictly less.
+    expect(mergeBoxCharacters('╶', '╭'), '╭');
+    expect(mergeBoxCharacters('╷', '╭'), '╭');
+    expect(mergeBoxCharacters('╶', '┬'), '┬');
+  });
+
+  test(
+      'Given an arm set with aliases '
+      'when resolved through the reverse lookup '
+      'then the canonical character wins', () {
+    // _armsToChar keeps the first entry per arm set, so the canonical
+    // solid/square character must precede its aliases in _charToArms.
+    // These merges go through that lookup rather than an early return, so
+    // they are what actually pins the ordering down: reorder the map so
+    // '╭' precedes '┌' and only these fail.
+    expect(mergeBoxCharacters('╶', '╷'), '┌');
+    expect(mergeBoxCharacters('╴', '╷'), '┐');
+    expect(mergeBoxCharacters('╶', '╵'), '└');
+    expect(mergeBoxCharacters('╶', '╴'), '─');
+    expect(mergeBoxCharacters('╵', '╷'), '│');
+  });
+
+  test(
+      'Given a double line and a light line '
+      'when merged then a double-single junction is formed', () {
+    expect(mergeBoxCharacters('═', '│'), '╪');
+    expect(mergeBoxCharacters('║', '─'), '╫');
+    expect(mergeBoxCharacters('│', '═'), '╪');
+  });
+
+  test(
+      'Given a dashed line and a perpendicular line '
+      'when merged then the junction matches the solid counterpart', () {
+    expect(mergeBoxCharacters('╌', '│'), '┼');
+    expect(mergeBoxCharacters('┊', '─'), '┼');
+  });
+
+  test(
+      'Given a combination with no Unicode representation '
+      'when merged then the new character is kept', () {
+    // Double meeting heavy has no Unicode junction.
+    expect(mergeBoxCharacters('═', '┃'), '═');
+  });
+
+  group('Given an arm combination with no standalone glyph', () {
+    const none = LineArm.none;
+    const dbl = LineArm.double;
+    // (up, right, down, left)
+    const doubleRight = (none, dbl, none, none);
+    const doubleDown = (none, none, dbl, none);
+
+    test('when merged into a line then the junction is still formed', () {
+      // Unicode has no double half-line, so these arms cannot be routed
+      // through mergeBoxCharacters at all - but every junction exists.
+      expect(mergeArmsIntoCharacter(doubleRight, '│'), '╞');
+      expect(mergeArmsIntoCharacter(doubleDown, '─'), '╥');
+      expect(mergeArmsIntoCharacter(doubleRight, '║'), '╠');
+      expect(mergeArmsIntoCharacter(doubleDown, '═'), '╦');
+    });
+
+    test('when the arms are already present then the character is unchanged',
+        () {
+      expect(mergeArmsIntoCharacter(doubleRight, '╠'), '╠');
+      expect(mergeArmsIntoCharacter(doubleRight, '╬'), '╬');
+    });
+
+    test('when merged into a non box-drawing character then no merge happens',
+        () {
+      expect(mergeArmsIntoCharacter(doubleRight, 'a'), isNull);
+      expect(mergeArmsIntoCharacter(doubleRight, ' '), isNull);
+    });
+  });
+
+  test(
+      'Given a non box-drawing character '
+      'when merged then no merge is performed', () {
+    expect(mergeBoxCharacters('a', '─'), isNull);
+    expect(mergeBoxCharacters('─', 'a'), isNull);
+    expect(mergeBoxCharacters('─', ' '), isNull);
+    expect(mergeBoxCharacters(' ', ' '), isNull);
+    // Diagonals are deliberately not mergeable.
+    expect(mergeBoxCharacters('╱', '─'), isNull);
+  });
+}
