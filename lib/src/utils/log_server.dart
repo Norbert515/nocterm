@@ -30,10 +30,20 @@ import 'nocterm_paths.dart';
 class LogServer {
   LogServer({
     this.maxBufferSize = 10000,
-  });
+    String? portFilePath,
+  }) : _portFilePath = portFilePath;
 
   /// Maximum number of log entries to keep in buffer
   final int maxBufferSize;
+
+  final String? _portFilePath;
+
+  /// Where this server publishes its port for CLI discovery.
+  ///
+  /// Defaults to the global file for the current process. That path is
+  /// keyed by pid, so two servers running in one process would share it -
+  /// pass a path of your own when starting more than one, as tests do.
+  String get portFilePath => _portFilePath ?? getLogPortPath();
 
   /// Circular buffer of log entries
   final Queue<LogEntry> _buffer = Queue<LogEntry>();
@@ -181,12 +191,11 @@ class LogServer {
     }
   }
 
-  /// Write port number to global log_port file
+  /// Write port number to the log_port file
   Future<void> _writePortFile() async {
     try {
-      await ensureNoctermDirectoryExists();
-
-      final portFile = File(getLogPortPath());
+      final portFile = File(portFilePath);
+      await portFile.parent.create(recursive: true);
       await portFile.writeAsString('$port');
     } catch (e) {
       stderr.writeln('Warning: Failed to write log_port file: $e');
@@ -221,7 +230,7 @@ class LogServer {
 
     // Clean up port file
     try {
-      final portFile = File(getLogPortPath());
+      final portFile = File(portFilePath);
       if (await portFile.exists()) {
         await portFile.delete();
       }

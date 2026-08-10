@@ -14,10 +14,10 @@ enum DividerStyle {
 ///
 /// The divider merges with box-drawing characters it overlaps, forming
 /// junctions instead of overwriting them. With a negative [indent] or
-/// [endIndent] it reaches outside its own bounds; those cells paint half-arm
-/// characters (`╶`/`╴`), so an end landing on a box border becomes a tee
-/// (`├`/`┤`). An end landing on a cell that is not a box-drawing character
-/// keeps the half-arm stub, so only reach into cells known to hold borders.
+/// [endIndent] it reaches outside its own bounds; those cells contribute
+/// only the arm pointing back into the rule, so an end landing on a box
+/// border becomes a tee (`├`/`┤`). An end with nothing to join is left
+/// unpainted, so reaching out is safe even where no border turns up.
 class Divider extends SingleChildRenderObjectComponent {
   const Divider({
     super.key,
@@ -70,10 +70,10 @@ class Divider extends SingleChildRenderObjectComponent {
 ///
 /// The divider merges with box-drawing characters it overlaps, forming
 /// junctions instead of overwriting them. With a negative [indent] or
-/// [endIndent] it reaches outside its own bounds; those cells paint half-arm
-/// characters (`╷`/`╵`), so an end landing on a box border becomes a tee
-/// (`┬`/`┴`). An end landing on a cell that is not a box-drawing character
-/// keeps the half-arm stub, so only reach into cells known to hold borders.
+/// [endIndent] it reaches outside its own bounds; those cells contribute
+/// only the arm pointing back into the rule, so an end landing on a box
+/// border becomes a tee (`┬`/`┴`). An end with nothing to join is left
+/// unpainted, so reaching out is safe even where no border turns up.
 class VerticalDivider extends SingleChildRenderObjectComponent {
   const VerticalDivider({
     super.key,
@@ -123,25 +123,122 @@ class VerticalDivider extends SingleChildRenderObjectComponent {
   }
 }
 
-/// The half-arm characters painted at a blended divider's end cells, so an
-/// end landing on a border merges into a tee instead of a cross.
+/// The arms a blended divider's end cell contributes: just the one arm
+/// pointing back into the segment, so an end landing on a border merges
+/// into a tee instead of a cross.
 ///
-/// Returns null for styles without half-arm characters (no blending caps).
-String? _capForStyle(
+/// Arms rather than a character: a lone double arm has no glyph, though
+/// the junctions it forms do. See [mergeArmsIntoCharacter].
+///
+/// Returns null for the ascii style, which never merges.
+BoxCharArms? _capForStyle(
   DividerStyle style, {
   required bool horizontal,
   required bool start,
 }) {
+  final LineArm weight;
   switch (style) {
     case DividerStyle.single:
     case DividerStyle.dashed:
     case DividerStyle.dotted:
-      return horizontal ? (start ? '╶' : '╴') : (start ? '╷' : '╵');
+      weight = LineArm.light;
     case DividerStyle.bold:
-      return horizontal ? (start ? '╺' : '╸') : (start ? '╻' : '╹');
+      weight = LineArm.heavy;
     case DividerStyle.double:
+      weight = LineArm.double;
     case DividerStyle.ascii:
       return null;
+  }
+  const none = LineArm.none;
+  // (up, right, down, left)
+  if (horizontal) {
+    return start ? (none, weight, none, none) : (none, none, none, weight);
+  }
+  return start ? (none, none, weight, none) : (weight, none, none, none);
+}
+
+/// The line character for [style] along the given axis.
+String _characterForStyle(DividerStyle style, {required bool horizontal}) {
+  switch (style) {
+    case DividerStyle.single:
+      return horizontal ? '─' : '│';
+    case DividerStyle.double:
+      return horizontal ? '═' : '║';
+    case DividerStyle.dashed:
+      return horizontal ? '╌' : '╎';
+    case DividerStyle.dotted:
+      return horizontal ? '┈' : '┊';
+    case DividerStyle.bold:
+      return horizontal ? '━' : '┃';
+    case DividerStyle.ascii:
+      return horizontal ? '-' : '|';
+  }
+}
+
+/// Paints one run of divider cells along an axis, shared by both dividers.
+///
+/// [mainOrigin] and [mainExtent] are the offset and size along the axis the
+/// divider runs on; [cross] is the fixed coordinate on the other.
+void _paintRun(
+  TerminalCanvas canvas, {
+  required double mainOrigin,
+  required double mainExtent,
+  required double cross,
+  required double indent,
+  required double endIndent,
+  required DividerStyle style,
+  required Color color,
+  required bool horizontal,
+}) {
+  // An unbounded parent leaves the extent infinite, and rounding a
+  // non-finite value throws.
+  if (!mainExtent.isFinite) return;
+
+  // Whole cells: layout offsets can be fractional, and an end has to land
+  // on exactly the cell it is drawn to.
+  final ownStart = mainOrigin.round();
+  final ownEnd = (mainOrigin + mainExtent).round();
+  // A rule with no cells of its own has nothing for an end to join it to,
+  // so it draws nothing at all.
+  if (ownStart >= ownEnd) return;
+
+  final start = (mainOrigin + indent).round();
+  final end = (mainOrigin + mainExtent - endIndent).round();
+  if (start >= end) return;
+
+  final char = _characterForStyle(style, horizontal: horizontal);
+  // The ascii style has no box-drawing characters to merge.
+  final blendLines = style != DividerStyle.ascii;
+  // Cells outside the divider's own bounds contribute only the arm pointing
+  // back into it, so a border cell forms a tee (├/┤) rather than a cross.
+  // Which cells those are comes from the run's rounded bounds: an indent of
+  // -0.5 rounds back onto the divider's own first cell, so it is not an end.
+  final startCap = blendLines && start < ownStart
+      ? _capForStyle(style, horizontal: horizontal, start: true)
+      : null;
+  final endCap = blendLines && end > ownEnd
+      ? _capForStyle(style, horizontal: horizontal, start: false)
+      : null;
+
+  for (var i = start; i < end; i++) {
+    BoxCharArms? cap;
+    if (i == start) {
+      cap = startCap;
+    } else if (i == end - 1) {
+      cap = endCap;
+    }
+    final at =
+        horizontal ? Offset(i.toDouble(), cross) : Offset(cross, i.toDouble());
+    if (cap != null) {
+      canvas.drawJunction(at, cap, style: TextStyle(color: color));
+    } else {
+      canvas.drawText(
+        at,
+        char,
+        style: TextStyle(color: color),
+        blendBoxLines: blendLines,
+      );
+    }
   }
 }
 
@@ -223,63 +320,17 @@ class RenderDivider extends RenderObject {
   void paint(TerminalCanvas canvas, Offset offset) {
     super.paint(canvas, offset);
 
-    // Work in whole cells: layout can produce fractional offsets, and the
-    // end caps must land on exactly the cells the characters are drawn to.
-    final startX = (offset.dx + indent).round();
-    final endX = (offset.dx + size.width - endIndent).round();
-    final y = offset.dy + (size.height / 2).floor();
-
-    if (startX >= endX) return;
-
-    final char = _getCharacterForStyle(style, horizontal: true);
-    // Box-line merging has no effect for the ascii style (its characters
-    // are not box-drawing characters).
-    final blendLines = style != DividerStyle.ascii;
-    // Cells reached via a negative indent lie outside the divider's own
-    // bounds, on top of foreign content such as a border. They contribute
-    // only the arm pointing into the segment, so a border cell forms a tee
-    // (├/┤) rather than a cross. Cells within bounds keep the full line
-    // character.
-    final useCaps = blendLines && endX - startX > 1;
-    final startCap =
-        indent < 0 ? _capForStyle(style, horizontal: true, start: true) : null;
-    final endCap = endIndent < 0
-        ? _capForStyle(style, horizontal: true, start: false)
-        : null;
-
-    for (var x = startX; x < endX; x++) {
-      var cellChar = char;
-      if (useCaps) {
-        if (x == startX) {
-          cellChar = startCap ?? char;
-        } else if (x == endX - 1) {
-          cellChar = endCap ?? char;
-        }
-      }
-      canvas.drawText(
-        Offset(x.toDouble(), y),
-        cellChar,
-        style: TextStyle(color: color),
-        blendBoxLines: blendLines,
-      );
-    }
-  }
-
-  String _getCharacterForStyle(DividerStyle style, {required bool horizontal}) {
-    switch (style) {
-      case DividerStyle.single:
-        return horizontal ? '─' : '│';
-      case DividerStyle.double:
-        return horizontal ? '═' : '║';
-      case DividerStyle.dashed:
-        return horizontal ? '╌' : '╎';
-      case DividerStyle.dotted:
-        return horizontal ? '┈' : '┊';
-      case DividerStyle.bold:
-        return horizontal ? '━' : '┃';
-      case DividerStyle.ascii:
-        return horizontal ? '-' : '|';
-    }
+    _paintRun(
+      canvas,
+      mainOrigin: offset.dx,
+      mainExtent: size.width,
+      cross: offset.dy + (size.height / 2).floor(),
+      indent: indent,
+      endIndent: endIndent,
+      style: style,
+      color: color,
+      horizontal: true,
+    );
   }
 }
 
@@ -361,62 +412,16 @@ class RenderVerticalDivider extends RenderObject {
   void paint(TerminalCanvas canvas, Offset offset) {
     super.paint(canvas, offset);
 
-    // Work in whole cells: layout can produce fractional offsets, and the
-    // end caps must land on exactly the cells the characters are drawn to.
-    final x = offset.dx + (size.width / 2).floor();
-    final startY = (offset.dy + indent).round();
-    final endY = (offset.dy + size.height - endIndent).round();
-
-    if (startY >= endY) return;
-
-    final char = _getCharacterForStyle(style, horizontal: false);
-    // Box-line merging has no effect for the ascii style (its characters
-    // are not box-drawing characters).
-    final blendLines = style != DividerStyle.ascii;
-    // Cells reached via a negative indent lie outside the divider's own
-    // bounds, on top of foreign content such as a border. They contribute
-    // only the arm pointing into the segment, so a border cell forms a tee
-    // (┬/┴) rather than a cross. Cells within bounds keep the full line
-    // character.
-    final useCaps = blendLines && endY - startY > 1;
-    final startCap =
-        indent < 0 ? _capForStyle(style, horizontal: false, start: true) : null;
-    final endCap = endIndent < 0
-        ? _capForStyle(style, horizontal: false, start: false)
-        : null;
-
-    for (var y = startY; y < endY; y++) {
-      var cellChar = char;
-      if (useCaps) {
-        if (y == startY) {
-          cellChar = startCap ?? char;
-        } else if (y == endY - 1) {
-          cellChar = endCap ?? char;
-        }
-      }
-      canvas.drawText(
-        Offset(x, y.toDouble()),
-        cellChar,
-        style: TextStyle(color: color),
-        blendBoxLines: blendLines,
-      );
-    }
-  }
-
-  String _getCharacterForStyle(DividerStyle style, {required bool horizontal}) {
-    switch (style) {
-      case DividerStyle.single:
-        return horizontal ? '─' : '│';
-      case DividerStyle.double:
-        return horizontal ? '═' : '║';
-      case DividerStyle.dashed:
-        return horizontal ? '╌' : '╎';
-      case DividerStyle.dotted:
-        return horizontal ? '┈' : '┊';
-      case DividerStyle.bold:
-        return horizontal ? '━' : '┃';
-      case DividerStyle.ascii:
-        return horizontal ? '-' : '|';
-    }
+    _paintRun(
+      canvas,
+      mainOrigin: offset.dy,
+      mainExtent: size.height,
+      cross: offset.dx + (size.width / 2).floor(),
+      indent: indent,
+      endIndent: endIndent,
+      style: style,
+      color: color,
+      horizontal: false,
+    );
   }
 }

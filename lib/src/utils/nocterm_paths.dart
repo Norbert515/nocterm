@@ -27,9 +27,17 @@ String getNoctermDirectory() {
   return p.join(home, '.nocterm', projHash);
 }
 
-String getProjectDirectory() {
-  final start = Directory.current.path;
-  var parent = Directory.current;
+/// The closest ancestor of [from] holding a `pubspec.yaml`, or [from]
+/// itself when no ancestor has one.
+///
+/// [from] defaults to the process's current directory. Pass it explicitly
+/// to avoid depending on that: `Directory.current` is process-wide rather
+/// than per-isolate, so a caller that sets it races with every other
+/// isolate in the process.
+String getProjectDirectory({Directory? from}) {
+  final origin = from ?? Directory.current;
+  final start = origin.path;
+  var parent = origin;
   while (true) {
     final pubspec = File(p.join(parent.path, 'pubspec.yaml'));
     if (pubspec.existsSync()) return parent.path;

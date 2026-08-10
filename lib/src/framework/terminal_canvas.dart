@@ -109,6 +109,15 @@ class TerminalCanvas {
       var char = grapheme;
       if (blendBoxLines) {
         char = mergeBoxCharacters(grapheme, existingCell.char) ?? grapheme;
+
+        // The merge kept what was there and it is not what we asked to
+        // draw, so the cell is not ours to change - style included. Drawing
+        // a glyph onto its twin is not this case: the result equals the
+        // grapheme.
+        if (char == existingCell.char && char != grapheme) {
+          currentColumn += width;
+          continue;
+        }
       }
 
       _buffer.setCell(
@@ -146,6 +155,36 @@ class TerminalCanvas {
 
       currentColumn += width;
     }
+  }
+
+  /// Merges [arms] into the single cell at [position].
+  ///
+  /// The cell is left untouched when there is nothing there to join, so a
+  /// space, a letter of a border title, or a wall this arm has no junction with
+  /// (fx bold on double) all survive.
+  void drawJunction(Offset position, BoxCharArms arms, {TextStyle? style}) {
+    final x = position.dx.round();
+    final y = position.dy.round();
+
+    if (x < 0 || y < 0 || x >= area.width || y >= area.height) {
+      return;
+    }
+
+    final cellX = area.left.round() + x;
+    final cellY = area.top.round() + y;
+    final existingCell = _buffer.getCell(cellX, cellY);
+
+    final merged = mergeArmsIntoCharacter(arms, existingCell.char);
+    if (merged == null || merged == existingCell.char) return;
+
+    _buffer.setCell(
+      cellX,
+      cellY,
+      Cell(
+        char: merged,
+        style: _blendStyle(style ?? const TextStyle(), existingCell),
+      ),
+    );
   }
 
   /// Fill a rectangle with a character

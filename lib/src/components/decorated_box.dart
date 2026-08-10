@@ -108,6 +108,7 @@ enum BoxBorderStyle {
   dotted,
   double,
   rounded,
+  bold,
 }
 
 /// Box border configuration.
@@ -586,7 +587,10 @@ class RenderDecoratedBox extends RenderObject
           // Minimum width: space + 1 char title + space + some border chars
           // Format: ─ Title ─────
           final titleText = title.plainText;
-          final titleStyle = title.style ?? borderStyle;
+          // The fill stops short of the border row, so a title style with
+          // no background of its own would show what was underneath.
+          final titleStyle = (title.style ?? borderStyle)
+              .copyWith(backgroundColor: borderBackground);
 
           // Calculate title display with " Title " format (space padding)
           // We need at least 2 horizontal chars for aesthetics
@@ -732,15 +736,18 @@ class RenderDecoratedBox extends RenderObject
       }
     }
 
+    // A vertical side stops short of the corners only where the top or
+    // bottom pass actually paints them. Without those borders it has to
+    // reach the end cell, which the inset fill does not cover either.
+    final verticalTop = top + (border.top.isNone ? 0 : 1);
+    final verticalBottom = bottom - (border.bottom.isNone ? 0 : 1);
+
     // Paint left border
     if (!border.left.isNone) {
       final style = TextStyle(
           color: border.left.color, backgroundColor: borderBackground);
-      // Only paint vertical lines if there's space between top and bottom
-      if (bottom > top) {
-        for (int y = top + 1; y < bottom; y++) {
-          _setCell(canvas, left, y, chars.vertical, style);
-        }
+      for (int y = verticalTop; y <= verticalBottom; y++) {
+        _setCell(canvas, left, y, chars.vertical, style);
       }
     }
 
@@ -748,11 +755,8 @@ class RenderDecoratedBox extends RenderObject
     if (!border.right.isNone && right > left) {
       final style = TextStyle(
           color: border.right.color, backgroundColor: borderBackground);
-      // Only paint vertical lines if there's space between top and bottom
-      if (bottom > top) {
-        for (int y = top + 1; y < bottom; y++) {
-          _setCell(canvas, right, y, chars.vertical, style);
-        }
+      for (int y = verticalTop; y <= verticalBottom; y++) {
+        _setCell(canvas, right, y, chars.vertical, style);
       }
     }
   }
@@ -776,6 +780,8 @@ class RenderDecoratedBox extends RenderObject
         return _BorderCharacters.dashed;
       case BoxBorderStyle.dotted:
         return _BorderCharacters.dotted;
+      case BoxBorderStyle.bold:
+        return _BorderCharacters.bold;
       case BoxBorderStyle.solid:
       case BoxBorderStyle.none:
       case null:
@@ -841,6 +847,15 @@ class _BorderCharacters {
     bottomRight: '┘',
   );
 
+  static const bold = _BorderCharacters(
+    horizontal: '━',
+    vertical: '┃',
+    topLeft: '┏',
+    topRight: '┓',
+    bottomLeft: '┗',
+    bottomRight: '┛',
+  );
+
   static const double = _BorderCharacters(
     horizontal: '═',
     vertical: '║',
@@ -869,8 +884,8 @@ class _BorderCharacters {
   );
 
   static const dotted = _BorderCharacters(
-    horizontal: '┅',
-    vertical: '┇',
+    horizontal: '┄',
+    vertical: '┆',
     topLeft: '┌',
     topRight: '┐',
     bottomLeft: '└',

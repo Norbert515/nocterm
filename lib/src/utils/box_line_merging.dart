@@ -220,18 +220,41 @@ String? mergeBoxCharacters(String newChar, String existingChar) {
   final existingArms = _charToArms[existingChar];
   if (newArms == null || existingArms == null) return null;
 
+  final merged = _combine(newArms, existingArms);
+  // Keep the existing character only when the new one adds nothing: a stub
+  // must not square a rounded corner. Equal arms are a style choice, and
+  // the character being drawn is on top.
+  if (merged == existingArms && newArms != existingArms) return existingChar;
+  if (merged == newArms) return newChar;
+  return _armsToChar[merged] ?? newChar;
+}
+
+/// Merges the arms [newArms] drawn on top of [existingChar].
+///
+/// The arms-level counterpart of [mergeBoxCharacters], for arm sets Unicode
+/// cannot name: half lines exist at light (`╴╵╶╷`) and heavy (`╸╹╺╻`) weight
+/// only, so a lone double arm has no character - though every junction it
+/// forms does.
+///
+/// Merges per arm as [mergeBoxCharacters] does. Returns null when
+/// [existingChar] is not mergeable, or the combination has no Unicode
+/// representation.
+String? mergeArmsIntoCharacter(BoxCharArms newArms, String existingChar) {
+  final existingArms = _charToArms[existingChar];
+  if (existingArms == null) return null;
+
+  final merged = _combine(newArms, existingArms);
+  if (merged == existingArms) return existingChar;
+  return _armsToChar[merged];
+}
+
+/// Combines two arm sets, the new character winning wherever it has a line.
+BoxCharArms _combine(BoxCharArms newArms, BoxCharArms existingArms) {
   LineArm pick(LineArm a, LineArm b) => a == LineArm.none ? b : a;
-  final merged = (
+  return (
     pick(newArms.$1, existingArms.$1),
     pick(newArms.$2, existingArms.$2),
     pick(newArms.$3, existingArms.$3),
     pick(newArms.$4, existingArms.$4),
   );
-
-  if (merged == existingArms) return existingChar;
-  if (merged == newArms) return newChar;
-  return _armsToChar[merged] ?? newChar;
 }
-
-/// Whether [char] participates in box-line merging.
-bool isMergeableBoxCharacter(String char) => _charToArms.containsKey(char);
