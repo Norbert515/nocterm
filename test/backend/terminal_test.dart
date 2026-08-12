@@ -12,7 +12,7 @@ void main() {
 
     expect(
       backend.output.toString(),
-      '\x1b]110\x07\x1b]111\x07',
+      '\x1b]110\x1b\x5c\x1b]111\x1b\x5c',
     );
   });
 }
