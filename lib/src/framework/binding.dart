@@ -74,6 +74,28 @@ abstract class NoctermBinding {
     _instance = null;
   }
 
+  /// Next paste payload stashed by `TerminalBinding` for a
+  /// `PasteInputEvent`. Set instead of writing to the system
+  /// clipboard so IME-committed text (which on macOS arrives as
+  /// a bracketed-paste payload) doesn't clobber whatever the
+  /// user had on their clipboard.
+  String? _pendingPasteText;
+
+  void setPendingPasteText(String text) {
+    _pendingPasteText = text;
+  }
+
+  String? consumePendingPasteText() {
+    final text = _pendingPasteText;
+    _pendingPasteText = null;
+    return text;
+  }
+
+  @visibleForTesting
+  void setPendingPasteTextForTest(String text) {
+    _pendingPasteText = text;
+  }
+
   BuildOwner? _buildOwner;
   BuildOwner get buildOwner => _buildOwner ??= createBuildOwner();
 

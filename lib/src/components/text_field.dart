@@ -852,8 +852,14 @@ class _TextFieldState extends State<TextField> {
   }
 
   void _paste() {
-    // Paste text from clipboard
-    var clipboardText = ClipboardManager.paste();
+    // Prefer framework-stashed paste text (set by TerminalBinding
+    // for a PasteInputEvent) over the system clipboard, so IME-
+    // committed text on macOS — which the IME wraps in bracketed-
+    // paste markers — doesn't clobber the user's clipboard. Real
+    // Ctrl+V has no pending text and falls through to the
+    // clipboard as before.
+    var clipboardText = NoctermBinding.instance.consumePendingPasteText() ??
+        ClipboardManager.paste();
     if (clipboardText != null && clipboardText.isNotEmpty) {
       if (component.maxLines == 1) {
         // Single-line field: replace all newlines/carriage returns with spaces
