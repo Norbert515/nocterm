@@ -229,15 +229,16 @@ class RenderParagraph extends RenderObject with Selectable {
             canvas, Offset(xOffset, offset.dy + i), lineSegments, lineText, i);
       } else {
         // Paint each segment with its style
-        double currentX = xOffset;
+        // Snap to integer cell boundary — fractional offsets from
+        // alignment calculations (e.g. center: (width - text) / 2)
+        // cause rounding drift across styled segments.
+        int currentX = xOffset.round();
         for (final segment in lineSegments) {
           canvas.drawText(
-            Offset(currentX, offset.dy + i),
+            Offset(currentX.toDouble(), offset.dy + i),
             segment.text,
             style: segment.style,
           );
-          // Move x position by the actual display width of the segment text
-          // This accounts for wide characters like emojis and CJK characters
           currentX += UnicodeWidth.stringWidth(segment.text);
         }
       }
@@ -277,7 +278,7 @@ class RenderParagraph extends RenderObject with Selectable {
     final hasLineSelection =
         selRangeEnd > lineStartOffset && selRangeStart < lineEndOffset;
 
-    double currentX = offset.dx;
+    double currentX = offset.dx.roundToDouble();
     int charOffset = lineStartOffset;
 
     for (final segment in segments) {

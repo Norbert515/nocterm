@@ -137,6 +137,12 @@ class NoctermTester {
   Future<void> sendArrowLeft() => sendKey(LogicalKey.arrowLeft);
   Future<void> sendArrowRight() => sendKey(LogicalKey.arrowRight);
 
+  /// Send raw stdin bytes, dispatched to [InputListener] widgets.
+  Future<void> sendRawBytes(List<int> bytes) async {
+    _binding.sendRawInput(bytes);
+    await pump();
+  }
+
   /// Send a mouse event
   Future<void> sendMouseEvent(MouseEvent event) async {
     _binding.sendMouseEvent(event);

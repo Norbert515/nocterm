@@ -3,9 +3,9 @@ import 'dart:convert';
 
 import 'package:nocterm/nocterm.dart';
 import 'package:nocterm/src/framework/terminal_canvas.dart';
+import 'package:nocterm/src/image/image_cleanup.dart';
 import 'package:nocterm/src/navigation/render_theater.dart';
 import 'package:nocterm/src/rendering/scrollable_render_object.dart';
-import 'package:nocterm/src/image/image_cleanup.dart';
 
 import '../backend/terminal.dart' as term;
 import '../buffer.dart' as buf;
@@ -229,6 +229,15 @@ class TerminalBinding extends NoctermBinding
         _inputParser.clear();
       }
       _lastInputTime = now;
+
+      // Check for raw input listeners before parsing. If an
+      // InputListener consumes the bytes, skip the parser.
+      if (_dispatchRawInput(bytes)) {
+        if (buildOwner.hasDirtyElements) {
+          scheduleFrame();
+        }
+        return;
+      }
 
       // Parse the bytes and process ALL events in the buffer
       _inputParser.addBytes(bytes);
@@ -654,6 +663,31 @@ class TerminalBinding extends NoctermBinding
       result ??= _findRenderObjectInTree(child);
     });
     return result;
+  }
+
+  /// Dispatch raw stdin bytes to [InputListenerElement]s in the tree.
+  /// Returns true if any listener consumed the bytes.
+  bool _dispatchRawInput(List<int> bytes) {
+    if (rootElement == null) return false;
+    return _findAndCallInputListener(rootElement!, bytes);
+  }
+
+  bool _findAndCallInputListener(Element element, List<int> bytes) {
+    // Respect BlockFocus — same as _dispatchKeyToElement.
+    if (element is BlockFocusElement && element.isBlocking) {
+      return true;
+    }
+
+    bool handled = false;
+    element.visitChildren((child) {
+      if (!handled) {
+        handled = _findAndCallInputListener(child, bytes);
+      }
+    });
+    if (!handled && element is InputListenerElement) {
+      handled = element.handleRawInput(bytes);
+    }
+    return handled;
   }
 
   /// Dispatch a keyboard event to an element and its children

@@ -353,8 +353,10 @@ class InputParser {
       if (result != null) return result;
     }
 
-    // Arrow keys: ESC [ A/B/C/D (3 bytes)
-    if (_buffer.length == 3) {
+    // Arrow keys and other 3-byte CSI finals: ESC [ A/B/C/D/H/F/Z
+    // Check byte[2] directly — buffer may contain trailing bytes from
+    // the next keystroke, so we can't require length == 3.
+    {
       switch (_buffer[2]) {
         case 0x41:
           return (
@@ -690,7 +692,8 @@ class InputParser {
   }
 
   (KeyboardEvent, int)? _parseSS3Sequence() {
-    if (_buffer.length != 3) return null;
+    // Don't require exact length 3 — buffer may have trailing bytes.
+    if (_buffer.length < 3) return null;
 
     // F1-F4 use SS3 sequences (all are 3 bytes: ESC O X)
     switch (_buffer[2]) {
