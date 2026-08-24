@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
 import 'stack.dart' as stack_lib;
 
 /// Implements the stack layout algorithm.

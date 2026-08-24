@@ -1,5 +1,4 @@
 import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
 
 /// A widget that clips its child using a rectangle.
 ///

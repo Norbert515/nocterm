@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
 import 'package:nocterm/src/rendering/mouse_hit_test.dart';
 import 'package:nocterm/src/rendering/mouse_tracker.dart';
 

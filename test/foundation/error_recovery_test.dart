@@ -1,6 +1,5 @@
 import 'package:nocterm/nocterm.dart';
 import 'package:nocterm/src/components/error_widget.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
 import 'package:test/test.dart';
 
 void main() {

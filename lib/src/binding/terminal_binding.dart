@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
 import 'package:nocterm/src/navigation/render_theater.dart';
 import 'package:nocterm/src/rendering/scrollable_render_object.dart';
 import 'package:nocterm/src/image/image_cleanup.dart';

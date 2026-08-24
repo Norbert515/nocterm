@@ -1,5 +1,4 @@
 import 'package:nocterm/nocterm.dart';
-import '../framework/terminal_canvas.dart';
 
 /// Applies a color tint over its child content.
 ///
