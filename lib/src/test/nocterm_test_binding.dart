@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
 import 'package:nocterm/src/rendering/mouse_hit_test.dart';
 import 'package:nocterm/src/rendering/mouse_tracker.dart';
 
@@ -195,7 +194,9 @@ class NoctermTestBinding extends NoctermBinding with SchedulerBinding {
   /// Shutdown the test binding
   void shutdown() {
     _testKeyboardController.close();
-    // Clear the singleton instance to allow multiple tests
+    // Clear the singleton so tests can create fresh bindings; the analyzer cannot
+    // tell this lib/ file is test-only.
+    // ignore: invalid_use_of_visible_for_testing_member
     NoctermBinding.resetInstance();
     _instance = null;
   }

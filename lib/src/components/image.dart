@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:image/image.dart' as img;
 import 'package:meta/meta.dart';
 import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
 import 'package:nocterm/src/image/color_quantizer.dart';
 import 'package:nocterm/src/image/image_cleanup.dart';
 import 'package:nocterm/src/image/iterm2_encoder.dart';

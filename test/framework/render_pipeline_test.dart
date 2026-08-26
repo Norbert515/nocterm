@@ -1,5 +1,4 @@
 import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
 import 'package:test/test.dart';
 
 /// Comprehensive test suite for the nocterm rendering pipeline.

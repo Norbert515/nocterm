@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
 import '../rendering/scrollable_render_object.dart';
 
 /// A box in which a single widget can be scrolled.
