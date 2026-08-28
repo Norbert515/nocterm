@@ -465,4 +465,39 @@ void main() {
       expect(event.modifiers.hasAnyModifier, isFalse);
     });
   });
+
+  group('Ctrl+C under the kitty protocol', () {
+    // With the protocol active a terminal reports Ctrl+C as an escape
+    // sequence rather than the raw 0x03 byte. The tty only raises SIGINT
+    // for the byte, so the escape form has to reach the app as an ordinary
+    // Ctrl+C event - it is the only notice the app gets that the user asked
+    // to quit.
+    InputParser parse(List<int> bytes) => InputParser()..addBytes(bytes);
+
+    KeyboardEvent keyEventFor(List<int> bytes) {
+      final event = parse(bytes).parseNext();
+      expect(event, isA<KeyboardInputEvent>());
+      return (event as KeyboardInputEvent).event;
+    }
+
+    test('ESC[99;5u parses as Ctrl+C, same as the raw 0x03 byte', () {
+      final fromEscape = keyEventFor('\x1b[99;5u'.codeUnits);
+      final fromByte = keyEventFor([0x03]);
+
+      expect(fromEscape.logicalKey, equals(LogicalKey.keyC));
+      expect(fromEscape.modifiers.ctrl, isTrue);
+      expect(fromEscape.modifiers.shift, isFalse);
+
+      expect(fromByte.logicalKey, equals(fromEscape.logicalKey));
+      expect(fromByte.modifiers.ctrl, equals(fromEscape.modifiers.ctrl));
+    });
+
+    test('ESC[99;6u is Ctrl+Shift+C and is distinguishable', () {
+      // Terminals bind Ctrl+Shift+C to copy, so it must not read as a quit.
+      final event = keyEventFor('\x1b[99;6u'.codeUnits);
+      expect(event.logicalKey, equals(LogicalKey.keyC));
+      expect(event.modifiers.ctrl, isTrue);
+      expect(event.modifiers.shift, isTrue);
+    });
+  });
 }
