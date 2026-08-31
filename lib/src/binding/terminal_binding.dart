@@ -879,33 +879,7 @@ class TerminalBinding extends NoctermBinding
   @override
   void scheduleFrameImpl() {
     // Override scheduler's frame implementation to also wake the event loop.
-    // Uses pendingFrameTimer from SchedulerBinding for rate limiting.
-
-    // Don't schedule if a timer is already pending
-    if (pendingFrameTimer != null && pendingFrameTimer!.isActive) {
-      return;
-    }
-
-    if (enableFrameRateLimiting && lastFrameTime != null) {
-      final now = DateTime.now();
-      final elapsed = now.difference(lastFrameTime!);
-
-      if (elapsed < targetFrameDuration) {
-        // Too soon, delay the frame
-        final delay = targetFrameDuration - elapsed;
-        pendingFrameTimer = Timer(delay, () {
-          pendingFrameTimer = null;
-          _executeFrameAndWakeEventLoop();
-        });
-        return;
-      }
-    }
-
-    // Execute frame immediately (but still async to allow event loop to process)
-    pendingFrameTimer = Timer(Duration.zero, () {
-      pendingFrameTimer = null;
-      _executeFrameAndWakeEventLoop();
-    });
+    scheduleFrameTimer(_executeFrameAndWakeEventLoop);
   }
 
   /// Executes frame and wakes the event loop.
@@ -957,6 +931,8 @@ class TerminalBinding extends NoctermBinding
     TextStyle? currentStyle;
 
     for (int y = 0; y < buffer.height; y++) {
+      int? expectedCursorX;
+
       for (int x = 0; x < buffer.width; x++) {
         final cell = buffer.getCell(x, y);
         final prevCell = previous.getCell(x, y);
@@ -976,8 +952,13 @@ class TerminalBinding extends NoctermBinding
           continue;
         }
 
-        // Cell changed - move cursor and write
-        terminal.moveCursor(x, y);
+        // The terminal cursor advances after writes, so adjacent changed cells
+        // can be emitted as one run. Scrolling commonly changes nearly every
+        // cell in a row; avoiding an absolute cursor move per cell keeps those
+        // frames small enough for Windows terminals and ConPTY.
+        if (expectedCursorX != x) {
+          terminal.moveCursor(x, y);
+        }
 
         // Handle style
         final hasStyle = cell.style.color != null ||
@@ -1004,6 +985,8 @@ class TerminalBinding extends NoctermBinding
           }
           terminal.write(cell.char);
         }
+
+        expectedCursorX = x + cell.width;
       }
     }
 

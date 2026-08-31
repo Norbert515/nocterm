@@ -128,6 +128,62 @@ void main() {
       );
     });
   });
+
+  group('SchedulerBinding frame pacing', () {
+    late TestFramePacingBinding binding;
+
+    setUp(() {
+      binding = TestFramePacingBinding();
+      binding.targetFrameDuration = FrameRate.fps30;
+    });
+
+    tearDown(() {
+      binding.shutdown();
+    });
+
+    test('compensates for timer overshoot instead of accumulating drift', () {
+      final firstFrame = DateTime.utc(2026, 1, 1);
+
+      binding.frameStartedAt(firstFrame);
+      expect(
+        binding.debugNextFrameTargetTime,
+        firstFrame.add(FrameRate.fps30),
+      );
+
+      final lateSecondFrame = firstFrame.add(
+        FrameRate.fps30 + const Duration(milliseconds: 2),
+      );
+      binding.frameStartedAt(lateSecondFrame);
+
+      final thirdFrameTarget = firstFrame.add(FrameRate.fps30 * 2);
+      expect(binding.debugNextFrameTargetTime, thirdFrameTarget);
+
+      final afterSecondFrameWork =
+          lateSecondFrame.add(const Duration(milliseconds: 1));
+      expect(
+        binding.delayFrom(afterSecondFrameWork),
+        thirdFrameTarget.difference(afterSecondFrameWork),
+      );
+      expect(
+        binding.delayFrom(afterSecondFrameWork),
+        FrameRate.fps30 - const Duration(milliseconds: 3),
+      );
+    });
+  });
+}
+
+class TestFramePacingBinding extends NoctermBinding with SchedulerBinding {
+  void frameStartedAt(DateTime frameTime) {
+    recordFrameStart(frameTime);
+  }
+
+  Duration delayFrom(DateTime now) {
+    return frameDelayFrom(now);
+  }
+
+  void shutdown() {
+    NoctermBinding.resetInstance();
+  }
 }
 
 // Test component that counts builds
