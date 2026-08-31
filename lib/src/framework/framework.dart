@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import 'package:nocterm/src/components/basic.dart';
 import 'package:nocterm/src/foundation/persistent_hash_map.dart';
 import 'package:nocterm/src/foundation/nocterm_error.dart';
+import 'package:nocterm/src/foundation/layout_profiler.dart';
 import 'package:nocterm/src/rectangle.dart';
 import 'package:nocterm/src/size.dart';
 import 'package:nocterm/src/style.dart';

@@ -1327,8 +1327,15 @@ class TerminalBinding extends NoctermBinding
 
     t0 = DateTime.now().microsecondsSinceEpoch;
 
-    // Build phase - handled by BuildOwner via persistent callback
+    // Build phase - handled by BuildOwner via persistent callback.
+    // Wrapped in `NoctermTimeline` here (not in
+    // `SchedulerBinding.handleDrawFrame`, which surrounds the
+    // entire persistent-callback loop and so would also count
+    // the layout and paint time we run later) so the per-section
+    // report reflects the actual build time, not the whole frame.
+    NoctermTimeline.startSync('Build');
     super.drawFrame();
+    NoctermTimeline.finishSync(); // Build
 
     t1 = DateTime.now().microsecondsSinceEpoch;
     // Report build end time to scheduler for FrameTiming
@@ -1363,11 +1370,13 @@ class TerminalBinding extends NoctermBinding
       }
 
       // Layout phase
+      NoctermTimeline.startSync('Layout');
       renderObject.layout(BoxConstraints.tight(
           Size(size.width.toDouble(), size.height.toDouble())));
 
       // Flush layout pipeline
       pipelineOwner.flushLayout();
+      NoctermTimeline.finishSync(); // Layout
 
       t3 = DateTime.now().microsecondsSinceEpoch;
       // Report layout end time to scheduler for FrameTiming
@@ -1377,8 +1386,10 @@ class TerminalBinding extends NoctermBinding
       pipelineOwner.flushPaint();
 
       // Paint phase - paint directly to buffer
+      NoctermTimeline.startSync('Paint');
       final canvas = TerminalCanvas(buffer, screenRect);
       renderObject.paintWithContext(canvas, Offset.zero);
+      NoctermTimeline.finishSync(); // Paint
     }
 
     t4 = DateTime.now().microsecondsSinceEpoch;

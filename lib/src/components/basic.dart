@@ -435,10 +435,13 @@ class RenderConstrainedBox extends RenderObject
 
   @override
   void performLayout() {
+    final enforcedConstraints = _additionalConstraints.enforce(constraints);
     if (child != null) {
       // Apply additional constraints using enforce method
-      child!.layout(_additionalConstraints.enforce(constraints),
-          parentUsesSize: true);
+      child!.layout(
+        enforcedConstraints,
+        parentUsesSize: true,
+      );
 
       // Position child at origin
       final BoxParentData childParentData = child!.parentData as BoxParentData;
@@ -448,7 +451,7 @@ class RenderConstrainedBox extends RenderObject
       size = child!.size;
     } else {
       // If no child, constrain to smallest size allowed by enforced constraints
-      size = _additionalConstraints.enforce(constraints).constrain(Size.zero);
+      size = enforcedConstraints.constrain(Size.zero);
     }
   }
 
