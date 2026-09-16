@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'logical_key.dart';
 import 'keyboard_event.dart';
 
@@ -43,17 +44,37 @@ class KeyboardParser {
       );
     }
 
-    // Enter/Return - 0x0D (CR) and 0x0A (LF).
-    // In raw mode most terminals send 0x0D for Enter, but some (e.g. Warp)
-    // may send 0x0A. We treat both as Enter for compatibility.
+    // Enter/Return - 0x0D (CR) is always Enter.
+    // 0x0A (LF) is ambiguous: in raw mode most terminals send 0x0D for Enter,
+    // but some (e.g. Warp) may send 0x0A. For Warp we keep legacy Enter mapping.
+    // For other terminals (xfce4-terminal/VTE, etc.) raw 0x0A from Ctrl+J
+    // must NOT be swallowed as Enter, otherwise TextField submits instead of
+    // inserting a newline. We therefore map non-Warp 0x0A to Ctrl+J here,
+    // matching the existing TextField branch
+    // `event.matches(LogicalKey.keyJ, ctrl: true)`.
     // When kitty keyboard protocol is active, Ctrl+J arrives as a kitty
     // CSI sequence (\x1b[106;5u), not as raw 0x0A, so this doesn't
     // interfere with Ctrl+J newline detection in kitty-capable terminals.
-    if (first == 0x0D || first == 0x0A) {
+    if (first == 0x0D) {
       return KeyboardEvent(
         logicalKey: LogicalKey.enter,
         character: '\n',
         modifiers: const ModifierKeys(),
+      );
+    }
+
+    if (first == 0x0A) {
+      final isWarp = Platform.environment['TERM_PROGRAM'] == 'Warp';
+      if (isWarp) {
+        return KeyboardEvent(
+          logicalKey: LogicalKey.enter,
+          character: '\n',
+          modifiers: const ModifierKeys(),
+        );
+      }
+      return KeyboardEvent(
+        logicalKey: LogicalKey.keyJ,
+        modifiers: const ModifierKeys(ctrl: true),
       );
     }
 
@@ -66,7 +87,9 @@ class KeyboardParser {
     }
 
     // Control characters (Ctrl+A through Ctrl+Z)
-    // Note: 0x08 (Ctrl+H), 0x09 (Ctrl+I/Tab), 0x0A (Ctrl+J), 0x0D (Ctrl+M/Enter) are handled above
+    // Note: 0x08 (Ctrl+H), 0x09 (Ctrl+I/Tab), 0x0D (Ctrl+M/Enter) are handled above.
+    // 0x0A (Ctrl+J) is handled above as LF→Ctrl+J for non-Warp terminals,
+    // so it won't reach this block unless TERM_PROGRAM=Warp.
     if (first >= 0x01 && first <= 0x1A) {
       return _parseControlChar(first);
     }

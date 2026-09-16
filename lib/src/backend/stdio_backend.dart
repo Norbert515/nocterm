@@ -5,6 +5,7 @@ import 'package:nocterm/src/size.dart';
 
 import 'terminal_backend.dart';
 import 'win32_ansi_stdin.dart';
+import 'posix_raw_input.dart';
 
 /// Backend for native terminal I/O via stdin/stdout.
 /// Handles Unix signals (SIGWINCH, SIGINT, SIGTERM) for resize and shutdown.
@@ -121,6 +122,7 @@ class StdioBackend implements TerminalBackend {
       if (stdin.hasTerminal) {
         stdin.echoMode = false;
         stdin.lineMode = false;
+        PosixRawInput.disableIcrnl();
       }
     } catch (e) {
       // Ignore errors in CI/CD or when piping
@@ -131,6 +133,7 @@ class StdioBackend implements TerminalBackend {
   void disableRawMode() {
     try {
       if (stdin.hasTerminal) {
+        PosixRawInput.restoreIcrnl();
         stdin.echoMode = true;
         stdin.lineMode = true;
       }
