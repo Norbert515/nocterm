@@ -215,7 +215,10 @@ abstract class Element implements BuildContext {
   }
 
   void markNeedsBuild() {
-    assert(_lifecycleState == _ElementLifecycle.active);
+    assert(_lifecycleState != _ElementLifecycle.defunct);
+    if (_lifecycleState != _ElementLifecycle.active) {
+      return;
+    }
     if (_dirty) {
       return;
     }
