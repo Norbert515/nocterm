@@ -86,9 +86,9 @@ abstract class NoctermBinding {
   }
 
   void attachRootComponent(Component rootComponent) {
-    if (_rootElement != null) {
-      _rootElement!.deactivate();
-      _rootElement!.unmount();
+    if (_rootElement case Element oldRoot) {
+      buildOwner._inactiveElements.add(oldRoot);
+      buildOwner.finalizeTree();
     }
     _rootElement = rootComponent.createElement();
     // Set the owner before mounting (root has no parent to inherit from)
