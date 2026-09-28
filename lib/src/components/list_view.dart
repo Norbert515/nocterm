@@ -355,10 +355,16 @@ class _ListViewportElement extends RenderObjectElement {
     // 0..itemCount - 2).
     final newItemCount = newViewport.itemCount;
     if (newItemCount != null) {
-      _children.removeWhere((key, _) {
-        if (key >= 0) return key >= newItemCount;
-        final separatorIndex = -key - 1;
-        return separatorIndex >= newItemCount - 1;
+      _children.removeWhere((key, child) {
+        final bool gone;
+        if (key >= 0) {
+          gone = key >= newItemCount;
+        } else {
+          final separatorIndex = -key - 1;
+          gone = separatorIndex >= newItemCount - 1;
+        }
+        if (gone) deactivateChild(child);
+        return gone;
       });
     }
 
@@ -430,8 +436,7 @@ class _ListViewportElement extends RenderObjectElement {
       final newChild = component.itemBuilder(this, index);
       if (newChild == null) {
         // Item no longer exists, remove cached element
-        existingChild.deactivate();
-        existingChild.unmount();
+        deactivateChild(existingChild);
         _children.remove(index);
         return null;
       }
@@ -442,8 +447,7 @@ class _ListViewportElement extends RenderObjectElement {
         return existingChild;
       } else {
         // Can't update, replace element
-        existingChild.deactivate();
-        existingChild.unmount();
+        deactivateChild(existingChild);
         // ignore: invalid_use_of_protected_member
         final element = newChild.createElement();
         _children[index] = element;
@@ -481,7 +485,7 @@ class _ListViewportElement extends RenderObjectElement {
       oldSeparator.update(separator);
       return oldSeparator;
     } else {
-      oldSeparator?.unmount();
+      if (oldSeparator != null) deactivateChild(oldSeparator);
       // ignore: invalid_use_of_protected_member
       final newSeparator = separator.createElement();
       _children[separatorIndex] = newSeparator;
@@ -510,13 +514,7 @@ class _ListViewportElement extends RenderObjectElement {
 
     for (final key in keysToRemove) {
       final child = _children[key];
-      if (child != null) {
-        // Properly deactivate and unmount the element
-        if (child.mounted) {
-          child.deactivate();
-          child.unmount();
-        }
-      }
+      if (child != null) deactivateChild(child);
       _children.remove(key);
     }
   }
