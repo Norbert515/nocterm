@@ -60,6 +60,48 @@ void main() {
       );
     });
 
+    test('auto-scrolls in the same frame when an item wraps', () async {
+      await testNocterm(
+        'auto-scroll same frame on wrap',
+        (tester) async {
+          final scrollController = AutoScrollController();
+          final items = <String>[
+            'Message 1',
+            'Message 2',
+            'Message 3',
+            'tail',
+          ];
+
+          Component buildList() {
+            return ListView.builder(
+              controller: scrollController,
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                return Text(items[index]);
+              },
+            );
+          }
+
+          await tester.pumpComponent(buildList());
+          expect(scrollController.offset, 0);
+          expect(scrollController.isAutoScrollEnabled, isTrue);
+
+          items[3] = 'alpha beta gamma delta epsilon zeta needle';
+
+          await tester.pumpComponent(buildList());
+
+          expect(scrollController.atEnd, isTrue);
+          expect(
+            tester.terminalState.getText(),
+            contains('needle'),
+            reason: 'The first painted frame after wrapping should already '
+                'be pinned to the new bottom.',
+          );
+        },
+        size: Size(20, 4),
+      );
+    });
+
     test('disables auto-scroll when user scrolls up', () async {
       await testNocterm(
         'disable auto-scroll on manual scroll',
