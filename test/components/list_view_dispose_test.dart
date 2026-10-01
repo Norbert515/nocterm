@@ -134,7 +134,6 @@ void main() {
 
       controller.jumpTo(80);
       await tester.pump();
-      await tester.pump();
 
       expect(_live, isNot(contains(0)));
       expect(
@@ -153,7 +152,6 @@ void main() {
 
       tester.findState<_ListState>().itemCount = 2;
       changes.fire();
-      await tester.pump();
       await tester.pump();
 
       expect(_live..sort(), [0, 1]);
