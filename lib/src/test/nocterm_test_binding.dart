@@ -180,6 +180,8 @@ class NoctermTestBinding extends NoctermBinding with SchedulerBinding {
       renderObject.paintWithContext(canvas, Offset.zero);
     }
 
+    buildOwner.finalizeTree();
+
     // Store the buffer for inspection
     _lastBuffer = buffer;
   }

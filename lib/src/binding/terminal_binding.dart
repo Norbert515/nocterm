@@ -1381,6 +1381,8 @@ class TerminalBinding extends NoctermBinding
       renderObject.paintWithContext(canvas, Offset.zero);
     }
 
+    buildOwner.finalizeTree();
+
     t4 = DateTime.now().microsecondsSinceEpoch;
     // Report paint end time to scheduler for FrameTiming
     currentFramePaintEnd = t4;

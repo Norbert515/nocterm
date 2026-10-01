@@ -107,11 +107,7 @@ abstract class NoctermBinding {
   }
 
   void drawFrame() {
-    buildOwner.buildScope(rootElement!, () {
-      // Layout phase would go here
-      // Paint phase would go here
-    });
-    buildOwner.finalizeTree();
+    buildOwner.buildScope(rootElement!, () {});
   }
 
   /// Cause the entire subtree rooted at the root element to be entirely
