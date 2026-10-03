@@ -6,6 +6,7 @@ import 'package:nocterm/nocterm.dart' hide TextAlign;
 import '../rendering/mouse_hit_test.dart';
 import '../rendering/mouse_tracker.dart';
 import '../text/text_layout_engine.dart';
+import '../utils/current_platform.dart';
 import '../utils/unicode_width.dart';
 import '../text/selection_utils.dart' as selection_utils;
 import 'text_field/cursor_movement.dart';
@@ -443,17 +444,25 @@ class _TextFieldState extends State<TextField> {
     } else if (key == LogicalKey.end) {
       _moveCursorToEnd();
       return true;
-    } else if (event.matches(LogicalKey.keyA, ctrl: true)) {
+    } else if (event.matches(LogicalKey.keyA, ctrl: true) ||
+        (isApplePlatform && event.matches(LogicalKey.keyA, meta: true))) {
       _selectAll();
       return true;
-    } else if (event.matches(LogicalKey.keyC, ctrl: true)) {
+    } else if (event.matches(LogicalKey.keyC, ctrl: true) ||
+        (isApplePlatform && event.matches(LogicalKey.keyC, meta: true))) {
       _copy();
       return true;
-    } else if (event.matches(LogicalKey.keyX, ctrl: true)) {
+    } else if (event.matches(LogicalKey.keyX, ctrl: true) ||
+        (isApplePlatform && event.matches(LogicalKey.keyX, meta: true))) {
       _cut();
       return true;
-    } else if (event.matches(LogicalKey.keyV, ctrl: true)) {
+    } else if (event.matches(LogicalKey.keyV, ctrl: true) ||
+        (isApplePlatform && event.matches(LogicalKey.keyV, meta: true))) {
       _paste();
+      return true;
+    } else if (event.matches(LogicalKey.keyW, ctrl: true)) {
+      // Cmd+W is "close window" on macOS — keep this ctrl-only.
+      _deleteWordBackward();
       return true;
     } else if (key == LogicalKey.backspace && event.isControlPressed) {
       _deleteWordBackward();
@@ -462,6 +471,7 @@ class _TextFieldState extends State<TextField> {
       _deleteWordForward();
       return true;
     } else if (event.matches(LogicalKey.keyT, ctrl: true)) {
+      // Cmd+T is "new tab" on macOS — keep this ctrl-only.
       _transposeCharacters();
       return true;
     } else {

@@ -36,6 +36,7 @@
 - **Terminal shutdown**: Stop sending DECRDA query on TUI shutdown
 - **Project paths**: Terminate `getProjectDirectory` walk at Windows drive roots
 - **TextField**: Use `InputDecoration` instead of `BoxDecoration`
+- **TextField macOS Cmd+A/C/V/X**: The kitty keyboard protocol parses the Cmd key into a "super"/Meta modifier, so `Cmd+A/C/V/X` was reaching `TextField` with `meta: true` and falling through to the character-insertion branch (typing a literal `a` / `c` / `v` / `x` into the field instead of selecting / copying / cutting / pasting). The select-all / copy / cut / paste handlers now accept either `ctrl: true` or `meta: true`, so `Cmd+A/C/V/X` work the same way macOS GUI users expect. `Cmd+W` and `Cmd+T` are intentionally NOT aliased — those have their own macOS conventions (close window / new tab) and should keep falling through.
 
 ## Refactoring
 - **Character width**: Delegate CJK classification to the xterm wcwidth table
