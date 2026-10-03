@@ -273,5 +273,176 @@ void main() {
         },
       );
     });
+
+    // Framework exposes TerminalBinding.consumePendingPasteText so
+    // bracketed-paste payloads (and the Warp-style batched-character
+    // fallback) can be inserted without going through
+    // ClipboardManager.copy — important on macOS, where IME-committed
+    // text arrives as bracketed-paste and would otherwise overwrite
+    // the user's clipboard.
+    group('framework-stashed paste text (IME / bracketed paste)', () {
+      test('pending text is consumed by Ctrl+V in the focused TextField',
+          () async {
+        await testNocterm(
+          'pending paste text IME path',
+          (tester) async {
+            final controller = TextEditingController(text: '');
+
+            await tester.pumpComponent(
+              TextField(
+                controller: controller,
+                focused: true,
+                decoration: InputDecoration(
+                  border: BoxBorder.all(),
+                ),
+              ),
+            );
+
+            // Simulate the framework stashing a paste payload
+            // (this is what `TerminalBinding` does on a
+            // `PasteInputEvent`).
+            NoctermBinding.instance
+                .setPendingPasteTextForTest('你好世界');
+
+            // The system clipboard is empty — the IME text must
+            // NOT have been written there.
+            expect(ClipboardManager.paste(), isNull);
+
+            // Ctrl+V is then routed by the framework, just like
+            // for a real paste. The TextField should pull the
+            // pending text and insert it.
+            await tester.sendKeyEvent(KeyboardEvent(
+              logicalKey: LogicalKey.keyV,
+              modifiers: const ModifierKeys(ctrl: true),
+            ));
+            await tester.pump();
+
+            expect(controller.text, equals('你好世界'));
+            // The system clipboard is still untouched.
+            expect(ClipboardManager.paste(), isNull);
+          },
+        );
+      });
+
+      test('pending text wins over a stale system clipboard', () async {
+        await testNocterm(
+          'pending paste text wins over clipboard',
+          (tester) async {
+            final controller = TextEditingController(text: '');
+
+            // Stale clipboard content the user copied earlier
+            // (a real Ctrl+C). It must NOT leak into the IME
+            // paste path.
+            ClipboardManager.copy('stale clipboard content');
+
+            await tester.pumpComponent(
+              TextField(
+                controller: controller,
+                focused: true,
+                decoration: InputDecoration(
+                  border: BoxBorder.all(),
+                ),
+              ),
+            );
+
+            // Framework stashes the IME text...
+            NoctermBinding.instance.setPendingPasteTextForTest('tool');
+            // ...Ctrl+V arrives...
+            await tester.sendKeyEvent(KeyboardEvent(
+              logicalKey: LogicalKey.keyV,
+              modifiers: const ModifierKeys(ctrl: true),
+            ));
+            await tester.pump();
+
+            // ...the pending text is inserted (not the stale
+            // clipboard).
+            expect(controller.text, equals('tool'));
+          },
+        );
+      });
+
+      test('real Ctrl+V still reads from the system clipboard', () async {
+        await testNocterm(
+          'real Ctrl+V falls through to clipboard',
+          (tester) async {
+            final controller = TextEditingController(text: '');
+
+            // No pending text was stashed — the framework only
+            // sets it for bracketed-paste / batched-character
+            // events, not for real key presses.
+
+            // The user previously copied something to the
+            // clipboard.
+            ClipboardManager.copy('from clipboard');
+
+            await tester.pumpComponent(
+              TextField(
+                controller: controller,
+                focused: true,
+                decoration: InputDecoration(
+                  border: BoxBorder.all(),
+                ),
+              ),
+            );
+
+            await tester.sendKeyEvent(KeyboardEvent(
+              logicalKey: LogicalKey.keyV,
+              modifiers: const ModifierKeys(ctrl: true),
+            ));
+            await tester.pump();
+
+            // The clipboard text wins when no pending text is
+            // set, preserving the previous behaviour for real
+            // user-initiated paste.
+            expect(controller.text, equals('from clipboard'));
+          },
+        );
+      });
+
+      test(
+          'pending text is cleared if no widget consumes it (no leak '
+          'to a subsequent real Ctrl+V)', () async {
+        await testNocterm(
+          'pending text cleared after routing',
+          (tester) async {
+            final controller = TextEditingController(text: '');
+
+            await tester.pumpComponent(
+              TextField(
+                controller: controller,
+                focused: true,
+                decoration: InputDecoration(
+                  border: BoxBorder.all(),
+                ),
+              ),
+            );
+
+            // First batch: framework stashes IME text, Ctrl+V is
+            // routed, TextField consumes and inserts.
+            NoctermBinding.instance.setPendingPasteTextForTest('你好');
+            await tester.sendKeyEvent(KeyboardEvent(
+              logicalKey: LogicalKey.keyV,
+              modifiers: const ModifierKeys(ctrl: true),
+            ));
+            await tester.pump();
+            expect(controller.text, equals('你好'));
+            expect(NoctermBinding.instance.consumePendingPasteText(), isNull,
+                reason: 'slot must be empty after consumption');
+
+            // Now the user explicitly copies something to the
+            // clipboard and presses Ctrl+V for real. The stale
+            // IME text must NOT reappear.
+            controller.text = '';
+            ClipboardManager.copy('explicit copy');
+            await tester.sendKeyEvent(KeyboardEvent(
+              logicalKey: LogicalKey.keyV,
+              modifiers: const ModifierKeys(ctrl: true),
+            ));
+            await tester.pump();
+            expect(controller.text, equals('explicit copy'));
+          },
+        );
+      });
+    });
   });
 }

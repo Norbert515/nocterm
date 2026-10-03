@@ -48,10 +48,11 @@ class _Enable {
   String get basicMouseTracking => '\x1B[?1000h';
   String get bracketedPasteMode => '\x1B[?2004h';
 
-  /// Push kitty keyboard mode with flags:
-  /// - Bit 0 (1): Disambiguate escape codes
-  /// This is sufficient for detecting Shift+Enter, Ctrl+Enter, etc.
-  String get kittyKeyboard => '\x1B[>1u';
+  /// Push kitty keyboard mode. Bit 0 (disambiguate escape codes)
+  /// + bit 4 (report associated text, so IME commits on
+  /// supporting terminals arrive as 4-part key events instead of
+  /// being routed through bracketed paste).
+  String get kittyKeyboard => '\x1B[>17u';
 
   /// Enable xterm modifyOtherKeys mode (level 1).
   String get modifyOtherKeys => '\x1B[>4;1m';
