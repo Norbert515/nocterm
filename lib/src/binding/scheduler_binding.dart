@@ -161,6 +161,8 @@ mixin SchedulerBinding on NoctermBinding {
   final List<FrameTimingCallback> _frameTimingCallbacks = [];
   int _frameNumber = 0;
   DateTime? _lastFrameTime;
+  DateTime? _nextFrameTargetTime;
+  Duration? _lastPacingTargetFrameDuration;
 
   /// Returns the time of the last frame execution.
   ///
@@ -487,31 +489,52 @@ mixin SchedulerBinding on NoctermBinding {
   /// Subclasses can override for different timing strategies (e.g., vsync).
   @protected
   void scheduleFrameImpl() {
-    // Don't schedule if a timer is already pending
+    scheduleFrameTimer(executeFrame);
+  }
+
+  /// Schedules [onFrame] using the shared frame pacing logic.
+  ///
+  /// Subclasses that need custom frame execution can call this helper instead
+  /// of duplicating the limiter. The limiter tracks the next target frame time
+  /// separately from the last actual frame start, so small timer overshoots are
+  /// compensated for on following frames instead of permanently lowering FPS.
+  @protected
+  void scheduleFrameTimer(VoidCallback onFrame) {
     if (pendingFrameTimer != null && pendingFrameTimer!.isActive) {
       return;
     }
 
-    if (enableFrameRateLimiting && _lastFrameTime != null) {
-      final now = DateTime.now();
-      final elapsed = now.difference(_lastFrameTime!);
+    final delay = frameDelayFrom(DateTime.now());
+    pendingFrameTimer = Timer(delay, () {
+      pendingFrameTimer = null;
+      onFrame();
+    });
+  }
 
-      if (elapsed < targetFrameDuration) {
-        // Too soon, delay the frame
-        final delay = targetFrameDuration - elapsed;
-        pendingFrameTimer = Timer(delay, () {
-          pendingFrameTimer = null;
-          executeFrame();
-        });
-        return;
-      }
+  /// Returns the delay required before the next frame may begin.
+  ///
+  /// This is protected primarily for tests and platform-specific bindings that
+  /// need to inspect pacing behavior.
+  @protected
+  Duration frameDelayFrom(DateTime now) {
+    if (!enableFrameRateLimiting ||
+        targetFrameDuration.inMicroseconds <= 0 ||
+        _lastFrameTime == null) {
+      return Duration.zero;
     }
 
-    // Execute frame immediately (but still async to allow event loop to process)
-    pendingFrameTimer = Timer(Duration.zero, () {
-      pendingFrameTimer = null;
-      executeFrame();
-    });
+    if (_lastPacingTargetFrameDuration != targetFrameDuration) {
+      _lastPacingTargetFrameDuration = targetFrameDuration;
+      _nextFrameTargetTime = _lastFrameTime!.add(targetFrameDuration);
+    } else {
+      _nextFrameTargetTime ??= _lastFrameTime!.add(targetFrameDuration);
+    }
+
+    if (!now.isBefore(_nextFrameTargetTime!)) {
+      return Duration.zero;
+    }
+
+    return _nextFrameTargetTime!.difference(now);
   }
 
   /// Executes a single frame by recording the time and calling [handleBeginFrame].
@@ -520,11 +543,56 @@ mixin SchedulerBinding on NoctermBinding {
   /// (e.g., waking an event loop after frame execution).
   @protected
   void executeFrame() {
-    _lastFrameTime = DateTime.now();
+    final frameTime = DateTime.now();
+    recordFrameStart(frameTime);
     final timeStamp =
         Duration(microseconds: _lastFrameTime!.microsecondsSinceEpoch);
     handleBeginFrame(timeStamp);
   }
+
+  /// Records the start time for a frame and advances pacing state.
+  @protected
+  void recordFrameStart(DateTime frameTime) {
+    updateFramePacing(frameTime);
+    _lastFrameTime = frameTime;
+  }
+
+  /// Advances the pacing target after a frame starts.
+  ///
+  /// If a timer fires late, this moves the next target by whole frame intervals
+  /// from the previous target rather than from the late actual start time. That
+  /// lets subsequent frames catch up to the requested average frame rate.
+  @protected
+  void updateFramePacing(DateTime frameTime) {
+    if (!enableFrameRateLimiting || targetFrameDuration.inMicroseconds <= 0) {
+      _nextFrameTargetTime = null;
+      _lastPacingTargetFrameDuration = null;
+      return;
+    }
+
+    final targetChanged = _lastPacingTargetFrameDuration != targetFrameDuration;
+    _lastPacingTargetFrameDuration = targetFrameDuration;
+
+    if (_lastFrameTime == null ||
+        _nextFrameTargetTime == null ||
+        targetChanged) {
+      _nextFrameTargetTime = frameTime.add(targetFrameDuration);
+      return;
+    }
+
+    if (frameTime.isBefore(_nextFrameTargetTime!)) {
+      return;
+    }
+
+    final lateBy = frameTime.difference(_nextFrameTargetTime!).inMicroseconds;
+    final missedIntervals = (lateBy ~/ targetFrameDuration.inMicroseconds) + 1;
+    _nextFrameTargetTime = _nextFrameTargetTime!.add(Duration(
+      microseconds: targetFrameDuration.inMicroseconds * missedIntervals,
+    ));
+  }
+
+  @visibleForTesting
+  DateTime? get debugNextFrameTargetTime => _nextFrameTargetTime;
 
   /// Ensures a visual update occurs.
   ///
