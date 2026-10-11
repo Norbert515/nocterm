@@ -257,10 +257,22 @@ class TerminalBinding extends NoctermBinding
           }
 
           // Route the event through the component tree
-          _routeKeyboardEvent(keyEvent);
+          final handled = _routeKeyboardEvent(keyEvent);
 
-          // Note: Ctrl+C (SIGINT) is routed through the event system first,
-          // allowing components to intercept it. Falls back to shutdown if unhandled.
+          // Ctrl+C is offered to the component tree first so it can be
+          // intercepted, and shuts down when nothing takes it.
+          //
+          // This is not merely a backstop for the SIGINT handler. The kitty
+          // keyboard protocol enabled at startup makes a terminal report
+          // Ctrl+C as an escape sequence instead of the raw 0x03 byte, and
+          // the tty only raises SIGINT for the byte. In any terminal that
+          // supports the protocol - most current ones - this is the only
+          // path that ever sees Ctrl+C.
+          if (!handled && _isCtrlC(keyEvent)) {
+            _performImmediateShutdown();
+            terminal.backend.requestExit(0);
+            return;
+          }
         } else if (event is MouseInputEvent) {
           final mouseEvent = event.event;
 
@@ -486,6 +498,15 @@ class TerminalBinding extends NoctermBinding
       });
     }
   }
+
+  /// Whether [event] is the Ctrl+C that asks the app to quit.
+  ///
+  /// Shift is excluded: terminals conventionally bind Ctrl+Shift+C to copy,
+  /// and the kitty protocol reports the two distinctly.
+  bool _isCtrlC(KeyboardEvent event) =>
+      event.logicalKey == LogicalKey.keyC &&
+      event.modifiers.ctrl &&
+      !event.modifiers.shift;
 
   void _startSignalHandling() {
     // Listen to backend's shutdown stream
