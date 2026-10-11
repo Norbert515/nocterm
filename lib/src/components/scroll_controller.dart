@@ -90,6 +90,16 @@ class ScrollController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Corrects the scroll position during layout without notifying listeners.
+  ///
+  /// Scrollable render objects can call this while updating metrics to keep
+  /// paint offsets consistent in the same frame. This mirrors Flutter's
+  /// layout-time pixel correction and avoids scheduling a second frame for
+  /// purely metric-driven adjustments.
+  void correctOffset(double value) {
+    _offset = value.clamp(minScrollExtent, maxScrollExtent);
+  }
+
   /// Scrolls by the given delta.
   void scrollBy(double delta) {
     jumpTo(offset + delta);

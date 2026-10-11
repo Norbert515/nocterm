@@ -42,25 +42,13 @@ class AutoScrollController extends ScrollController {
       axisDirection: axisDirection,
     );
 
-    // Auto-scroll if we were near bottom and content grew
+    // Auto-scroll if we were near bottom and content grew.
+    //
+    // This must be a silent layout-time correction. Deferring to a post-frame
+    // jump lets one frame paint with the old offset when content wraps onto a
+    // new line, which shows up as a visible flicker in chat/log panels.
     if (_isAutoScrollEnabled && wasNearBottom && contentGrew) {
-      // Schedule scroll to end after the frame
-      try {
-        TerminalBinding.instance.addPostFrameCallback((_) {
-          if (isReversed) {
-            scrollToStart(); // In reverse mode, scroll to start (offset 0)
-          } else {
-            scrollToEnd(); // In normal mode, scroll to end
-          }
-        });
-      } catch (e) {
-        // In test environment or when binding is not available, scroll immediately
-        if (isReversed) {
-          scrollToStart();
-        } else {
-          scrollToEnd();
-        }
-      }
+      correctOffset(isReversed ? minScrollExtent : maxScrollExtent);
     }
 
     _previousMaxScrollExtent = maxScrollExtent;
