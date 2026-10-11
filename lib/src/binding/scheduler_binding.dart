@@ -637,11 +637,14 @@ mixin SchedulerBinding on NoctermBinding {
       // Execute persistent frame callbacks
       // Subclasses (like TerminalBinding) set currentFrameBuildEnd/LayoutEnd/PaintEnd
       // during their _drawFrameCallback to provide accurate phase timings.
-      NoctermTimeline.startSync('Build');
+      // The 'Build' NoctermTimeline section is opened INSIDE
+      // TerminalBinding's _drawFrameCallback around the actual
+      // `super.drawFrame()` call (the buildScope + finalizeTree),
+      // not here — opening it here would also enclose the layout
+      // and paint the callback runs, which is misleading.
       for (final callback in List<FrameCallback>.of(_persistentCallbacks)) {
         _invokeFrameCallback(callback, _currentFrameTimeStamp!);
       }
-      NoctermTimeline.finishSync(); // Build
 
       // Use subclass-provided timing if available, otherwise use now
       final buildEnd =

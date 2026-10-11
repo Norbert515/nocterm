@@ -24,7 +24,9 @@ class PipelineOwner {
   VoidCallback? onNeedsVisualUpdate;
 
   void requestLayout(RenderObject renderObject) {
-    _nodesNeedingLayout.add(renderObject);
+    if (!_nodesNeedingLayout.contains(renderObject)) {
+      _nodesNeedingLayout.add(renderObject);
+    }
     requestVisualUpdate();
   }
 
@@ -167,6 +169,7 @@ class BoxConstraints {
   bool get hasBoundedHeight => maxHeight < double.infinity;
   bool get hasInfiniteWidth => minWidth >= double.infinity;
   bool get hasInfiniteHeight => minHeight >= double.infinity;
+  bool get isTight => minWidth == maxWidth && minHeight == maxHeight;
 
   /// Returns new box constraints that respect the given constraints while being
   /// as close as possible to the original constraints.
@@ -322,6 +325,7 @@ abstract class RenderObject {
   bool _needsLayout = false;
   bool _needsPaint = false;
   bool _hasLayoutError = false;
+  bool _parentUsesSize = false;
 
   /// Whether this render object needs layout.
   ///
@@ -342,8 +346,10 @@ abstract class RenderObject {
   /// Mark this render object as needing layout.
   ///
   /// This will cause [performLayout] to be called during the next layout pass.
-  /// The mark propagates up the tree the first time it's set; subsequent calls
-  /// short-circuit. Frame-skip in the scheduler can retire `_hasScheduledFrame`
+  /// If the parent used this object's size during the last layout, the dirty
+  /// mark propagates up because ancestor geometry may change. Otherwise this
+  /// object is a relayout boundary and can be queued directly with its existing
+  /// constraints. Frame-skip in the scheduler can retire `_hasScheduledFrame`
   /// between calls, so even a short-circuited call must prod the owner.
   void markNeedsLayout() {
     if (_needsLayout) {
@@ -352,7 +358,15 @@ abstract class RenderObject {
     }
     _needsLayout = true;
     markNeedsPaint();
-    parent?.markNeedsLayout();
+    if (parent == null) {
+      owner?.requestVisualUpdate();
+    } else if (_parentUsesSize) {
+      parent!.markNeedsLayout();
+    } else if (_constraints != null) {
+      owner?.requestLayout(this);
+    } else {
+      parent!.markNeedsLayout();
+    }
   }
 
   /// Mark this render object as needing to be repainted.
@@ -387,6 +401,34 @@ abstract class RenderObject {
   /// The [parentUsesSize] parameter indicates whether the parent depends on
   /// this render object's size for its own layout. This is used for optimization.
   void layout(BoxConstraints constraints, {bool parentUsesSize = false}) {
+    // Hot-path gate: when the [NoctermLayoutProfiler] is inactive
+    // (the common case), skip the bookkeeping entirely. The
+    // framework sets it active only while the chat panel's
+    // `/d-profiler` recording is running, so the cost of this
+    // method in the steady state is a single bool check.
+    if (NoctermLayoutProfiler.isActive) {
+      final t0 = DateTime.now().microsecondsSinceEpoch;
+      try {
+        _layoutImpl(constraints, parentUsesSize: parentUsesSize);
+      } finally {
+        final dt = DateTime.now().microsecondsSinceEpoch - t0;
+        NoctermLayoutProfiler.instance.record(runtimeType.toString(), dt);
+      }
+    } else {
+      _layoutImpl(constraints, parentUsesSize: parentUsesSize);
+    }
+  }
+
+  /// Original [layout] body, split out so the profiling wrapper
+  /// (above) can time it without paying for try/finally when
+  /// the profiler is inactive. Hot path is the no-op
+  /// [NoctermLayoutProfiler.isActive] branch above.
+  void _layoutImpl(
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
+    _parentUsesSize = parentUsesSize;
+
     // Always reset error state when layout is called, even if we might skip the actual layout
     _hasLayoutError = false;
     _lastError = null;
@@ -506,7 +548,8 @@ abstract class RenderObject {
     _lastStackTrace = null;
 
     // If we were already marked as needing layout or paint, notify the owner
-    if (_needsLayout && parent == null) {
+    if (_needsLayout &&
+        (parent == null || (!_parentUsesSize && _constraints != null))) {
       owner.requestLayout(this);
     }
     if (_needsPaint && parent == null) {

@@ -25,8 +25,17 @@ class RenderParagraph extends RenderObject with Selectable {
   InlineSpan get text => _text;
   set text(InlineSpan value) {
     if (_text == value) return;
+    final oldPlainText = _text.toPlainText();
+    final newPlainText = value.toPlainText();
     _text = value;
     _cachedSegments = null;
+
+    if (_layoutResult != null && oldPlainText == newPlainText) {
+      _styledLines = _mapSegmentsToLines(_segments, _layoutResult!.lines);
+      markNeedsPaint();
+      return;
+    }
+
     markNeedsLayout();
   }
 
