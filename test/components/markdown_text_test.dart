@@ -118,6 +118,50 @@ Ordered list:
       );
     });
 
+    test('renders task lists', () async {
+      await testNocterm(
+        'task lists',
+        (tester) async {
+          await tester.pumpComponent(
+            const MarkdownText('''- [ ] Task 1
+- [x] Task 2
+  - [ ] Nested task
+- Plain item'''),
+          );
+
+          expect(tester.terminalState, containsText('□ Task 1'));
+          expect(tester.terminalState, containsText('✓ Task 2'));
+          expect(tester.terminalState, containsText('  □ Nested task'));
+          expect(tester.terminalState, containsText('• Plain item'));
+          expect(tester.terminalState, isNot(containsText('• □')));
+          expect(tester.terminalState, isNot(containsText('[ ]')));
+        },
+        debugPrintAfterPump: true,
+      );
+    });
+
+    test('renders task lists with custom markers', () async {
+      await testNocterm(
+        'task lists custom markers',
+        (tester) async {
+          await tester.pumpComponent(
+            const MarkdownText(
+              '''- [ ] Todo
+- [x] Done''',
+              styleSheet: MarkdownStyleSheet(
+                taskListUnchecked: '◎ ',
+                taskListChecked: '◉ ',
+              ),
+            ),
+          );
+
+          expect(tester.terminalState, containsText('◎ Todo'));
+          expect(tester.terminalState, containsText('◉ Done'));
+        },
+        debugPrintAfterPump: true,
+      );
+    });
+
     test('renders links', () async {
       await testNocterm(
         'links',

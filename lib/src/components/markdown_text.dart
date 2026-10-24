@@ -18,6 +18,7 @@ import 'package:nocterm/src/utils/unicode_width.dart';
 /// - Headers (# H1, ## H2, etc.)
 /// - Unordered lists (-, *, +)
 /// - Ordered lists (1., 2., etc.)
+/// - Task lists (- [ ] and - [x]) - displayed as "□ " and "✓ "
 /// - `Inline code` using backticks
 /// - Code blocks using triple backticks
 /// - Links [text](url) - displayed as "text [url]"
@@ -129,6 +130,8 @@ class MarkdownStyleSheet {
     this.blockquoteStyle,
     this.linkStyle,
     this.listBullet = '• ',
+    this.taskListUnchecked = '□ ',
+    this.taskListChecked = '✓ ',
     this.horizontalRule = '─',
   });
 
@@ -194,6 +197,15 @@ class MarkdownStyleSheet {
   final TextStyle? blockquoteStyle;
   final TextStyle? linkStyle;
   final String listBullet;
+
+  /// Marker shown in place of [listBullet] for an unchecked task list item
+  /// (`- [ ] task`).
+  final String taskListUnchecked;
+
+  /// Marker shown in place of [listBullet] for a checked task list item
+  /// (`- [x] task`).
+  final String taskListChecked;
+
   final String horizontalRule;
 }
 
@@ -388,8 +400,12 @@ class _MarkdownVisitor {
         ]);
       case 'li':
         final indent = '  ' * _listDepth;
+        // Task list items render their checkbox in place of the bullet.
+        final firstChild = element.children?.firstOrNull;
+        final isTaskListItem =
+            firstChild is md.Element && _isCheckbox(firstChild);
         // Using unordered list bullet style for now
-        final bullet = styleSheet.listBullet;
+        final bullet = isTaskListItem ? '' : styleSheet.listBullet;
         final children = <InlineSpan>[TextSpan(text: indent + bullet)];
 
         if (element.children != null) {
@@ -420,6 +436,13 @@ class _MarkdownVisitor {
         );
       case 'br':
         return const TextSpan(text: '\n');
+      case 'input':
+        if (!_isCheckbox(element)) return null;
+        return TextSpan(
+          text: element.attributes.containsKey('checked')
+              ? styleSheet.taskListChecked
+              : styleSheet.taskListUnchecked,
+        );
       case 'table':
         // Basic table rendering - this is simplified
         return _renderTable(element);
@@ -428,6 +451,9 @@ class _MarkdownVisitor {
         return TextSpan(children: visitChildren(element));
     }
   }
+
+  static bool _isCheckbox(md.Element element) =>
+      element.tag == 'input' && element.attributes['type'] == 'checkbox';
 
   List<InlineSpan> visitChildren(md.Element element) {
     final spans = <InlineSpan>[];
