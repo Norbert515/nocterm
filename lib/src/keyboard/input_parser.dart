@@ -419,117 +419,27 @@ class InputParser {
     if (_buffer.length >= 6) {
       final sequence = String.fromCharCodes(_buffer);
 
-      // Shift+Arrow: ESC [ 1 ; 2 A/B/C/D
-      if (sequence.startsWith('\x1B[1;2')) {
-        switch (_buffer[5]) {
-          case 0x41:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowUp,
-                modifiers: const ModifierKeys(shift: true),
-              ),
-              6
-            );
-          case 0x42:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowDown,
-                modifiers: const ModifierKeys(shift: true),
-              ),
-              6
-            );
-          case 0x43:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowRight,
-                modifiers: const ModifierKeys(shift: true),
-              ),
-              6
-            );
-          case 0x44:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowLeft,
-                modifiers: const ModifierKeys(shift: true),
-              ),
-              6
-            );
-        }
-      }
-
-      // Alt+Arrow: ESC [ 1 ; 3 A/B/C/D
-      if (sequence.startsWith('\x1B[1;3')) {
-        switch (_buffer[5]) {
-          case 0x41:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowUp,
-                modifiers: const ModifierKeys(alt: true),
-              ),
-              6
-            );
-          case 0x42:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowDown,
-                modifiers: const ModifierKeys(alt: true),
-              ),
-              6
-            );
-          case 0x43:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowRight,
-                modifiers: const ModifierKeys(alt: true),
-              ),
-              6
-            );
-          case 0x44:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowLeft,
-                modifiers: const ModifierKeys(alt: true),
-              ),
-              6
-            );
-        }
-      }
-
-      // Ctrl+Arrow: ESC [ 1 ; 5 A/B/C/D
-      if (sequence.startsWith('\x1B[1;5')) {
-        switch (_buffer[5]) {
-          case 0x41:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowUp,
-                modifiers: const ModifierKeys(ctrl: true),
-              ),
-              6
-            );
-          case 0x42:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowDown,
-                modifiers: const ModifierKeys(ctrl: true),
-              ),
-              6
-            );
-          case 0x43:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowRight,
-                modifiers: const ModifierKeys(ctrl: true),
-              ),
-              6
-            );
-          case 0x44:
-            return (
-              KeyboardEvent(
-                logicalKey: LogicalKey.arrowLeft,
-                modifiers: const ModifierKeys(ctrl: true),
-              ),
-              6
-            );
+      // Modified arrow/home/end keys: ESC [ 1 ; {modifier} A/B/C/D/H/F
+      // Modifier is 1 + bitmask (shift=1, alt=2, ctrl=4, meta=8).
+      // Handles all combinations: Shift(2), Alt(3), Alt+Shift(4), Ctrl(5),
+      // Ctrl+Shift(6), Ctrl+Alt(7), Ctrl+Alt+Shift(8), etc.
+      if (sequence.startsWith('\x1B[1;') && _buffer.length == 6) {
+        final modValue = int.tryParse(String.fromCharCode(_buffer[4]));
+        if (modValue != null) {
+          final modifiers = _decodeModifiers(modValue);
+          final LogicalKey? key;
+          switch (_buffer[5]) {
+            case 0x41: key = LogicalKey.arrowUp;
+            case 0x42: key = LogicalKey.arrowDown;
+            case 0x43: key = LogicalKey.arrowRight;
+            case 0x44: key = LogicalKey.arrowLeft;
+            case 0x48: key = LogicalKey.home;
+            case 0x46: key = LogicalKey.end;
+            default: key = null;
+          }
+          if (key != null) {
+            return (KeyboardEvent(logicalKey: key, modifiers: modifiers), 6);
+          }
         }
       }
     }

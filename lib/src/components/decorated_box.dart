@@ -17,11 +17,13 @@ class BorderTitle {
   }) : textSpan = null;
 
   /// Creates a border title with rich text (multiple styles).
+  /// When [style] is provided, it overrides the border style for the title's
+  /// leading/trailing padding spaces. Children still use their own styles.
   const BorderTitle.rich({
     required InlineSpan this.textSpan,
     this.alignment = TitleAlignment.left,
-  })  : text = '',
-        style = null;
+    this.style,
+  })  : text = '';
 
   /// Plain text for the title. Used when [textSpan] is null.
   final String text;
@@ -591,19 +593,34 @@ class RenderDecoratedBox extends RenderObject
           final titleStyle = (title.style ?? borderStyle)
               .copyWith(backgroundColor: borderBackground);
 
+          // Display width accounting for wide characters (emoji > U+FFFF = 2 cols)
+          int _dw(String s) {
+            int w = 0;
+            for (final r in s.runes) {
+              w += r > 0xFFFF ? 2 : 1;
+            }
+            return w;
+          }
+
           // Calculate title display with " Title " format (space padding)
           // We need at least 2 horizontal chars for aesthetics
           final maxTitleWidth =
               horizontalWidth - 2; // Reserve 2 chars for border lines
           String displayTitle;
-          if (titleText.length + 2 > maxTitleWidth) {
-            // Truncate with ellipsis
-            final truncateLen =
-                maxTitleWidth - 3; // -3 for "..." and space padding
-            if (truncateLen > 0) {
-              displayTitle = ' ${titleText.substring(0, truncateLen)}… ';
+          if (_dw(titleText) + 2 > maxTitleWidth) {
+            // Truncate with ellipsis — truncate by runes, not UTF-16 units
+            final targetWidth = maxTitleWidth - 3; // -3 for "…" and space padding
+            if (targetWidth > 0) {
+              final buf = StringBuffer();
+              int w = 0;
+              for (final r in titleText.runes) {
+                final cw = r > 0xFFFF ? 2 : 1;
+                if (w + cw > targetWidth) break;
+                buf.writeCharCode(r);
+                w += cw;
+              }
+              displayTitle = ' ${buf}… ';
             } else {
-              // Not enough space even for ellipsis, skip title
               displayTitle = '';
             }
           } else {
@@ -611,7 +628,7 @@ class RenderDecoratedBox extends RenderObject
           }
 
           if (displayTitle.isNotEmpty) {
-            final titleWidth = displayTitle.length;
+            final titleWidth = _dw(displayTitle);
             final remainingWidth = horizontalWidth - titleWidth;
 
             int titleStartX;
@@ -649,17 +666,19 @@ class RenderDecoratedBox extends RenderObject
                   title.textSpan!.toStyledSegments(titleStyle);
               // Paint leading space
               _setCell(canvas, titleStartX, top, ' ', titleStyle);
-              // Paint styled characters
+              // Paint styled characters using rune iteration to handle
+              // surrogate pairs (emoji like 💡👤📋 are > U+FFFF).
               final contentLen =
                   displayTitle.length - 2; // Minus padding spaces
               int charIndex = 0;
               for (final segment in styledSegments) {
-                for (int i = 0;
-                    i < segment.text.length && charIndex < contentLen;
-                    i++) {
+                final runes = segment.text.runes.toList();
+                for (int i = 0; i < runes.length && charIndex < contentLen; i++) {
+                  final char = String.fromCharCode(runes[i]);
+                  final isWide = runes[i] > 0xFFFF;
                   _setCell(canvas, titleStartX + 1 + charIndex, top,
-                      segment.text[i], segment.style ?? titleStyle);
-                  charIndex++;
+                      char, segment.style ?? titleStyle);
+                  charIndex += isWide ? 2 : 1;
                 }
                 if (charIndex >= contentLen) break;
               }
@@ -667,10 +686,12 @@ class RenderDecoratedBox extends RenderObject
               _setCell(canvas, titleStartX + displayTitle.length - 1, top, ' ',
                   titleStyle);
             } else {
-              // Plain text - use single style
-              for (int i = 0; i < displayTitle.length; i++) {
-                _setCell(
-                    canvas, titleStartX + i, top, displayTitle[i], titleStyle);
+              // Plain text - use single style, rune-aware for emoji
+              int col = 0;
+              for (final rune in displayTitle.runes) {
+                final char = String.fromCharCode(rune);
+                _setCell(canvas, titleStartX + col, top, char, titleStyle);
+                col += rune > 0xFFFF ? 2 : 1;
               }
             }
 
