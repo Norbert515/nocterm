@@ -4,14 +4,8 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 
 import 'package:meta/meta.dart';
-import 'package:nocterm/src/components/basic.dart';
+import 'package:nocterm/nocterm.dart';
 import 'package:nocterm/src/foundation/persistent_hash_map.dart';
-import 'package:nocterm/src/foundation/nocterm_error.dart';
-import 'package:nocterm/src/rectangle.dart';
-import 'package:nocterm/src/size.dart';
-import 'package:nocterm/src/style.dart';
-
-import 'terminal_canvas.dart';
 
 part 'binding.dart';
 part 'build_context.dart';
@@ -29,7 +23,6 @@ part 'layout_builder.dart';
 
 typedef ComponentBuilder = Component Function(BuildContext context);
 typedef StateSetter = void Function(VoidCallback fn);
-typedef VoidCallback = void Function();
 typedef ElementVisitor = void Function(Element element);
 
 /// Base class for all TUI components (similar to Flutter's Widget)

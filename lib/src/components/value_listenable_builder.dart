@@ -1,5 +1,4 @@
-import 'package:nocterm/src/framework/framework.dart';
-import 'package:nocterm/src/framework/value_listenable.dart';
+import 'package:nocterm/nocterm.dart';
 
 typedef ValueComponentBuilder<T> = Component Function(
     BuildContext context, T value, Component? child);

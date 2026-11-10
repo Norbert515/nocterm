@@ -1,3 +1,6 @@
+//Reexport the listen library
+export 'package:listen/listen.dart';
+
 export 'src/app.dart';
 export 'src/backend/terminal.dart';
 export 'src/backend/terminal_backend.dart';
@@ -55,8 +58,6 @@ export 'src/navigation/overlay.dart';
 
 export 'src/components/markdown_text.dart';
 export 'src/components/rich_text.dart';
-export 'src/framework/listenable.dart';
-export 'src/framework/value_listenable.dart';
 export 'src/components/value_listenable_builder.dart';
 // LayoutBuilder is exported via framework.dart (it's a part file)
 

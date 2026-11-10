@@ -1,5 +1,4 @@
-import 'package:nocterm/src/framework/framework.dart';
-import 'package:nocterm/src/framework/listenable.dart';
+import 'package:nocterm/nocterm.dart';
 
 /// A component that rebuilds when the given [Listenable] changes value.
 ///
